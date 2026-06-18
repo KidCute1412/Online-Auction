@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-
 import { formatToVN } from "@/utils/format_time";
 import Loading from "@/components/common/Loading";
+
 interface ApplicationInfo {
   full_name: string;
   username: string;
@@ -16,7 +16,6 @@ interface ApplicationInfo {
 export default function SellerApplicationDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const editorRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [detailForm, setDetailForm] = useState<ApplicationInfo | null>(null);
@@ -24,7 +23,8 @@ export default function SellerApplicationDetailPage() {
   useEffect(() => {
     setIsLoading(true);
     setHasError(false);
-    // Fetch application detail from API
+    
+    // Fetch application details by form ID
     fetch(
       `${import.meta.env.VITE_API_URL}/${
         import.meta.env.VITE_PATH_ADMIN
@@ -41,7 +41,7 @@ export default function SellerApplicationDetailPage() {
             full_name: app.full_name || "",
             username: app.username || "",
             email: app.email || "",
-            status: app.status || "Chờ duyệt",
+            status: app.status || "pending",
             submitted_date: formatToVN(app.created_at),
             description: app.reason || "",
           });
@@ -49,17 +49,18 @@ export default function SellerApplicationDetailPage() {
         } else {
           setHasError(true);
           setIsLoading(false);
-          toast.error(data.message || "Lỗi khi tải chi tiết đơn");
+          toast.error(data.message || "Error loading application details");
         }
       })
       .catch(() => {
         setHasError(true);
         setIsLoading(false);
-        toast.error("Đơn chi tiết không tồn tại");
+        toast.error("Application details do not exist");
       });
   }, [id, navigate]);
 
   const handleConfirmApplication = (status: string) => {
+    // Send request to set application status
     fetch(
       `${import.meta.env.VITE_API_URL}/${
         import.meta.env.VITE_PATH_ADMIN
@@ -77,38 +78,37 @@ export default function SellerApplicationDetailPage() {
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message);
-          // Update local state instead of navigating
           setDetailForm((prev) => (prev ? { ...prev, status } : null));
         } else {
-          toast.error(data.message || "Lỗi khi xác nhận đơn");
+          toast.error(data.message || "Error confirming application status");
         }
       })
       .catch(() => {
-        toast.error("Lỗi khi xác nhận đơn");
+        toast.error("Error confirming application status");
       });
   };
 
   if (isLoading) {
     return (
-      <Loading className = "ml-[240px] bg-transparent"></Loading>
+      <Loading className="ml-[240px] bg-transparent"></Loading>
     );
   }
 
   if (hasError) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Không tìm thấy đơn
+      <div className="flex justify-center items-center min-h-[calc(100vh-140px)] text-foreground">
+        <div className="text-center p-6 bg-card rounded-xl border border-border shadow-sm max-w-md">
+          <h1 className="text-xl font-bold text-destructive mb-2">
+            Application not found
           </h1>
-          <p className="text-gray-600 mb-6">
-            Đơn xin nâng cấp tài khoản này không tồn tại hoặc đã bị xóa.
+          <p className="text-sm text-muted-foreground mb-4">
+            This account upgrade application does not exist or has been deleted.
           </p>
           <button
             onClick={() => navigate("/admin/seller/applications")}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:opacity-90 shadow-sm transition-all cursor-pointer"
           >
-            Quay lại danh sách
+            Back to list
           </button>
         </div>
       </div>
@@ -117,140 +117,137 @@ export default function SellerApplicationDetailPage() {
 
   return (
     detailForm && (
-      <>
-        <div className="p-5 md:p-8 max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8">
-            Chi tiết đơn xin nâng cấp tài khoản
-          </h1>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground bg-background">
+        <h1 className="text-xl sm:text-2xl font-heading font-bold mb-4 text-foreground">
+          Upgrade Application Details
+        </h1>
 
-          <div className="bg-white rounded-xl p-6 md:p-10 shadow-md">
-            {/* Thông tin đơn */}
-            <div className="mb-8 pb-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                Thông tin đơn
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-600">Ngày gửi đơn:</span>
-                  <span className="ml-2 font-medium">
-                    {detailForm.submitted_date}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Trạng thái:</span>
-                  <span
-                    className={`ml-2 px-3 py-1 rounded-full text-sm font-medium ${
-                      detailForm.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : detailForm.status === "accepted"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {detailForm.status === "pending"
-                      ? "Chờ duyệt"
+        <div className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-sm transition-colors duration-300">
+          {/* Summary Application info fields */}
+          <div className="mb-4 pb-4 border-b border-border">
+            <h2 className="text-sm font-bold text-foreground mb-2">
+              Application Info
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-muted-foreground">Submitted date:</span>
+                <span className="ml-2 font-medium text-foreground">
+                  {detailForm.submitted_date}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Status:</span>
+                <span
+                  className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                    detailForm.status === "pending"
+                      ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
                       : detailForm.status === "accepted"
-                      ? "Đã duyệt"
-                      : "Từ chối"}
-                  </span>
-                </div>
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : "bg-destructive/10 text-destructive border border-destructive/20"
+                  }`}
+                >
+                  {detailForm.status === "pending"
+                    ? "Pending"
+                    : detailForm.status === "accepted"
+                    ? "Accepted"
+                    : "Rejected"}
+                </span>
               </div>
-            </div>
-
-            {/* Row 1: Họ và tên & Tên đăng nhập */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
-              <div>
-                <label className="block mb-2 font-medium text-gray-700">
-                  Họ và tên
-                </label>
-                <input
-                  type="text"
-                  value={detailForm.full_name}
-                  readOnly
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2 font-medium text-gray-700">
-                  Tên đăng nhập
-                </label>
-                <input
-                  type="text"
-                  value={detailForm.username}
-                  readOnly
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Row 2: Email */}
-            <div className="grid grid-cols-1 gap-6 md:gap-8 mb-6 md:mb-8">
-              <div>
-                <label className="block mb-2 font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={detailForm.email}
-                  readOnly
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Description - TinyMCE Editor (Read-only) */}
-            <div className="mb-8 md:mb-10">
-              <label className="block mb-2 font-medium text-gray-700">
-                Lý do xin nâng cấp
-              </label>
-              <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
-                <div className="p-4 prose max-w-none">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: detailForm.description }}
-                  ></div>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                * Nội dung này chỉ để xem, không thể chỉnh sửa
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-
-            <div className="flex flex-col justify-center sm:flex-row gap-3 sm:gap-4">
-              {detailForm.status === "pending" && (
-                <>
-                  <button
-                    onClick={() => handleConfirmApplication("accepted")}
-                    className="cursor-pointer px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Phê duyệt
-                  </button>
-
-                  <button
-                    onClick={() => handleConfirmApplication("rejected")}
-                    className="cursor-pointer px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Từ chối
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={() =>
-                  navigate(
-                    `/${import.meta.env.VITE_PATH_ADMIN}/seller/applications`
-                  )
-                }
-                className="cursor-pointer px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Quay lại
-              </button>
             </div>
           </div>
+
+          {/* Full Name & Username */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={detailForm.full_name}
+                readOnly
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none cursor-default"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Username
+              </label>
+              <input
+                type="text"
+                value={detailForm.username}
+                readOnly
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none cursor-default"
+              />
+            </div>
+          </div>
+
+          {/* Email address field */}
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            <div>
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Email
+              </label>
+              <input
+                type="email"
+                value={detailForm.email}
+                readOnly
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none cursor-default"
+              />
+            </div>
+          </div>
+
+          {/* Reason details text area */}
+          <div className="mb-6">
+            <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Reason for Upgrade
+            </label>
+            <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
+              <div className="p-4 text-sm text-foreground">
+                <div
+                  dangerouslySetInnerHTML={{ __html: detailForm.description }}
+                ></div>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              * This content is view-only and cannot be modified
+            </p>
+          </div>
+
+          {/* User action button triggers */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            {detailForm.status === "pending" && (
+              <>
+                <button
+                  onClick={() => handleConfirmApplication("accepted")}
+                  className="cursor-pointer px-6 py-2 bg-emerald-500 text-white rounded-xl text-sm font-semibold hover:opacity-90 shadow-sm transition-all focus:outline-none"
+                >
+                  Approve
+                </button>
+
+                <button
+                  onClick={() => handleConfirmApplication("rejected")}
+                  className="cursor-pointer px-6 py-2 bg-destructive text-destructive-foreground rounded-xl text-sm font-semibold hover:opacity-90 shadow-sm transition-all focus:outline-none"
+                >
+                  Reject
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() =>
+                navigate(
+                  `/${import.meta.env.VITE_PATH_ADMIN}/seller/applications`
+                )
+              }
+              className="cursor-pointer px-6 py-2 bg-muted text-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-all focus:outline-none"
+            >
+              Back
+            </button>
+          </div>
         </div>
-      </>
+      </div>
     )
   );
 }

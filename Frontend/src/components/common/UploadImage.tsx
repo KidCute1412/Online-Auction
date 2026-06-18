@@ -17,9 +17,7 @@ export default function UploadImage({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageModalOpen, setImageModalOpen] = useState(false);
 
-  // Create previews when images change
   useEffect(() => {
-    // Clean up old previews
     previews.forEach((url) => {
       if (url.startsWith("blob:")) {
         URL.revokeObjectURL(url);
@@ -57,7 +55,6 @@ export default function UploadImage({
     });
   }, [images]);
 
-  // Handle ESC key for modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && imageModalOpen) {
@@ -67,7 +64,7 @@ export default function UploadImage({
 
     if (imageModalOpen) {
       document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden"; // Prevent background scrolling
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
@@ -76,7 +73,6 @@ export default function UploadImage({
     };
   }, [imageModalOpen]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       previews.forEach((url) => {
@@ -101,13 +97,6 @@ export default function UploadImage({
     onImagesChange(newImages);
   };
 
-  const moveImage = (fromIndex: number, toIndex: number) => {
-    const newImages = [...images];
-    const [movedImage] = newImages.splice(fromIndex, 1);
-    newImages.splice(toIndex, 0, movedImage);
-    onImagesChange(newImages);
-  };
-
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
       onDrop,
@@ -120,7 +109,7 @@ export default function UploadImage({
 
   return (
     <div className="w-full">
-      {/* Dropzone Area */}
+      {/* Dropzone container */}
       <div
         {...getRootProps()}
         className={`
@@ -128,18 +117,17 @@ export default function UploadImage({
           transition-all duration-300 ease-in-out
           ${
             isDragActive && !isDragReject
-              ? "border-blue-500 bg-blue-50 scale-[1.02] shadow-lg"
+              ? "border-accent bg-accent/5 scale-[1.01] shadow-gold-glow"
               : isDragReject
-              ? "border-red-500 bg-red-50"
+              ? "border-destructive bg-destructive/5"
               : images.length >= maxFiles
-              ? "border-gray-300 bg-gray-50 cursor-not-allowed opacity-80"
-              : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"
+              ? "border-border bg-muted/20 cursor-not-allowed opacity-80"
+              : "border-border hover:border-accent/40 hover:bg-muted/20"
           }
         `}
       >
         <input {...getInputProps()} />
 
-        {/* Upload Area - Show when no images or when dragging */}
         {(images.length === 0 || isDragActive) && (
           <div className="text-center py-8">
             <div
@@ -147,41 +135,37 @@ export default function UploadImage({
               w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-all duration-300 mb-4
               ${
                 isDragActive && !isDragReject
-                  ? "bg-blue-500 text-white"
+                  ? "bg-accent text-primary-foreground"
                   : isDragReject
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-100 text-gray-400"
+                  ? "bg-destructive text-destructive-foreground"
+                  : "bg-muted text-muted-foreground"
               }
             `}
             >
-              {isDragReject ? (
-                <X className="w-8 h-8" />
-              ) : (
-                <Upload className="w-8 h-8" />
-              )}
+              {isDragReject ? <X className="w-8 h-8" /> : <Upload className="w-8 h-8" />}
             </div>
 
             <div>
               {isDragActive && !isDragReject ? (
-                <p className="text-blue-600 font-semibold">
-                  Thả hình ảnh vào đây!
+                <p className="text-accent font-semibold font-heading">
+                  Drop images here!
                 </p>
               ) : isDragReject ? (
-                <p className="text-red-600 font-semibold">
-                  Chỉ chấp nhận file hình ảnh!
+                <p className="text-destructive font-semibold font-heading">
+                  Only image files are accepted!
                 </p>
               ) : images.length >= maxFiles ? (
-                <p className="text-gray-500">
-                  Đã đạt giới hạn {maxFiles} hình ảnh
+                <p className="text-muted-foreground font-heading">
+                  Limit of {maxFiles} images reached
                 </p>
               ) : (
                 <>
-                  <p className="text-gray-600 font-semibold mb-2">
-                    Kéo thả hình ảnh vào đây hoặc{" "}
-                    <span className="text-blue-500">nhấn để chọn</span>
+                  <p className="text-foreground font-semibold font-heading mb-2">
+                    Drag and drop images here, or{" "}
+                    <span className="text-accent">click to browse</span>
                   </p>
-                  <p className="text-sm text-gray-400">
-                    Hỗ trợ: JPG, PNG, GIF, WEBP (Tối đa {maxFiles} hình)
+                  <p className="text-sm text-muted-foreground">
+                    Supports: JPG, PNG, GIF, WEBP (Max {maxFiles} files)
                   </p>
                 </>
               )}
@@ -189,17 +173,16 @@ export default function UploadImage({
           </div>
         )}
 
-        {/* Images Grid - Show inside dropzone when there are images */}
         {images.length > 0 && !isDragActive && (
           <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-sm text-gray-600">
-                <ImageIcon className="w-4 h-4 mr-2 text-blue-500" />
-                <span className="font-medium">{images.length}</span>
+            {/* Grid Header Info */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center text-muted-foreground">
+                <ImageIcon className="w-4 h-4 mr-2 text-accent" />
+                <span className="font-semibold text-foreground">{images.length}</span>
                 <span className="mx-1">/</span>
-                <span>{maxFiles} hình ảnh</span>
-                <span className="ml-2 text-gray-400">• Click để thêm hình</span>
+                <span>{maxFiles} images</span>
+                <span className="ml-2 text-xs opacity-60">• Click to add more</span>
               </div>
 
               <button
@@ -207,26 +190,22 @@ export default function UploadImage({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (
-                    window.confirm(
-                      `Bạn có chắc muốn xóa tất cả ${images.length} hình ảnh?`
-                    )
-                  ) {
+                  if (window.confirm(`Are you sure you want to delete all ${images.length} images?`)) {
                     onImagesChange([]);
                   }
                 }}
-                className="flex items-center cursor-pointer hover:scale-105  space-x-1 px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs transition-all duration-200"
+                className="flex items-center cursor-pointer hover:scale-105 space-x-1 px-3 py-1 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg text-xs font-semibold transition-all duration-200"
               >
                 <Trash2 className="w-3 h-3" />
-                <span>Xóa tất cả</span>
+                <span>Clear all</span>
               </button>
             </div>
 
-            {/* Images Grid */}
+            {/* Preview Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {images.map((image, index) => (
-                <div key={`${image.name}-${index}`} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 cursor-pointer">
+                <div key={`${image.name}-${index}`} className="relative group select-none">
+                  <div className="aspect-square rounded-lg overflow-hidden border border-border bg-muted/40 cursor-pointer relative">
                     {previews[index] ? (
                       <>
                         <img
@@ -240,8 +219,8 @@ export default function UploadImage({
                           }}
                         />
 
-                        {/* Action buttons */}
-                        <div className="absolute top-1 right-1 flex flex-col space-y-1">
+                        {/* Interactive overlays */}
+                        <div className="absolute top-1.5 right-1.5 flex flex-col space-y-1.5 z-10">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -250,10 +229,10 @@ export default function UploadImage({
                               setSelectedImage(previews[index]);
                               setImageModalOpen(true);
                             }}
-                            className="p-1 bg-white bg-opacity-90 cursor-pointer hover:scale-[110%] hover:bg-opacity-100 rounded-full shadow-md transition-all duration-300 md:opacity-0 md:group-hover:opacity-100"
-                            title="Xem trước"
+                            className="p-1.5 bg-background/80 hover:bg-background text-foreground cursor-pointer rounded-full shadow-sm hover:scale-105 transition-transform duration-200 md:opacity-0 md:group-hover:opacity-100"
+                            title="Preview"
                           >
-                            <Eye className="w-3 h-3 text-gray-600" />
+                            <Eye className="w-3.5 h-3.5" />
                           </button>
 
                           <button
@@ -261,42 +240,41 @@ export default function UploadImage({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              if (window.confirm("Xóa hình ảnh này?")) {
+                              if (window.confirm("Delete this image?")) {
                                 removeImage(index);
                               }
                             }}
-                            className="p-1 bg-red-500 cursor-pointer hover:scale-110  bg-opacity-90 hover:bg-opacity-100 text-white rounded-full shadow-md transition-all duration-300 md:opacity-0 md:group-hover:opacity-100"
-                            title="Xóa"
+                            className="p-1.5 bg-destructive hover:bg-destructive/90 text-white cursor-pointer rounded-full shadow-sm hover:scale-105 transition-transform duration-200 md:opacity-0 md:group-hover:opacity-100"
+                            title="Delete"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
                       </div>
                     )}
 
-                    {/* Badges */}
-                    <div className="absolute top-1 left-1">
-                      <span className="bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                    {/* Numeric tags */}
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className="bg-accent text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                         {index + 1}
                       </span>
                     </div>
 
                     {index === 0 && (
-                      <div className="absolute bottom-1 left-1">
-                        <span className="bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                          Chính
+                      <div className="absolute bottom-1.5 left-1.5">
+                        <span className="bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          Main
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* File name - compact */}
                   <p
-                    className="mt-1 text-xs text-gray-500 truncate text-center"
+                    className="mt-1 text-xs text-muted-foreground truncate text-center"
                     title={images[index]?.name}
                   >
                     {images[index]?.name}
@@ -304,12 +282,12 @@ export default function UploadImage({
                 </div>
               ))}
 
-              {/* Add more button */}
+              {/* Add items slot */}
               {images.length < maxFiles && (
-                <div className="aspect-square rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all duration-200 flex items-center justify-center">
+                <div className="aspect-square rounded-lg border border-dashed border-border bg-muted/10 hover:border-accent/40 hover:bg-muted/30 cursor-pointer transition-all duration-200 flex items-center justify-center">
                   <div className="text-center">
-                    <Upload className="w-6 h-6 mx-auto text-gray-400 mb-1" />
-                    <p className="text-xs text-gray-500">Thêm hình</p>
+                    <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                    <p className="text-xs font-medium text-muted-foreground">Add image</p>
                   </div>
                 </div>
               )}
@@ -318,38 +296,38 @@ export default function UploadImage({
         )}
       </div>
 
-      {/* Image Preview Modal */}
+      {/* Popover Preview Overlay */}
       {imageModalOpen && selectedImage && (
         <div
-          className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/50 bg-opacity-80 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fadeIn"
           onClick={() => setImageModalOpen(false)}
         >
           <div
-            className="relative max-w-6xl max-h-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scaleIn"
+            className="relative max-w-4xl max-h-full bg-card rounded-2xl border border-border shadow-gold-glow overflow-hidden animate-scaleIn"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-500 to-white text-white">
-              <h3 className="text-lg font-semibold flex items-center">
-                <Eye className="w-5 h-5 mr-2" />
-                Xem trước hình ảnh
+            {/* Popover Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border bg-muted/40">
+              <h3 className="text-lg font-heading font-semibold text-foreground flex items-center">
+                <Eye className="w-5 h-5 mr-2 text-accent" />
+                Image Preview
               </h3>
               <button
                 onClick={() => setImageModalOpen(false)}
-                className="p-2 hover:bg-red-200 cursor-pointer hover:bg-opacity-20 rounded-full transition-all duration-200"
-                title="Đóng"
+                className="p-1.5 bg-transparent hover:bg-muted text-foreground cursor-pointer rounded-full transition-colors duration-200"
+                title="Close"
               >
-                <X className="w-5 h-5 bg-red-300" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 bg-gray-50">
-              <div className="relative bg-white rounded-lg p-4 shadow-inner">
+            {/* Popover Content */}
+            <div className="p-6 bg-background/30">
+              <div className="relative bg-card rounded-lg p-2 border border-border shadow-sm">
                 <img
                   src={selectedImage}
                   alt="Preview"
-                  className="max-w-full max-h-[70vh] object-contain mx-auto rounded-lg shadow-lg"
+                  className="max-w-full max-h-[65vh] object-contain mx-auto rounded-lg"
                 />
               </div>
             </div>

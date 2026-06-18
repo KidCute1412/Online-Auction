@@ -11,7 +11,9 @@ export default function UserDetailPage() {
   const [userDetail, setUserDetail] = useState<UserItem | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+
   useEffect(() => {
+    // Fetch detailed user profile by user ID
     fetch(
       `${import.meta.env.VITE_API_URL}/${
         import.meta.env.VITE_PATH_ADMIN
@@ -30,6 +32,7 @@ export default function UserDetailPage() {
   }, [id]);
 
   const handleSave = () => {
+    // Send request to edit user role and status
     fetch(
       `${import.meta.env.VITE_API_URL}/${
         import.meta.env.VITE_PATH_ADMIN
@@ -43,32 +46,33 @@ export default function UserDetailPage() {
     )
       .then((res) => res.json())
       .then((data) => {
-        if (data.code == "success") {
-          toast.success("Cập nhật thành công!");
+        if (data.code === "success") {
+          toast.success("Updated successfully!");
           setUserDetail((prev) =>
             prev
               ? { ...prev, role: selectedRole, status: selectedStatus }
               : null
           );
         } else {
-          toast.error("Cập nhật thất bại.");
+          toast.error("Failed to update.");
         }
       })
       .catch(() => {
-        toast.error("Có lỗi xảy ra khi cập nhật.");
+        toast.error("An error occurred while updating.");
       });
   };
 
   const handleResetPassword = () => {
+    // Show SweetAlert warning dialog before resetting password
     Swal.fire({
-      title: "Bạn có chắc muốn reset mật khẩu?",
-      text: "Hành động này sẽ không được khôi phục được",
+      title: "Are you sure you want to reset the password?",
+      text: "This action cannot be undone",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Vẫn reset",
-      cancelButtonText: "Không reset",
+      confirmButtonText: "Yes, reset",
+      cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(
@@ -82,14 +86,14 @@ export default function UserDetailPage() {
         )
           .then((res) => res.json())
           .then((data) => {
-            if (data.code == "success") {
+            if (data.code === "success") {
               toast.success(data.message);
             } else {
               toast.error(data.message);
             }
           })
           .catch(() => {
-            toast.error("Có lỗi xảy ra khi reset mật khẩu.");
+            toast.error("An error occurred while resetting the password.");
           });
       }
     });
@@ -97,154 +101,154 @@ export default function UserDetailPage() {
 
   return (
     userDetail && (
-      <div className="p-5 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8">
-          Chi tiết người dùng
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground bg-background">
+        <h1 className="text-xl sm:text-2xl font-heading font-bold mb-4 text-foreground">
+          User Details
         </h1>
 
-        <div className="bg-white rounded-xl p-6 md:p-10 shadow-md">
-          {/* Row 1: Họ và tên & Tên đăng nhập */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+        <div className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-sm transition-colors duration-300">
+          {/* Row 1: Full Name & Username */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Họ và tên
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Full Name
               </label>
               <input
                 type="text"
                 value={userDetail.full_name}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Tên đăng nhập
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Username
               </label>
               <input
                 type="text"
                 value={userDetail.username}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Row 2: Email & Địa chỉ */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+          {/* Row 2: Email & Address */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Email
               </label>
               <input
                 type="email"
                 value={userDetail.email}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Địa chỉ
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Address
               </label>
               <input
                 type="text"
                 value={userDetail.address}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Row 3: Vai trò, Trạng thái & Ngày sinh */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
+          {/* Row 3: Role, Account Status & Birthday */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Vai trò
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                User Role
               </label>
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-card text-foreground cursor-pointer focus:outline-none"
               >
-                <option value="user">Người dùng</option>
-                <option value="seller">Người bán</option>
+                <option value="user" className="bg-card text-foreground">User</option>
+                <option value="seller" className="bg-card text-foreground">Seller</option>
               </select>
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Trạng thái tài khoản
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Account Status
               </label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-card text-foreground cursor-pointer focus:outline-none"
               >
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
+                <option value="active" className="bg-card text-foreground">Active</option>
+                <option value="inactive" className="bg-card text-foreground">Inactive</option>
               </select>
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Ngày sinh
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Date of Birth
               </label>
               <input
                 type="text"
                 value={formatDateOfBirth(userDetail.date_of_birth)}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Row 4: Rating & Rating Count */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+          {/* Row 4: Rating & Rating Count info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Đánh giá trung bình
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Average Rating
               </label>
-              <div className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2">
-                <span className="text-xl text-yellow-500">⭐</span>
-                <span className="text-lg font-bold">{userDetail.rating}</span>
-                <span className="text-gray-600">/ 5.0</span>
+              <div className="px-3.5 py-2 border border-border rounded-lg bg-muted/30 flex items-center gap-2">
+                <span className="text-lg text-yellow-500">⭐</span>
+                <span className="text-base font-bold text-foreground">{userDetail.rating}</span>
+                <span className="text-xs text-muted-foreground">/ 5.0</span>
               </div>
             </div>
 
             <div>
-              <label className="block mb-2 font-medium text-gray-700">
-                Số lượng đánh giá
+              <label className="block mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Rating Count
               </label>
               <input
                 type="text"
-                value={`${userDetail.rating_count} đánh giá`}
+                value={`${userDetail.rating_count} ratings`}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 border border-border rounded-lg text-sm bg-muted/30 text-foreground focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center sm:flex-row gap-3 sm:gap-4">
+          {/* Action triggers */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
             <button
               onClick={() => navigate("/admin/user/list")}
-              className="cursor-pointer px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="cursor-pointer px-6 py-2 bg-muted text-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-all focus:outline-none"
             >
-              Quay về danh sách
+              Back to list
             </button>
             <button
               onClick={handleSave}
-              className=" cursor-pointer px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="cursor-pointer px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-all focus:outline-none"
             >
-              Lưu thay đổi
+              Save changes
             </button>
             <button
               onClick={handleResetPassword}
-              className=" cursor-pointer px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-base font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="cursor-pointer px-6 py-2 bg-destructive text-destructive-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-all focus:outline-none"
             >
-              Reset mật khẩu
+              Reset Password
             </button>
           </div>
         </div>

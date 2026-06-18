@@ -47,15 +47,14 @@ export default function CategoryEdit() {
     validate
       .addField(
         "#name",
-        [{ rule: "required", errorMessage: "Vui lòng nhập tên danh mục!" }],
+        [{ rule: "required", errorMessage: "Please enter a category name!" }],
         { errorContainer: "#nameError" }
       )
-
       .onSuccess((event: any) => {
         setIsLoading(true);
         const name = event.target.name.value;
         const status = event.target.status.value;
-        const parentValue = event.target.parent.value as string; // "" hoặc "3"
+        const parentValue = event.target.parent.value as string;
         const parent_id = parentValue === "" ? null : Number(parentValue);
         let description;
         if (editorRef.current) {
@@ -71,6 +70,7 @@ export default function CategoryEdit() {
           slug: slug,
         };
 
+        // Submit patch request to update category details
         fetch(
           `${import.meta.env.VITE_API_URL}/${
             import.meta.env.VITE_PATH_ADMIN
@@ -85,69 +85,64 @@ export default function CategoryEdit() {
           .then((res) => res.json())
           .then((data) => {
             setIsLoading(false);
-            if (data.code == "error") {
+            if (data.code === "error") {
               toast.error(data.message);
             }
-            if (data.code == "success") {
+            if (data.code === "success") {
               toast.success(data.message);
             }
           })
           .catch(() => {
             setIsLoading(false);
-            toast.error("Có lỗi xảy ra");
+            toast.error("An error occurred!");
           });
       });
-  }, [item]);
+  }, [item, id]);
 
   return (
-    <>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground">
       {item && (
-        <form id="CategoryEditForm" className="space-y-6">
-          <h2 className="text-3xl font-medium">Chỉnh sửa danh mục</h2>
+        <form id="CategoryEditForm" className="w-full max-w-5xl mx-auto space-y-4">
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-foreground">Edit Category</h2>
 
-          <div className="rounded-2xl border-3 bg-white p-6 md:p-8">
-            <div className="space-y-8">
-              {/* tên danh mục */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="">
-                  <div className="space-y-5  ">
-                    <label
-                      htmlFor="name"
-                      className="mb-4 block text-sm font-medium text-gray-700"
-                    >
-                      Tên danh mục
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      name="name"
-                      defaultValue={item.name}
-                      className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      placeholder="Nhập tên danh mục"
-                    />
-                  </div>
-                  <div id="errorName" className="text-sm text-red mt-0.2"></div>
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 shadow-sm transition-colors duration-300">
+            <div className="space-y-4">
+              {/* Category name and parent inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="w-full">
+                  <label
+                    htmlFor="name"
+                    className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                  >
+                    Category Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    defaultValue={item.name}
+                    className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200"
+                    placeholder="Enter category name"
+                  />
+                  <div id="nameError" className="text-xs text-destructive mt-0.5 min-h-[16px] font-medium"></div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="w-full">
                   <label
                     htmlFor="parent"
-                    className="mb-4 block text-sm font-medium text-gray-700"
+                    className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
                   >
-                    Danh mục cha
+                    Parent Category
                   </label>
                   <select
                     id="parent"
                     name="parent"
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm
-             text-gray-800 shadow-sm outline-none
-             focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-             disabled:bg-gray-100"
+                    className="w-full rounded-lg border border-border bg-card px-3.5 py-2 text-sm text-foreground shadow-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 disabled:bg-muted transition-all duration-200"
                     defaultValue={item.parent_id ?? ""}
                   >
-                    <option value="">-- Chọn danh mục --</option>
+                    <option value="" className="bg-card text-foreground">-- Select parent category --</option>
                     {options.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
+                      <option key={opt.id} value={opt.id} className="bg-card text-foreground">
                         {opt.label}
                       </option>
                     ))}
@@ -155,58 +150,64 @@ export default function CategoryEdit() {
                 </div>
               </div>
 
-              {/* Hàng 2: Vị trí + Trạng thái */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
+              {/* Status input selection field */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="w-full">
                   <label
                     htmlFor="status"
-                    className="mb-4 block text-sm font-medium text-gray-700"
+                    className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
                   >
-                    Trạng thái
+                    Status
                   </label>
                   <select
                     id="status"
                     name="status"
-                    className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-border bg-card px-3.5 py-2 text-sm text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200"
                     defaultValue={item.status}
                   >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Tạm dừng</option>
+                    <option value="active" className="bg-card text-foreground">Active</option>
+                    <option value="inactive" className="bg-card text-foreground">Inactive</option>
                   </select>
                 </div>
               </div>
 
-              {/* Mô tả */}
-              <TinyMCEEditor
-                editorRef={editorRef}
-                value={item.description ? item.description : ""}
-              />
+              {/* Description Input editor */}
+              <div className="w-full">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Description
+                </label>
+                <div className="w-full">
+                  <TinyMCEEditor
+                    editorRef={editorRef}
+                    value={item.description ? item.description : ""}
+                  />
+                </div>
+              </div>
 
-              {/* Nút hành động */}
-              <div className="flex flex-col items-center justify-center gap-5 pt-2">
+              {/* Form trigger action links */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="rounded-xl bg-blue-500 px-3 py-5 text-[18px] font-medium text-white hover:bg-blue-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer w-full sm:w-auto rounded-xl bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:opacity-90 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Đang cập nhật..." : "Cập nhật danh mục"}
+                  {isLoading ? "Updating..." : "Update Category"}
                 </button>
 
-                <span
-                  className="text-[15px] font-medium cursor-pointer underline text-blue-400"
+                <button
+                  type="button"
+                  className="cursor-pointer w-full sm:w-auto text-sm font-semibold text-accent hover:underline transition-colors py-2"
                   onClick={() => {
-                    navigate(
-                      `/${import.meta.env.VITE_PATH_ADMIN}/category/list`
-                    );
+                    navigate(`/${import.meta.env.VITE_PATH_ADMIN}/category/list`);
                   }}
                 >
-                  Quay lại danh sách
-                </span>
+                  Back to list
+                </button>
               </div>
             </div>
           </div>
         </form>
       )}
-    </>
+    </div>
   );
 }

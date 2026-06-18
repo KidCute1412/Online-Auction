@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Camera, Save, X, User, Mail, Shield, Calendar } from "lucide-react";
+import { Camera, Save, X, User, Mail, Shield } from "lucide-react";
 import { useAuth } from "@/routes/ProtectedRouter";
 import { toast } from "sonner";
 
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // Update form data when user data loads
+  // Sync state values with auth contexts on update
   React.useEffect(() => {
     if (user) {
       setFormData({
@@ -49,7 +49,6 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-
       const formDataToSend = new FormData();
       formDataToSend.append("full_name", formData.full_name);
       formDataToSend.append("username", user.username);
@@ -69,17 +68,17 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (data.status === "success") {
-        toast.success("Cập nhật thông tin thành công!");
-        setAuth(data.data); // Update auth context with new user data
+        toast.success("Profile updated successfully!");
+        setAuth(data.data);
         setIsEditing(false);
         setSelectedFile(null);
         setPreviewUrl(null);
       } else {
-        toast.error(data.message || "Có lỗi xảy ra khi cập nhật");
+        toast.error(data.message || "An error occurred during update!");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật thông tin");
+      toast.error("An error occurred while updating profile!");
     } finally {
       setIsSaving(false);
     }
@@ -106,153 +105,131 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <User className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Không thể tải thông tin người dùng
-            </h2>
-            <p className="text-gray-600">Vui lòng đăng nhập lại để tiếp tục.</p>
-          </div>
-        </div>
+      <div className="w-full min-h-[calc(100vh-140px)] flex justify-center items-center py-6 bg-background text-foreground transition-colors duration-300">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground bg-background transition-colors duration-300">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Thông tin cá nhân
+        <div className="mb-4">
+          <h1 className="font-heading font-bold text-xl sm:text-2xl text-foreground">
+            Personal Profile
           </h1>
-          <p className="text-gray-600 mt-1">
-            Quản lý thông tin tài khoản của bạn
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage your account information
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Avatar Section */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="text-center">
-                <div className="relative inline-block">
-                  {previewUrl || user.avatar ? (
-                    <img
-                      src={previewUrl || user.avatar}
-                      alt={user.full_name}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 mx-auto"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mx-auto border-4 border-gray-200">
-                      {getInitials(user.full_name)}
-                    </div>
-                  )}
+            <div className="bg-card rounded-xl border border-border p-5 shadow-sm text-center transition-colors duration-300">
+              <div className="relative inline-block">
+                {previewUrl || user.avatar ? (
+                  <img
+                    src={previewUrl || user.avatar}
+                    alt={user.full_name}
+                    className="w-28 h-28 rounded-full object-cover border-2 border-border mx-auto shadow-sm"
+                  />
+                ) : (
+                  <div className="w-28 h-28 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-3xl font-bold mx-auto border-2 border-border shadow-sm">
+                    {getInitials(user.full_name)}
+                  </div>
+                )}
 
-                  {isEditing && (
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
-                    >
-                      <Camera size={16} />
-                    </button>
-                  )}
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-
-                <h3 className="text-xl font-semibold text-gray-900 mt-4">
-                  {user.full_name}
-                </h3>
-                <p className="text-gray-600">{user.email}</p>
-
-                <div className="mt-4 flex justify-center">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      user.role === "admin"
-                        ? "bg-purple-100 text-purple-800"
-                        : user.role === "seller"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
+                {isEditing && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1.5 rounded-full hover:opacity-90 shadow-sm transition-opacity cursor-pointer"
                   >
-                    <Shield className="w-4 h-4 mr-1" />
-                    {user.role === "admin"
-                      ? "Quản trị viên"
+                    <Camera size={14} />
+                  </button>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              <h3 className="text-base font-bold text-foreground mt-3">
+                {user.full_name}
+              </h3>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+
+              <div className="mt-3 flex justify-center">
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                    user.role === "admin"
+                      ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
                       : user.role === "seller"
-                      ? "Người bán"
-                      : "Người dùng"}
-                  </span>
-                </div>
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : "bg-primary/10 text-accent border border-accent/20"
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5 mr-1" />
+                  {user.role === "admin"
+                    ? "Administrator"
+                    : user.role === "seller"
+                    ? "Seller"
+                    : "User"}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Profile Information */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Thông tin chi tiết
+            <div className="bg-card rounded-xl border border-border p-5 shadow-sm transition-colors duration-300">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b border-border">
+                <h2 className="text-base font-bold text-foreground">
+                  Detailed Info
                 </h2>
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    className="bg-primary text-primary-foreground px-4 py-1.5 rounded-lg hover:opacity-90 text-xs font-semibold shadow-sm transition-all cursor-pointer"
                   >
-                    Chỉnh sửa
+                    Edit
                   </button>
                 ) : (
                   <div className="flex gap-2">
                     <button
                       onClick={handleCancel}
-                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                      className="bg-muted text-foreground px-3 py-1.5 rounded-lg hover:bg-muted/80 text-xs font-semibold transition-colors cursor-pointer"
                       disabled={isSaving}
                     >
-                      <X size={16} className="inline mr-1" />
-                      Hủy
+                      <X size={14} className="inline mr-1" />
+                      Cancel
                     </button>
                     <button
                       onClick={handleSave}
-                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                      className="bg-emerald-500 text-white px-3 py-1.5 rounded-lg hover:opacity-90 text-xs font-semibold transition-opacity disabled:opacity-50 cursor-pointer"
                       disabled={isSaving}
                     >
                       {isSaving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline mr-1"></div>
+                        <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white inline mr-1"></div>
                       ) : (
-                        <Save size={16} className="inline mr-1" />
+                        <Save size={14} className="inline mr-1" />
                       )}
-                      Lưu
+                      Save
                     </button>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <User className="inline w-4 h-4 mr-1" />
-                    Họ và tên
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    <User className="inline w-3.5 h-3.5 mr-1 align-text-bottom" />
+                    Full Name
                   </label>
                   {isEditing ? (
                     <input
@@ -260,11 +237,11 @@ export default function ProfilePage() {
                       name="full_name"
                       value={formData.full_name}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Nhập họ và tên"
+                      className="w-full px-3.5 py-2 border border-border bg-muted/30 text-foreground text-sm rounded-lg outline-none focus:border-accent transition-all"
+                      placeholder="Enter your full name"
                     />
                   ) : (
-                    <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                    <p className="text-sm text-foreground bg-muted/20 border border-border/50 px-3.5 py-2 rounded-lg">
                       {user.full_name}
                     </p>
                   )}
@@ -272,8 +249,8 @@ export default function ProfilePage() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="inline w-4 h-4 mr-1" />
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    <Mail className="inline w-3.5 h-3.5 mr-1 align-text-bottom" />
                     Email
                   </label>
                   {isEditing ? (
@@ -282,12 +259,11 @@ export default function ProfilePage() {
                       name="email"
                       value={formData.email}
                       readOnly
-                      onChange={handleInputChange}
-                      className=" w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Nhập email"
+                      className="w-full px-3.5 py-2 border border-border bg-muted/30 text-muted-foreground text-sm rounded-lg outline-none cursor-not-allowed"
+                      placeholder="Enter your email"
                     />
                   ) : (
-                    <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                    <p className="text-sm text-foreground bg-muted/20 border border-border/50 px-3.5 py-2 rounded-lg">
                       {user.email}
                     </p>
                   )}
@@ -295,16 +271,16 @@ export default function ProfilePage() {
 
                 {/* Role */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Shield className="inline w-4 h-4 mr-1" />
-                    Quyền người dùng
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    <Shield className="inline w-3.5 h-3.5 mr-1 align-text-bottom" />
+                    User Role
                   </label>
-                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                  <p className="text-sm text-foreground bg-muted/20 border border-border/50 px-3.5 py-2 rounded-lg">
                     {user.role === "admin"
-                      ? "Quản trị viên"
+                      ? "Administrator"
                       : user.role === "seller"
-                      ? "Người bán"
-                      : "Người dùng"}
+                      ? "Seller"
+                      : "User"}
                   </p>
                 </div>
               </div>

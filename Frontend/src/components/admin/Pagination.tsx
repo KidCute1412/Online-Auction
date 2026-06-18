@@ -17,32 +17,31 @@ export default function Pagination({
 
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const showPages = 5; // Số trang hiển thị xung quanh trang hiện tại
 
     if (totalPages <= 7) {
-      // Nếu tổng số trang <= 7, hiển thị tất cả
+      // Show all pages if total pages <= 7
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Luôn hiển thị trang đầu
+      // Always insert the first page
       pages.push(1);
 
       if (currentPage <= 3) {
-        // Gần đầu: 1 2 3 4 5 ... 10
+        // Page navigation close to the beginning
         for (let i = 2; i <= 5; i++) {
           pages.push(i);
         }
         pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Gần cuối: 1 ... 6 7 8 9 10
+        // Page navigation close to the end
         pages.push("...");
         for (let i = totalPages - 4; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Ở giữa: 1 ... 4 5 6 ... 10
+        // Page navigation in the middle range
         pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pages.push(i);
@@ -59,6 +58,7 @@ export default function Pagination({
 
   return (
     <div className="flex justify-center items-center space-x-2 mt-6">
+      {/* Previous page handler button */}
       <button
         onClick={() =>
           setSearchParams((prev) => ({
@@ -67,15 +67,17 @@ export default function Pagination({
           }))
         }
         disabled={currentPage === 1 || isPageLoading}
-        className="cursor-pointer px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="cursor-pointer px-3 py-2 border border-border rounded-lg text-sm font-medium text-muted-foreground bg-card hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Trước
+        Previous
       </button>
+
+      {/* Pages list renderer */}
       {pageNumbers.map((page, index) =>
         typeof page === "string" ? (
           <span
             key={`ellipsis-${index}`}
-            className=" px-3 py-2 text-gray-500 text-sm font-medium"
+            className="px-3 py-2 text-muted-foreground text-sm font-medium"
           >
             {page}
           </span>
@@ -89,16 +91,18 @@ export default function Pagination({
               }))
             }
             disabled={isPageLoading}
-            className={` cursor-pointer px-3 py-2 border border-gray-300 rounded-md text-sm font-medium ${
+            className={`cursor-pointer px-3 py-2 border border-border rounded-lg text-sm font-medium transition-colors ${
               page === currentPage
-                ? "bg-blue-500 text-white border-blue-500"
-                : "text-gray-700 bg-white hover:bg-gray-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "text-muted-foreground bg-card hover:bg-muted/50"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {page}
           </button>
         )
       )}
+
+      {/* Next page handler button */}
       <button
         onClick={() =>
           setSearchParams((prev) => ({
@@ -107,9 +111,9 @@ export default function Pagination({
           }))
         }
         disabled={currentPage === totalPages || isPageLoading}
-        className="cursor-pointer px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="cursor-pointer px-3 py-2 border border-border rounded-lg text-sm font-medium text-muted-foreground bg-card hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Sau
+        Next
       </button>
     </div>
   );

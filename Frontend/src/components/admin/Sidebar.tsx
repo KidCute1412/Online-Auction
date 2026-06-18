@@ -4,30 +4,33 @@ import {
   FiPackage,
   FiUsers,
   FiFileText,
-  FiUser,
-  FiSettings,
   FiUserCheck,
   FiLogOut,
 } from "react-icons/fi";
-import { NavLink, useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const baseLinkClass =
-  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[500]";
-const activeClass = "bg-blue-500 text-white hover:bg-blue-500/90";
-const normalClass = "text-gray-800 hover:bg-gray-100";
+  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
+const activeClass = "bg-primary text-primary-foreground shadow-sm";
+const normalClass = "text-muted-foreground hover:text-foreground hover:bg-muted/50";
 
 export default function Sidebar() {
   const location = useLocation();
   const pathname = location.pathname;
   const navigate = useNavigate();
+  
+  // Check if current path matches parent categories route
   const isCategoryActive = pathname.startsWith(
     `/${import.meta.env.VITE_PATH_ADMIN}/category`
-  ); //đường dẫn cha
+  );
+  
+  // Check if current path matches parent users route
   const isUserActive = pathname.startsWith(
     `/${import.meta.env.VITE_PATH_ADMIN}/user`
   );
+  
+  // Check if current path matches bidder applications route
   const isBidderFormActive =
     pathname.startsWith(
       `/${import.meta.env.VITE_PATH_ADMIN}/seller/applications`
@@ -37,18 +40,20 @@ export default function Sidebar() {
     );
 
   return (
-    <nav className="p-3 space-y-1">
+    <nav className="p-3 space-y-1 bg-card h-full border-r border-border/10 transition-colors duration-300">
+      {/* Dashboard / Overview Link */}
       <NavLink
         to={`/${import.meta.env.VITE_PATH_ADMIN}/dashboard`}
-        end //trùng với đường dẫn
+        end
         className={({ isActive }) =>
           `${baseLinkClass} ${isActive ? activeClass : normalClass}`
         }
       >
         <FiHome className="text-lg" />
-        <span>Tổng quan</span>
+        <span>Dashboard</span>
       </NavLink>
 
+      {/* Category Management Link */}
       <NavLink
         to={`/${import.meta.env.VITE_PATH_ADMIN}/category/list`}
         className={() =>
@@ -56,9 +61,10 @@ export default function Sidebar() {
         }
       >
         <FiTag className="text-lg" />
-        <span>Quản lý danh mục</span>
+        <span>Manage Categories</span>
       </NavLink>
 
+      {/* Product Management Link */}
       <NavLink
         to={`/${import.meta.env.VITE_PATH_ADMIN}/product/list`}
         className={({ isActive }) =>
@@ -66,9 +72,10 @@ export default function Sidebar() {
         }
       >
         <FiPackage className="text-lg" />
-        <span>Quản lý sản phẩm</span>
+        <span>Manage Products</span>
       </NavLink>
 
+      {/* User Management Link */}
       <NavLink
         to={`/${import.meta.env.VITE_PATH_ADMIN}/user/list`}
         className={() =>
@@ -76,9 +83,10 @@ export default function Sidebar() {
         }
       >
         <FiUsers className="text-lg" />
-        <span>Quản lý người dùng</span>
+        <span>Manage Users</span>
       </NavLink>
 
+      {/* Registration Applications Link */}
       <NavLink
         to={`/${import.meta.env.VITE_PATH_ADMIN}/seller/applications`}
         className={() =>
@@ -86,10 +94,12 @@ export default function Sidebar() {
         }
       >
         <FiFileText className="text-lg" />
-        <span>Quản lý form đăng ký</span>
+        <span>Manage Applications</span>
       </NavLink>
 
-      <div className="pt-4 mt-4 border-t">
+      {/* Separate section for profile and action triggers */}
+      <div className="pt-4 mt-4 border-t border-border">
+        {/* Personal Profile Info Link */}
         <NavLink
           to={`/${import.meta.env.VITE_PATH_ADMIN}/profile`}
           className={({ isActive }) =>
@@ -97,11 +107,12 @@ export default function Sidebar() {
           }
         >
           <FiUserCheck className="text-lg" />
-          <span>Thông tin cá nhân</span>
+          <span>Profile Info</span>
         </NavLink>
 
+        {/* Account Logout Button */}
         <div
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[500] text-red-600 hover:bg-red-50 cursor-pointer"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer transition-colors duration-200"
           onClick={() => {
             fetch(`${import.meta.env.VITE_API_URL}/accounts/logout`, {
               credentials: "include",
@@ -117,7 +128,7 @@ export default function Sidebar() {
           }}
         >
           <FiLogOut className="text-lg" />
-          <span>Đăng xuất</span>
+          <span>Logout</span>
         </div>
       </div>
     </nav>

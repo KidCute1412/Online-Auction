@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import FilterBar from "@/components/admin/FilterBar";
-import Pagination from "@/components/admin/Pagination";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatToVN } from "@/utils/format_time";
 import { useFilters } from "@/hooks/useFilters";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
-const LIMIT = 10;
 import PaginationComponent from "@/components/common/Pagination";
+
+const LIMIT = 10;
+
 type ProductItem = {
   product_id: number;
   product_name: string;
@@ -123,6 +124,7 @@ export default function ProductListPage() {
     fetchItems();
   }, [currentPage, creatorFilter, dateFrom, dateTo, searchFromUrl]);
 
+  // Extract all unique seller IDs from items
   const creatorOptions: string[] = useMemo(
     () =>
       Array.from(
@@ -180,22 +182,21 @@ export default function ProductListPage() {
         if (data.code === "success") {
           fetchItems();
           fetchTotal();
-          toast.success("Xóa sản phẩm thành công");
-        } else {
+          toast.success("Product deleted successfully!");
         }
       });
   };
 
   if (isLoading) {
     return (
-      <Loading className = "ml-[240px] bg-transparent"></Loading>
+      <Loading className="ml-[240px] bg-transparent"></Loading>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <h2 className="font-semibold text-2xl sm:text-3xl mb-5">
-        Quản lý sản phẩm
+    <div className="px-4 sm:px-6 lg:px-8 text-foreground">
+      <h2 className="font-heading font-bold text-xl sm:text-2xl mb-4 text-foreground">
+        Manage Products
       </h2>
 
       <FilterBar
@@ -212,8 +213,8 @@ export default function ProductListPage() {
         onSearchSubmit={handleSearchSubmit}
         onResetFilters={resetFilters}
         bulkActionOptions={[
-          { value: "restore", label: "Khôi phục" },
-          { value: "delete", label: "Xóa" },
+          { value: "restore", label: "Restore" },
+          { value: "delete", label: "Delete" },
         ]}
         onApplyBulkAction={(action) => console.log(action, selectedIds)}
         onTrashClick={() =>
@@ -222,50 +223,49 @@ export default function ProductListPage() {
       />
 
       {/* Desktop Table View */}
-      <div className="mt-5 bg-white rounded-2xl border border-gray-200 overflow-hidden hidden lg:block relative">
+      <div className="mt-5 bg-card rounded-xl border border-border overflow-hidden hidden lg:block relative transition-colors duration-300">
         {isPageLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-xs flex justify-center items-center z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
           </div>
         )}
         <div className="w-full overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/30">
               <tr>
-                <th className="px-4 py-4 text-left w-12">
+                <th className="px-4 py-3 text-left w-12">
                   <input
                     type="checkbox"
                     checked={allChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
                   />
                 </th>
-                <th className="px-4 py-4 text-center font-semibold text-gray-700">
-                  Tên sản phẩm
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Product Name
                 </th>
-
-                <th className="px-4 py-4 text-center font-semibold text-gray-700">
-                  Tạo bởi
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Created By
                 </th>
-                <th className="px-4 py-4 text-center font-semibold text-gray-700">
-                  Hành động
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border/60">
               {items.map((item) => {
                 const checked = selectedIds.includes(item.product_id);
                 return (
-                  <tr key={item.product_id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4">
+                  <tr key={item.product_id} className="hover:bg-muted/20 transition-colors duration-150">
+                    <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggleOne(item.product_id)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
                       />
                     </td>
-                    <td className="px-4 py-4 font-medium text-gray-900 text-center">
+                    <td className="px-4 py-3 font-medium text-foreground text-center text-sm">
                       <span title={item.product_name}>
                         {item.product_name.split(" ").length > 5
                           ? item.product_name.split(" ").slice(0, 5).join(" ") +
@@ -274,27 +274,27 @@ export default function ProductListPage() {
                       </span>
                     </td>
 
-                    <td className="px-4 py-4 text-center">
-                      <div className="font-medium">
-                        {item.creator_name || "Không rõ"}
+                    <td className="px-4 py-3 text-center text-sm">
+                      <div className="font-medium text-foreground">
+                        {item.creator_name || "Unknown"}
                       </div>
-                      <div className="text-gray-500 text-xs mt-1">
+                      <div className="text-muted-foreground text-xs mt-0.5">
                         {formatToVN(item.created_at)}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-4 py-3 text-center text-sm">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
-                          className="cursor-pointer p-2 hover:bg-blue-50 text-blue-500 rounded-lg"
+                          className="cursor-pointer p-1.5 hover:bg-muted text-accent rounded-lg transition-colors"
                           onClick={() => handleView(item.product_id)}
                         >
-                          <Eye size={18} />
+                          <Eye size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(item.product_id)}
-                          className="cursor-pointer p-2 hover:bg-red-50 text-red-500 rounded-lg"
+                          className="cursor-pointer p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -305,25 +305,21 @@ export default function ProductListPage() {
           </table>
         </div>
         {items.length === 0 && (
-          <div className="py-10 text-center text-gray-500">
-            Không có sản phẩm nào phù hợp bộ lọc
+          <div className="py-8 text-center text-muted-foreground text-sm bg-card transition-colors duration-300">
+            No products match the filters
           </div>
         )}
       </div>
 
       {/* Mobile/Tablet Card View */}
       <div className="mt-5 space-y-4 lg:hidden relative">
-        {isPageLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10 rounded-xl">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
-        )}
+        {isPageLoading && <Loading></Loading>}
         {items.map((item) => {
           const checked = selectedIds.includes(item.product_id);
           return (
             <div
               key={item.product_id}
-              className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+              className="bg-card rounded-xl border border-border p-4 shadow-sm text-foreground transition-colors duration-300"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -331,11 +327,11 @@ export default function ProductListPage() {
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleOne(item.product_id)}
-                    className="w-4 h-4 mt-1"
+                    className="w-4 h-4 mt-0.5 rounded text-accent bg-card border-border focus:ring-accent"
                   />
                   <div>
                     <h3
-                      className="font-semibold text-gray-900 text-lg"
+                      className="font-bold text-foreground text-base"
                       title={item.product_name}
                     >
                       {item.product_name.split(" ").length > 5
@@ -347,42 +343,36 @@ export default function ProductListPage() {
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Tạo bởi:</span>
-                  <span className="font-medium text-right">
-                    {item.seller_id || "Không rõ"}
+                  <span className="text-muted-foreground">Created by:</span>
+                  <span className="font-medium text-foreground">
+                    {item.seller_id || "Unknown"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Ngày tạo:</span>
-                  <span className="text-gray-700 text-xs text-right">
+                  <span className="text-muted-foreground">Created at:</span>
+                  <span className="text-muted-foreground">
                     {formatToVN(item.created_at)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Chỉnh sửa:</span>
-                  <span className="text-gray-700 text-xs text-right">
-                    {/* {formatToVN(item.edited_at)} */}
                   </span>
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+              <div className="flex gap-2 mt-4 pt-3 border-t border-border/55">
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-muted/30 hover:bg-muted text-accent text-sm rounded-lg transition-colors cursor-pointer"
                   onClick={() => handleView(item.product_id)}
                 >
-                  <Eye size={16} />
-                  <span className="font-medium">Xem</span>
+                  <Eye size={14} />
+                  <span className="font-medium">View</span>
                 </button>
 
                 <button
                   onClick={() => handleDelete(item.product_id)}
-                  className=" cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                  className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive text-sm rounded-lg transition-colors"
                 >
-                  <Trash2 size={16} />
-                  <span className="font-medium">Xóa</span>
+                  <Trash2 size={14} />
+                  <span className="font-medium">Delete</span>
                 </button>
               </div>
             </div>
@@ -390,13 +380,13 @@ export default function ProductListPage() {
         })}
 
         {items.length === 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 py-10 text-center text-gray-500">
-            Không có sản phẩm nào phù hợp bộ lọc
+          <div className="bg-card rounded-xl border border-border py-8 text-center text-muted-foreground text-sm transition-colors duration-300">
+            No products match the filters
           </div>
         )}
       </div>
 
-      <PaginationComponent numberOfPages = {totalPages} currentPage = {currentPage} controlPage = {setCurrentPage}></PaginationComponent>
+      <PaginationComponent numberOfPages={totalPages} currentPage={currentPage} controlPage={setCurrentPage}></PaginationComponent>
     </div>
   );
 }

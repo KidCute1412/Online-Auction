@@ -24,7 +24,7 @@ export default function BanBidderModal({
 
   const handleBanBidder = async () => {
     if (!reason.trim()) {
-      toast.error("Vui lòng nhập lý do cấm người dùng");
+      toast.error("Please enter the reason for banning the user");
       return;
     }
 
@@ -48,14 +48,14 @@ export default function BanBidderModal({
 
       const data = await response.json();
       if (response.ok) {
-        toast.success(`Đã cấm người dùng ${username} thành công`);
+        toast.success(`Successfully banned user ${username}`);
         onClose();
       } else {
-        toast.error(data.message || "Không thể cấm người dùng này");
+        toast.error(data.message || "Unable to ban this user");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Có lỗi xảy ra khi cấm người dùng");
+      toast.error("An error occurred while banning the user");
     } finally {
       setIsSubmitting(false);
     }
@@ -69,17 +69,17 @@ export default function BanBidderModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 bg-opacity-50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 animate__animated animate__zoomIn animate__fast">
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-red-600 to-rose-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-lg">
               <AlertTriangle className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Cấm người dùng</h2>
+            <h2 className="text-xl font-bold text-white">Ban Bidder</h2>
           </div>
           <button
             onClick={onClose}
@@ -93,16 +93,16 @@ export default function BanBidderModal({
         {/* Body */}
         <div className="p-6 space-y-4">
           {/* Warning Message */}
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
             <div className="flex gap-3">
-              <Ban className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <Ban className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-red-900 mb-1">
-                  Bạn đang thực hiện cấm người dùng
+                <p className="text-sm font-medium text-red-500 mb-1">
+                  Banning Bidder Action
                 </p>
-                <p className="text-sm text-red-700">
-                  Người dùng <span className="font-semibold">{username}</span>{" "}
-                  sẽ không thể tham gia đấu giá sản phẩm này nữa.
+                <p className="text-sm text-muted-foreground">
+                  User <span className="font-semibold text-foreground">{username}</span>{" "}
+                  will no longer be able to place bids on this product.
                 </p>
               </div>
             </div>
@@ -112,33 +112,33 @@ export default function BanBidderModal({
           <div className="space-y-2">
             <label
               htmlFor="ban-reason"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-muted-foreground"
             >
-              Lý do cấm <span className="text-red-500">*</span>
+              Ban Reason <span className="text-red-500">*</span>
             </label>
             <textarea
               id="ban-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               disabled={isSubmitting}
-              placeholder="Nhập lý do cấm người dùng này..."
+              placeholder="Enter the reason for banning this user..."
               rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all resize-none text-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <p className="text-xs text-gray-500">
-              Lý do này sẽ được lưu lại và có thể xem lại sau
+            <p className="text-xs text-muted-foreground">
+              This reason will be recorded and can be viewed later.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3">
+        <div className="bg-muted/30 px-6 py-4 flex items-center justify-end gap-3 border-t border-border">
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm cursor-pointer font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm cursor-pointer font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Hủy bỏ
+            Cancel
           </button>
           <button
             onClick={handleBanBidder}
@@ -148,12 +148,12 @@ export default function BanBidderModal({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Đang xử lý...
+                Processing...
               </>
             ) : (
               <>
                 <Ban className="w-4 h-4" />
-                Xác nhận cấm
+                Confirm Ban
               </>
             )}
           </button>

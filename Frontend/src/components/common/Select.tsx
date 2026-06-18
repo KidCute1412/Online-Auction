@@ -2,9 +2,7 @@ import {cn} from "@/lib/utils"
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -26,7 +24,7 @@ interface SelectProps {
 
 export default function SelectComponent({
   items = [],
-  placeholder = "Chọn...",
+  placeholder = "Select...",
   value,
   setState,
   className = "",
@@ -42,21 +40,21 @@ export default function SelectComponent({
         disabled={disabled}
       >
         <SelectTrigger className={cn(
-          "w-full",
+          "w-full bg-background/50 border-border text-foreground hover:border-accent/40 focus:ring-accent focus:border-accent transition-colors duration-200",
           disabled && "opacity-50 cursor-not-allowed"
         )}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-glass border-border shadow-gold-glow text-foreground">
           {items.length > 0 ? (
             items.map((item, index) => (
-              <SelectItem key={index} value={item.value}>
+              <SelectItem key={index} value={item.value} className="cursor-pointer hover:bg-muted text-sm">
                 {item.content}
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="None" disabled>
-              Không có dữ liệu
+            <SelectItem value="None" disabled className="text-muted-foreground text-sm">
+              No data available
             </SelectItem>
           )}
         </SelectContent>

@@ -7,25 +7,25 @@ import { Key, Mail, Send } from "lucide-react";
 
 function ForgotPassword() {
   const navigate = useNavigate();
+
   useEffect(() => {
     const validate = new JustValidate("#forgotPasswordForm");
 
+    // Add validation rules for email input
     validate
       .addField(
         "#email",
         [
-          { rule: "required", errorMessage: "Vui lòng nhập email!" },
-          { rule: "email", errorMessage: "Email không đúng định dạng" },
+          { rule: "required", errorMessage: "Please enter your email!" },
+          { rule: "email", errorMessage: "Invalid email format" },
         ],
         { errorContainer: "#emailError" }
       )
       .onSuccess((event: any) => {
         const email = event.target.email.value;
+        const dataFinal = { email: email };
 
-        const dataFinal = {
-          email: email,
-        };
-
+        // Send forgot password request to server
         fetch(`${import.meta.env.VITE_API_URL}/accounts/forgot-password`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -34,89 +34,83 @@ function ForgotPassword() {
         })
           .then((res) => res.json())
           .then((data) => {
-            if (data.code == "error") {
+            if (data.code === "error") {
               toast.error(data.message);
             }
-
-            if (data.code == "success") {
+            if (data.code === "success") {
               navigate(`/accounts/verify?email=${email}&type=forgot-password`);
             }
-
-            if (data.code == "existedOTP") {
+            if (data.code === "existedOTP") {
               navigate(`/accounts/verify?email=${email}&type=forgot-password`);
             }
           });
       });
-  }, []);
+  }, [navigate]);
+
   return (
-    <>
-      <div className="flex justify-center bg-gray-50 px-4 py-6">
-        <form
-          id="forgotPasswordForm"
-          action=""
-          className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-gray-200"
-        >
-          {/* Header */}
-          <div className="text-center mb-5">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-600 rounded-full mb-3 shadow-lg">
-              <Key className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              Quên mật khẩu
-            </h1>
-            <p className="text-gray-600 text-xs">
-              Vui lòng nhập email để nhận mã xác nhận
-            </p>
+    <div className="flex justify-center px-4 min-h-[calc(100vh-140px)] items-center py-4 transition-colors duration-300">
+      <form
+        id="forgotPasswordForm"
+        className="w-full max-w-md bg-card p-6 sm:p-7 rounded-2xl shadow-gold-glow border border-border"
+      >
+        {/* Header section with Key icon */}
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full mb-2 border border-accent/20">
+            <Key className="w-5 h-5 text-accent" />
           </div>
+          <h1 className="font-heading font-bold text-xl text-foreground mb-1">
+            Forgot Password
+          </h1>
+          <p className="text-muted-foreground text-xs">
+            Enter your email to receive a verification OTP code
+          </p>
+        </div>
 
-          {/* Form Fields */}
-          <div className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-xs font-semibold text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="email"
-                  type="text"
-                  placeholder="Ví dụ: nva@gmail.com"
-                  className="w-full px-3 py-2 pl-9 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-white text-sm"
-                />
-                <div className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  <Mail className="w-4 h-4" />
-                </div>
+        {/* Inputs stack */}
+        <div className="space-y-3.5">
+          {/* Email input field */}
+          <div>
+            <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              Email
+            </label>
+            <div className="relative">
+              <input
+                id="email"
+                type="text"
+                placeholder="your@email.com"
+                className="w-full px-3.5 py-2 pl-10 bg-muted/30 border border-border rounded-xl focus:border-accent focus:ring-1 focus:ring-accent/30 text-foreground transition-all duration-200 text-sm outline-none"
+              />
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                <Mail className="w-4 h-4" />
               </div>
-              <div id="emailError" className="text-xs text-red-500 mt-1"></div>
             </div>
-
-            {/* Submit Button */}
-            <div className="pt-2">
-              <button
-                className="w-full cursor-pointer bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg text-sm"
-                type="submit"
-              >
-                <Send className="w-4 h-4" />
-                Gửi mã xác nhận
-              </button>
-            </div>
-
-            {/* Back to Login Link */}
-            <div className="text-center pt-3">
-              <p className="text-xs text-gray-600">
-                Quay lại trang đăng nhập?
-                <span
-                  className="ml-1 text-blue-600 hover:text-blue-800 cursor-pointer font-semibold transition-colors duration-200"
-                  onClick={() => navigate("/accounts/login")}
-                >
-                  Đăng nhập ngay
-                </span>
-              </p>
-            </div>
+            <div id="emailError" className="text-xs text-destructive mt-0.5 font-medium"></div>
           </div>
-        </form>
-      </div>
-    </>
+
+          {/* Action button */}
+          <div className="pt-1">
+            <button
+              className="w-full cursor-pointer bg-primary text-primary-foreground font-semibold py-2 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm text-sm"
+              type="submit"
+            >
+              <Send className="w-4 h-4" />
+              Send Code
+            </button>
+          </div>
+
+          {/* Navigation to login */}
+          <div className="text-center pt-1">
+            <span className="text-xs text-muted-foreground">Back to login?</span>
+            <span
+              className="ml-1 text-accent hover:underline cursor-pointer font-bold transition-colors duration-200 text-xs"
+              onClick={() => navigate("/accounts/login")}
+            >
+              Log in now
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 

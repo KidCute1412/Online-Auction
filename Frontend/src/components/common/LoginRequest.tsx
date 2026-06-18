@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ArrowLeft, LogIn, Shield } from 'lucide-react';
+import { ArrowLeft, LogIn, Shield } from 'lucide-react';
 
 export default function LoginRequest() {
   const navigate = useNavigate();
@@ -14,29 +14,28 @@ export default function LoginRequest() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pb-10">
+    <div className="min-h-screen flex items-center justify-center px-4 pb-10 bg-background transition-colors duration-300">
       <div className="max-w-md w-full">
-        {/* Card */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        {/* Main Card */}
+        <div className="bg-card rounded-2xl shadow-gold-glow border border-border overflow-hidden">
           {/* Header */}
-          <div className="bg-blue-400 px-6 py-8 text-center">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-              <Shield className="w-8 h-8 text-blue-400" />
+          <div className="bg-muted/40 px-6 py-8 text-center border-b border-border">
+            <div className="w-16 h-16 bg-card border border-accent/20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Shield className="w-8 h-8 text-accent animate-pulse" />
             </div>
-            <h1 className="text-2xl font-bold text-white">
-              Truy cập bị hạn chế
+            <h1 className="font-heading text-2xl font-bold text-foreground">
+              Restricted Access
             </h1>
           </div>
 
           {/* Content */}
           <div className="px-6 py-8">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">
-                Yêu cầu xác thực
+              <h2 className="font-heading text-lg font-semibold text-foreground mb-3">
+                Authentication Required
               </h2>
-              <p className="text-gray-600 leading-relaxed">
-                Để tiếp tục sử dụng tính năng này, bạn cần đăng nhập vào tài khoản của mình.
-                Việc này giúp đảm bảo an toàn và bảo mật thông tin.
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                To access this feature, please log in to your account. This helps ensure data security and integrity.
               </p>
             </div>
 
@@ -44,40 +43,40 @@ export default function LoginRequest() {
             <div className="space-y-3">
               <button
                 onClick={handleGoToLogin}
-                className="w-full bg-blue-400 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
+                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center shadow-sm"
               >
-                <LogIn className="w-5 h-5 mr-2" />
-                Đăng nhập
+                <LogIn className="w-4 h-4 mr-2" />
+                Log In
               </button>
 
               <button
                 onClick={handleGoBack}
-                className="w-full bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg border border-gray-300 transition-all duration-200 flex items-center justify-center hover:border-gray-400"
+                className="w-full bg-transparent hover:bg-muted text-foreground font-semibold py-3 px-4 rounded-xl border border-border transition-colors duration-200 flex items-center justify-center"
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Quay lại
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Go Back
               </button>
             </div>
 
-            {/* Footer */}
-            <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-500">
-                Chưa có tài khoản?{' '}
+            {/* Registration Prompt */}
+            <div className="mt-6 pt-6 border-t border-border text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
                 <button
                   onClick={() => navigate('/accounts/register')}
-                  className="text-blue-400 hover:text-blue-500 font-medium hover:underline"
+                  className="text-accent hover:underline font-semibold"
                 >
-                  Đăng ký ngay
+                  Register here
                 </button>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Additional Info */}
+        {/* Security Info */}
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-400">
-            Bảo mật thông tin của bạn là ưu tiên hàng đầu của chúng tôi
+          <p className="text-xs text-muted-foreground">
+            Your information security is our top priority
           </p>
         </div>
       </div>

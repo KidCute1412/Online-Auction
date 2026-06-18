@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { KeyRound, Key, Check, Lock, ShieldCheck, CheckCircle, Eye, EyeOff } from "lucide-react";
 import OTPForm from "@/components/common/OTPForm";
 
-// Component Form Đổi Mật Khẩu
 interface ChangePasswordFormProps {
   onSuccess: () => void;
 }
@@ -24,7 +23,7 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       .addField(
         "#currentPassword",
         [
-          { rule: "required", errorMessage: "Vui lòng nhập mật khẩu hiện tại!" },
+          { rule: "required", errorMessage: "Please enter your current password!" },
         ],
         {
           errorContainer: "#currentPasswordError",
@@ -33,26 +32,26 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       .addField(
         "#newPassword",
         [
-          { rule: "required", errorMessage: "Vui lòng nhập mật khẩu mới!" },
+          { rule: "required", errorMessage: "Please enter your new password!" },
           {
             validator: (value: string) => value.length >= 8,
-            errorMessage: "Mật khẩu có ít nhất 8 kí tự",
+            errorMessage: "Password must be at least 8 characters long",
           },
           {
             validator: (value: string) => /[A-Z]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ cái in hoa!",
+            errorMessage: "Password must contain at least one uppercase letter!",
           },
           {
             validator: (value: string) => /[a-z]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ cái thường!",
+            errorMessage: "Password must contain at least one lowercase letter!",
           },
           {
             validator: (value: string) => /\d/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ số!",
+            errorMessage: "Password must contain at least one number!",
           },
           {
             validator: (value: string) => /[@$!%*?&]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một ký tự đặc biệt!",
+            errorMessage: "Password must contain at least one special character!",
           },
         ],
         {
@@ -62,26 +61,26 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       .addField(
         "#confirmPassword",
         [
-          { rule: "required", errorMessage: "Vui lòng nhập lại mật khẩu!" },
+          { rule: "required", errorMessage: "Please re-enter password!" },
           {
             validator: (value: string) => value.length >= 8,
-            errorMessage: "Mật khẩu có ít nhất 8 kí tự",
+            errorMessage: "Password must be at least 8 characters long",
           },
           {
             validator: (value: string) => /[A-Z]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ cái in hoa!",
+            errorMessage: "Password must contain at least one uppercase letter!",
           },
           {
             validator: (value: string) => /[a-z]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ cái thường!",
+            errorMessage: "Password must contain at least one lowercase letter!",
           },
           {
             validator: (value: string) => /\d/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một chữ số!",
+            errorMessage: "Password must contain at least one number!",
           },
           {
             validator: (value: string) => /[@$!%*?&]/.test(value),
-            errorMessage: "Mật khẩu phải chứa ít nhất một ký tự đặc biệt!",
+            errorMessage: "Password must contain at least one special character!",
           },
         ],
         { errorContainer: "#confirmPasswordError" }
@@ -92,12 +91,12 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
         const confirmPassword = event.target.confirmPassword.value;
         
         if (newPassword !== confirmPassword) {
-          toast.error("Mật khẩu mới không khớp!");
+          toast.error("New passwords do not match!");
           return;
         }
 
         if (currentPassword === newPassword) {
-          toast.error("Mật khẩu mới phải khác mật khẩu hiện tại!");
+          toast.error("New password must be different from current password!");
           return;
         }
 
@@ -119,12 +118,12 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
             }
 
             if (data.code === "success") {
-              toast.success("Vui lòng xác nhận OTP để hoàn tất đổi mật khẩu!");
+              toast.success("Please verify OTP to complete changing your password!");
               onSuccess();
             }
           })
           .catch(() => {
-            toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+            toast.error("An error occurred, please try again!");
           });
       });
 
@@ -137,15 +136,15 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
     <form
       id="changePasswordForm"
       action=""
-      className="bg-white p-6 rounded-2xl shadow-2xl border-2 border-emerald-100"
+      className="bg-card p-6 rounded-2xl shadow-2xl border border-border"
     >
       {/* Header */}
       <div className="text-center mb-5">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl mb-3 shadow-lg">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-3 shadow-lg">
           <KeyRound className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-          Đổi Mật Khẩu
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-accent to-accent/90 bg-clip-text text-transparent">
+          Change Password
         </h1>
       </div>
 
@@ -153,8 +152,8 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       <div className="space-y-3">
         {/* Current Password Field */}
         <div>
-          <label htmlFor="currentPassword" className="block text-sm font-bold text-gray-700 mb-1.5">
-            Mật khẩu cũ
+          <label htmlFor="currentPassword" className="block text-sm font-bold text-muted-foreground mb-1.5">
+            Current Password
           </label>
           <div className="relative">
             <input
@@ -162,15 +161,15 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
               name="currentPassword"
               type={showCurrentPassword ? "text" : "password"}
               placeholder="••••••••"
-              className="w-full px-3 py-2.5 pl-10 pr-10 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              className="w-full px-3 py-2.5 pl-10 pr-10 border border-border rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all duration-200 bg-muted hover:bg-card text-sm text-foreground"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
               <Lock className="w-4 h-4" />
             </div>
             <button
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors"
             >
               {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -180,8 +179,8 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
 
         {/* New Password Field */}
         <div>
-          <label htmlFor="newPassword" className="block text-sm font-bold text-gray-700 mb-1.5">
-            Mật khẩu mới
+          <label htmlFor="newPassword" className="block text-sm font-bold text-muted-foreground mb-1.5">
+            New Password
           </label>
           <div className="relative">
             <input
@@ -189,15 +188,15 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
               name="newPassword"
               type={showNewPassword ? "text" : "password"}
               placeholder="••••••••"
-              className="w-full px-3 py-2.5 pl-10 pr-10 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              className="w-full px-3 py-2.5 pl-10 pr-10 border border-border rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all duration-200 bg-muted hover:bg-card text-sm text-foreground"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
               <Key className="w-4 h-4" />
             </div>
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors"
             >
               {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -207,8 +206,8 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
 
         {/* Confirm Password Field */}
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-1.5">
-            Xác nhận
+          <label htmlFor="confirmPassword" className="block text-sm font-bold text-muted-foreground mb-1.5">
+            Confirm Password
           </label>
           <div className="relative">
             <input
@@ -216,15 +215,15 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
               name="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
-              className="w-full px-3 py-2.5 pl-10 pr-10 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 bg-gray-50 hover:bg-white text-sm"
+              className="w-full px-3 py-2.5 pl-10 pr-10 border border-border rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all duration-200 bg-muted hover:bg-card text-sm text-foreground"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
               <Check className="w-4 h-4" />
             </div>
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -234,20 +233,20 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
 
         {/* Submit Button */}
         <button
-          className="w-full cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl text-sm"
+          className="w-full cursor-pointer bg-accent hover:bg-accent/90 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl text-sm"
           type="submit"
         >
           <KeyRound className="w-4 h-4" />
-          Cập nhật
+          Update
         </button>
 
         {/* Back Link */}
         <div className="text-center pt-2">
           <span
-            className="text-emerald-600 hover:text-emerald-700 cursor-pointer font-semibold transition-colors duration-200 text-xs"
+            className="text-accent hover:text-accent/90 cursor-pointer font-semibold transition-colors duration-200 text-xs"
             onClick={() => navigate(-1)}
           >
-            ← Quay lại
+            ← Back
           </span>
         </div>
       </div>
@@ -255,7 +254,6 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
   );
 }
 
-// Component Form Xác Thực OTP
 interface OTPVerifyFormProps {
   onBack: () => void;
 }
@@ -269,7 +267,7 @@ function OTPVerifyForm({ onBack }: OTPVerifyFormProps) {
     event.preventDefault();
 
     if (otpValue.trim().length !== 6) {
-      setOtpError("Vui lòng nhập đủ 6 chữ số");
+      setOtpError("Please enter all 6 digits");
       return;
     }
 
@@ -301,15 +299,15 @@ function OTPVerifyForm({ onBack }: OTPVerifyFormProps) {
     <form
       id="otpVerifyForm"
       action=""
-      className="bg-white p-6 rounded-2xl shadow-2xl border-2 border-emerald-100"
+      className="bg-card p-6 rounded-2xl shadow-2xl border border-border"
     >
       {/* Header */}
       <div className="text-center mb-4">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl mb-3 shadow-lg">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-3 shadow-lg">
           <ShieldCheck className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-          Xác thực OTP
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-accent to-accent/90 bg-clip-text text-transparent">
+          OTP Verification
         </h1>
       </div>
 
@@ -317,7 +315,7 @@ function OTPVerifyForm({ onBack }: OTPVerifyFormProps) {
       <div className="flex flex-col items-center space-y-3 mb-4">
         <div className="w-full flex flex-col items-center">
           <OTPForm
-            className="flex scale-125"
+            className="flex scale-125 bg-card"
             onChange={(val) => {
               setOtp(val);
               setOtpError("");
@@ -329,43 +327,42 @@ function OTPVerifyForm({ onBack }: OTPVerifyFormProps) {
 
       {/* Submit Button */}
       <button
-        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl cursor-pointer mb-3"
+        className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl cursor-pointer mb-3"
         type="submit"
         onClick={handleOtpSubmit}
       >
         <CheckCircle className="w-4 h-4" />
-        Xác nhận
+        Confirm
       </button>
 
       {/* Back Link */}
       <div className="text-center">
         <span
-          className="text-emerald-600 hover:text-emerald-700 cursor-pointer font-semibold transition-colors duration-200 text-xs"
+          className="text-accent hover:text-accent/90 cursor-pointer font-semibold transition-colors duration-200 text-xs"
           onClick={onBack}
         >
-          ← Quay lại
+          ← Back
         </span>
       </div>
     </form>
   );
 }
 
-// Component Cha
 function ChangePassword() {
   const [showOtpForm, setShowOtpForm] = useState(false);
 
   return (
-    <div className="flex items-center justify-center  px-4 py-8 mb-20">
+    <div className="flex items-center justify-center px-4 py-8 mb-20 bg-background text-foreground min-h-[70vh]">
       <div className="w-full max-w-md">
         {/* Header Text */}
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            {showOtpForm ? "Xác thực OTP" : "Đổi Mật Khẩu"}
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-accent to-accent/95 bg-clip-text text-transparent">
+            {showOtpForm ? "OTP Verification" : "Change Password"}
           </h2>
-          <p className="text-gray-600 mt-2 text-sm">
+          <p className="text-muted-foreground mt-2 text-sm">
             {showOtpForm 
-              ? "Nhập mã OTP đã được gửi đến email của bạn"
-              : "Cập nhật mật khẩu mới cho tài khoản của bạn"
+              ? "Enter the OTP code sent to your email"
+              : "Update a new password for your account"
             }
           </p>
         </div>

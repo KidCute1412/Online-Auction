@@ -76,7 +76,6 @@ export async function playBid (user_id: number, product_id: number, max_price: n
         
         const productData = lockProduct.rows[0];
         if (!productData) {
-            await trx.rollback();
             throw new Error('Product not found');
         }
         
@@ -277,30 +276,25 @@ export async function buyNowProduct (user_id: number, product_id : number, buy_p
         const product = productQuery.rows[0];
 
         if (!product) {
-            await trx.rollback();
             throw new Error('Product not found');
         }
 
         // Validate buy_now_price exists and matches
         if (product.buy_now_price == null) {
-            await trx.rollback();
             throw new Error('Product does not have buy now price');
         }
 
         if (buy_price < product.buy_now_price) {
-            await trx.rollback();
             throw new Error('Buy price is less than buy now price');
         }
 
         // Check if auction is still active
         if (new Date(product.end_time) < new Date()) {
-            await trx.rollback();
             throw new Error('Auction has ended');
         }
 
         // Check if user is not the seller
         if (product.seller_id == user_id) {
-            await trx.rollback();
             throw new Error('Seller cannot buy their own product');
         }
 

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/routes/ProtectedRouter";
 
 export default function MainLayout() {
-  const {auth}= useAuth();
+  const { auth } = useAuth();
   const route = useNavigate();
 
   if (!auth) {
@@ -20,11 +20,13 @@ export default function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen w-full">
-      <header className="fixed inset-x-0 top-0 z-20 border-b bg-white">
+    <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
+      {/* Fixed top header with border */}
+      <header className="fixed inset-x-0 top-0 z-20 border-b border-border bg-card transition-colors duration-300">
         <Header />
       </header>
 
+      {/* Grid container for navigation and main views */}
       <div
         className="grid"
         style={{
@@ -32,11 +34,13 @@ export default function MainLayout() {
           gridTemplateColumns: "240px 1fr",
         }}
       >
-        <aside className="sticky top-16 hidden h-[calc(100vh-64px)] overflow-y-auto border-r bg-white md:block">
+        {/* Sticky sidebar for administration routing */}
+        <aside className="sticky top-16 hidden h-[calc(100vh-64px)] overflow-y-auto border-r border-border bg-card transition-colors duration-300 md:block">
           <Sidebar />
         </aside>
 
-        <main className="pt-16">
+        {/* Main viewing area with offset padding */}
+        <main className="pt-16 bg-muted/10">
           <div className="min-h-[calc(100vh-64px)] overflow-y-auto p-6">
             <Outlet />
           </div>

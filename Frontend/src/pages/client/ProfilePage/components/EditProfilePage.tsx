@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useRef} from 'react';
-import { useAuth } from '@/routes/ProtectedRouter';
-import { useNavigate } from 'react-router-dom';
-import JustValidate from 'just-validate';
-import {DatePicker} from "react-datepicker";
-import Loading from '@/components/common/Loading';
+import React, { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/routes/ProtectedRouter";
+import { useNavigate } from "react-router-dom";
+import JustValidate from "just-validate";
+import DatePicker from "react-datepicker";
+import Loading from "@/components/common/Loading";
 import { 
   User, 
   Mail, 
   MapPin, 
-  Calendar, 
   Save, 
-  ArrowLeft, 
   Edit3,
   Camera
-} from 'lucide-react';
-import { toast } from 'sonner';
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface ProfileData {
   username: string;
@@ -28,68 +26,62 @@ interface ProfileData {
 export default function EditProfilePage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {auth, setAuth} = useAuth();
+  const { auth, setAuth } = useAuth();
   const [date, setDate] = useState<Date | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null); // Ensure form is initialized only once
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
-  
-  // Form state
   const [formData, setFormData] = useState<ProfileData | null>(null);
+
   useEffect(() => {
     if (auth) {
-
-        console.log ("Auth data loaded in EditProfilePage:", auth);
-        setFormData({
-            username: auth.username,
-            email: auth.email,
-            full_name: auth.full_name,
-            address: auth.address,
-            date_of_birth : auth.date_of_birth ,
-            avatar: auth.avatar
-        });
-        const parsedDate = auth.date_of_birth ? new Date(auth.date_of_birth) : null;
-        setDate(parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null);
-        if (auth.avatar) {
-          setAvatarPreview(auth.avatar);
-        }
-        console.log ("Form data initialized:", formData);
+      setFormData({
+        username: auth.username,
+        email: auth.email,
+        full_name: auth.full_name,
+        address: auth.address,
+        date_of_birth: auth.date_of_birth,
+        avatar: auth.avatar
+      });
+      const parsedDate = auth.date_of_birth ? new Date(auth.date_of_birth) : null;
+      setDate(parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null);
+      if (auth.avatar) {
+        setAvatarPreview(auth.avatar);
+      }
     }
-    }, [auth]);
+  }, [auth]);
 
-
-
-  useEffect (() => {
+  useEffect(() => {
     if (!formData || formRef.current) return;  
-    const validate = new JustValidate ('#edit-profile-form');
-    formRef.current = validate;
+    const validate = new JustValidate("#edit-profile-form");
+    formRef.current = validate as any;
     validate
-      .addField ('#username', [
-        { rule: 'required', errorMessage: 'Username là bắt buộc' },
-        { rule: 'minLength', value: 3, errorMessage: 'Username phải có ít nhất 3 ký tự' }
+      .addField("#username", [
+        { rule: "required", errorMessage: "Username is required" },
+        { rule: "minLength", value: 3, errorMessage: "Username must be at least 3 characters" }
       ])
-      .addField ('#email', [
-        { rule: 'required', errorMessage: 'Email là bắt buộc' },
-        { rule: 'email', errorMessage: 'Email không hợp lệ' }
+      .addField("#email", [
+        { rule: "required", errorMessage: "Email is required" },
+        { rule: "email", errorMessage: "Invalid email" }
       ])
-        .addField ('#full_name', [
-        { rule: 'required', errorMessage: 'Họ và tên là bắt buộc' },
-        { rule: 'minLength', value: 3, errorMessage: 'Họ và tên phải có ít nhất 3 ký tự' }
+      .addField("#full_name", [
+        { rule: "required", errorMessage: "Full name is required" },
+        { rule: "minLength", value: 3, errorMessage: "Full name must be at least 3 characters" }
       ])
-    .onSuccess ((event : any) => {
-        setIsSubmitting (true);
-    })
+      .onSuccess(() => {
+        setIsSubmitting(true);
+      });
   }, [formData]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        toast.error("Kích thước ảnh không được vượt quá 10MB");
+        toast.error("Image size cannot exceed 10MB");
         return;
       }
-      if (!file.type.startsWith('image/')) {
-        toast.error("Vui lòng chọn file ảnh");
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
         return;
       }
       setAvatarFile(file);
@@ -101,84 +93,77 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleSubmit = (event : any) => {
+  const handleSubmit = (event: any) => {
     event.preventDefault();
-    if (!isSubmitting) return; // Prevent multiple submissions
+    if (!isSubmitting) return;
     
     const formSubmitData = new FormData();
-    formSubmitData.append('username', event.target.username.value);
-    formSubmitData.append('email', event.target.email.value);
-    formSubmitData.append('full_name', event.target.full_name.value);
-    formSubmitData.append('address', event.target.address.value);
-    formSubmitData.append('date_of_birth', date ? date.toLocaleDateString('en-CA') : '');
+    formSubmitData.append("username", event.target.username.value);
+    formSubmitData.append("email", event.target.email.value);
+    formSubmitData.append("full_name", event.target.full_name.value);
+    formSubmitData.append("address", event.target.address.value);
+    formSubmitData.append("date_of_birth", date ? date.toLocaleDateString("en-CA") : "");
     if (avatarFile) {
-      formSubmitData.append('avatar', avatarFile);
+      formSubmitData.append("avatar", avatarFile);
     }
     
-    fetch (`${import.meta.env.VITE_API_URL}/api/profile/edit`, {
-        method: "PATCH",
-        credentials: "include",
-        body: formSubmitData
+    fetch(`${import.meta.env.VITE_API_URL}/api/profile/edit`, {
+      method: "PATCH",
+      credentials: "include",
+      body: formSubmitData
     })
-    .then (res => { 
-        if (!res.ok){
-            return res.json().then (data => {
-                throw new Error (data.message || "Có lỗi xảy ra");
-            });
+      .then((res) => { 
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.message || "An error occurred");
+          });
         }
         return res.json();
-    }
-    )
-    .then (data => {
-        toast.success (data.message || "Cập nhật thông tin thành công");
-        setAuth (data.data);
-        navigate (-1);
-    })
-    .catch (err => {
-        toast.error (err.message || "Có lỗi xảy ra khi cập nhật thông tin");
-
-    })
-    .finally (()=> {
+      })
+      .then((data) => {
+        toast.success(data.message || "Profile updated successfully");
+        setAuth(data.data);
+        navigate(-1);
+      })
+      .catch((err) => {
+        toast.error(err.message || "An error occurred while updating profile");
+      })
+      .finally(() => {
         setIsSubmitting(false);
-    });
-  } 
-
-
+      });
+  };
 
   if (!formData) return <Loading />;
 
   return (
-    <div className="min-h-screen  py-8 px-4">
+    <div className="min-h-screen bg-background text-foreground py-6 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          
-          <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Edit3 className="w-8 h-8 text-white" />
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Edit3 className="w-6 h-6 text-accent" />
           </div>
-          
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Chỉnh sửa thông tin</h1>
-          <p className="text-gray-600">Cập nhật thông tin cá nhân của bạn</p>
+          <h1 className="text-2xl font-heading font-extrabold text-foreground mb-1">Edit Profile</h1>
+          <p className="text-muted-foreground text-sm">Update your personal information</p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden" >
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
           {/* Card Header */}
-          <div className="bg-blue-400 text-white p-6">
-            <h2 className="text-xl font-semibold flex items-center">
-              <User className="w-5 h-5 mr-3" />
-              Thông tin cá nhân
+          <div className="bg-accent text-white p-4">
+            <h2 className="text-lg font-semibold flex items-center">
+              <User className="w-4 h-4 mr-2" />
+              Personal Information
             </h2>
-            <p className="text-blue-100 mt-2">Vui lòng điền chính xác thông tin của bạn</p>
           </div>
 
           {/* Form Content */}
-          <form id = "edit-profile-form" onSubmit = {handleSubmit} className="p-8">
-            <div className="space-y-6">
+          <form id="edit-profile-form" onSubmit={handleSubmit} className="p-6">
+            <div className="space-y-4">
               {/* Avatar Upload */}
-              <div className="flex flex-col items-center mb-6">
+              <div className="flex items-center gap-4 p-3 bg-muted/30 border border-border rounded-xl mb-4">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-muted border border-border shadow-md">
                     {avatarPreview ? (
                       <img 
                         src={avatarPreview} 
@@ -187,16 +172,16 @@ export default function EditProfilePage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                        <User className="w-16 h-16 text-gray-500" />
+                      <div className="w-full h-full flex items-center justify-center bg-muted">
+                        <User className="w-10 h-10 text-muted-foreground/50" />
                       </div>
                     )}
                   </div>
                   <label 
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors"
+                    className="absolute bottom-0 right-0 bg-accent hover:bg-accent/90 text-white p-1.5 rounded-full cursor-pointer shadow-md transition-colors"
                   >
-                    <Camera className="w-5 h-5" />
+                    <Camera className="w-3.5 h-3.5" />
                   </label>
                   <input
                     id="avatar-upload"
@@ -206,129 +191,128 @@ export default function EditProfilePage() {
                     className="hidden"
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-3">Click vào biểu tượng camera để thay đổi ảnh đại diện</p>
-                <p className="text-xs text-gray-400 mt-1">Định dạng: JPG, PNG. Tối đa 10MB</p>
-              </div>
-
-              {/* Username */}
-              <div>
-                <label htmlFor="#username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Username <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    defaultValue={formData.username}
-                    className="w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="username123"
-                  />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Profile Avatar</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">JPG or PNG, max 10MB.</p>
                 </div>
               </div>
 
-              {/* Email */}
-              <div>
-                <label htmlFor = "#email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    id="email"
-                    name = "email"
-                    defaultValue = {formData.email}               
-                    className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors `
-                      }
-                    placeholder="example@email.com"
-                  />
+              {/* Input Fields Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Username */}
+                <div>
+                  <label htmlFor="#username" className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Username <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      defaultValue={formData.username}
+                      className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-foreground focus:ring-1 focus:ring-accent focus:border-accent transition-colors text-sm"
+                      placeholder="username123"
+                    />
+                  </div>
                 </div>
-                
-              </div>
 
-              {/* Full Name */}
-              <div>
-                <label htmlFor = "#full_name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Họ và tên <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    id="full_name"
-                    name="full_name"
-                    defaultValue={formData.full_name}
-                    className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors`}
-                    placeholder="Nguyễn Văn A"
+                {/* Email */}
+                <div>
+                  <label htmlFor="#email" className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      defaultValue={formData.email}               
+                      className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-foreground focus:ring-1 focus:ring-accent focus:border-accent transition-colors text-sm"
+                      placeholder="example@email.com"
+                    />
+                  </div>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label htmlFor="#full_name" className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                    <input
+                      type="text"
+                      id="full_name"
+                      name="full_name"
+                      defaultValue={formData.full_name}
+                      className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-foreground focus:ring-1 focus:ring-accent focus:border-accent transition-colors text-sm"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label htmlFor="#date_of_birth" className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Date of Birth 
+                  </label>
+                  <DatePicker
+                    id="date_of_birth"
+                    name="date_of_birth"
+                    selected={date}
+                    onChange={(date: Date | null) => setDate(date)}
+                    dateFormat="dd/MM/yyyy"
+                    className="w-full pl-3 py-2 bg-card border border-border rounded-lg text-foreground focus:ring-1 focus:ring-accent focus:border-accent transition-colors text-sm"
+                    placeholderText="Select date of birth"
                   />
                 </div>
-               
               </div>
 
               {/* Address */}
               <div>
-                <label htmlFor = "#address" className="block text-sm font-medium text-gray-700 mb-2">
-                  Địa chỉ 
+                <label htmlFor="#address" className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Address 
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground/50" />
                   <textarea
                     defaultValue={formData.address}
-                    name ="address"
-                    rows={3}
+                    name="address"
+                    rows={2}
                     id="address"
-                    className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none 
-                      `}
-                    placeholder="123 Đường ABC, Phường XYZ, Quận DEF, TP.HCM"
+                    className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-foreground focus:ring-1 focus:ring-accent focus:border-accent transition-colors resize-none text-sm"
+                    placeholder="123 Street, District, City"
                   />
                 </div>
-                
-              </div>
-
-              {/* Date of Birth */}
-              <div>
-                <label htmlFor = "#date_of_birth" className="block text-sm font-medium text-gray-700 mb-2">
-                  Ngày sinh 
-                </label>
-                <DatePicker
-                  id="date_of_birth"
-                  name="date_of_birth"
-                  selected={date}
-                  onChange={(date: Date | null) => setDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  className="w-full pl-5 py-5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholderText="Chọn ngày sinh"
-                />
-  
               </div>
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-8 pt-6 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-6 py-3 cursor-pointer border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 cursor-pointer border border-border text-muted-foreground rounded-lg bg-card hover:bg-muted/50 transition-colors text-sm"
               >
-                Hủy bỏ
+                Cancel
               </button>
               
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-8 py-3 cursor-pointer bg-blue-500  text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100"
+                className="px-6 py-2 cursor-pointer bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Đang lưu...
+                    Saving...
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Lưu thay đổi
+                    Save Changes
                   </>
                 )}
               </button>

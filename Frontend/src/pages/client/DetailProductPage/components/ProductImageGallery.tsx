@@ -30,12 +30,12 @@ export default function ProductImageGallery({
             src={product_images[currentImageIndex]}
             alt={product_name}
             loading="lazy"
-            className="w-full h-[600px] object-cover rounded-lg shadow-lg cursor-pointer"
+            className="w-full h-[500px] object-contain bg-card border border-border rounded-lg shadow-sm cursor-pointer"
             onClick={() => onOpenImageModal(currentImageIndex)}
           />
         ) : (
-          <div className="w-full h-[600px] bg-gray-200 rounded-lg flex items-center justify-center">
-            <FileText className="w-16 h-16 text-gray-400" />
+          <div className="w-full h-[500px] bg-muted rounded-lg flex items-center justify-center">
+            <FileText className="w-16 h-16 text-muted-foreground/50" />
           </div>
         )}
         <div onClick={(e) => e.stopPropagation()}>
@@ -47,13 +47,13 @@ export default function ProductImageGallery({
         <div
           className="absolute top-5 right-5 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 backdrop-blur-sm"
           onClick={() => onOpenImageModal(currentImageIndex)}
-          title="Xem chi tiết hình ảnh"
+          title="View full size image"
         >
           <Eye className="w-5 h-5 text-white" />
         </div>
       </div>
 
-      {/* Related Images - Horizontal Scroll */}
+      {/* Related Images */}
       <div className="max-w-[80%] mx-auto">
         <div className="flex overflow-x-auto space-x-2 pb-4 pt-2">
           {product_images?.map((image, index) => (
@@ -64,8 +64,8 @@ export default function ProductImageGallery({
               loading="lazy"
               className={`w-28 h-20 object-cover rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:scale-105 flex-shrink-0 ${
                 index === currentImageIndex
-                  ? "ring-2 ring-blue-500"
-                  : "hover:ring-1 hover:ring-gray-300"
+                  ? "ring-2 ring-accent"
+                  : "hover:ring-1 hover:ring-border"
               }`}
               onClick={() => handleImageClick(index)}
             />

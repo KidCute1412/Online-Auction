@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/routes/ProtectedRouter";
-import { ChevronDown, User, Package, Lock, LogOut, Heart } from "lucide-react";
-import {toast } from "sonner";
+import { ChevronDown, User, Package, Lock, LogOut } from "lucide-react";
+import { toast } from "sonner";
+
 interface ProfileMenuItem {
   label: string;
   icon: React.ReactNode;
@@ -16,11 +17,10 @@ interface ProfileDropdownProps {
 
 export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
   const navigate = useNavigate();
-  const {auth, setAuth} = useAuth();
+  const { auth, setAuth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -37,7 +37,7 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
   const initials = auth?.full_name
     ? auth.full_name
         .split(" ")
-        .map((n : any) => n[0])
+        .map((n: any) => n[0])
         .join("")
         .toUpperCase()
     : auth?.username
@@ -46,7 +46,7 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
 
   const defaultMenuItems: ProfileMenuItem[] = [
     {
-      label: "Trang cá nhân",
+      label: "Profile",
       icon: <User size={16} />,
       action: () => {
         navigate(`/profile/${auth?.username}_${auth?.user_id}`);
@@ -54,15 +54,15 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
       }
     },
     {
-      label: "Sản phẩm",
+      label: "Products",
       icon: <Package size={16} />,
       action: () => {
         navigate("/my-products");
-        setIsOpen(false);   
+        setIsOpen(false);
       }
     },
     {
-      label: "Đổi mật khẩu",
+      label: "Change Password",
       icon: <Lock size={16} />,
       action: () => {
         navigate("/profile/change-password");
@@ -70,10 +70,9 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
       }
     },
     {
-      label: "Đăng xuất",
+      label: "Log Out",
       icon: <LogOut size={16} />,
       action: () => {
-        // Handle logout logic here
         fetch(`${import.meta.env.VITE_API_URL}/accounts/logout`, {
           method: "POST",
           credentials: "include"
@@ -83,10 +82,9 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
             navigate("/");
           }
         })
-        .catch ((e) => {
-          toast.error("Không thể kết nối đến máy chủ để đăng xuất!");
-        })
-
+        .catch(() => {
+          toast.error("Unable to connect to the server for logout!");
+        });
       },
       danger: true
     }
@@ -96,51 +94,53 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
 
   return (
     <div className="relative flex items-center" ref={dropdownRef}>
-      
-
-      {/* Profile Button */}
+      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center cursor-pointer space-x-3 px-3 py-2 rounded-full hover:shadow-md transition-all duration-200 bg-white/90 hover:bg-white"
+        className="flex items-center cursor-pointer space-x-3 px-3 py-1.5 rounded-full border border-border hover:shadow-sm transition-all duration-200 bg-background/50 hover:bg-muted"
       >
-        { auth?.avatar ? (<img
-              src={auth.avatar}
-              alt="User Avatar"
-              className="w-12 h-12 rounded-full object-cover border-2 border-blue-300 shadow-[0_0_15px_rgba(0,0,0,0.1)] shadow-blue-300"
-            />
-          ) :
-          <div className="w-11 h-11 border-2 border-blue-300 rounded-full bg-linear-30 from-black via-blue-500 to-blue-300 flex items-center justify-center text-white font-semibold">
-          {initials}
-        </div>}
+        {auth?.avatar ? (
+          <img
+            src={auth.avatar}
+            alt="User Avatar"
+            className="w-10 h-10 rounded-full object-cover border border-accent/30 shadow-gold-glow"
+          />
+        ) : (
+          <div className="w-10 h-10 border border-accent/30 rounded-full bg-gradient-to-r from-accent to-accent/60 flex items-center justify-center text-primary-foreground font-heading font-semibold">
+            {initials}
+          </div>
+        )}
 
         <div className="hidden md:flex flex-col text-left">
-          <span className="text-sm font-semibold text-gray-700 max-w-[150px] truncate">
+          <span className="text-sm font-semibold text-foreground max-w-[120px] truncate">
             {auth?.full_name || auth?.username}
           </span>
-          <span className="text-xs text-gray-500 max-w-[150px] truncate">{auth?.email}</span>
+          <span className="text-xs text-muted-foreground max-w-[120px] truncate">{auth?.email}</span>
         </div>
 
         <ChevronDown
           size={16}
-          className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Menu Container */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-full bg-white/90 shadow-lg border-2 border-gray-300 py-2 z-50">
+        <div className="absolute top-full right-0 mt-2 w-48 bg-glass shadow-gold-glow border border-border py-1.5 rounded-xl z-50 p-1 flex flex-col gap-0.5">
           {itemsToRender.map((item, index) => (
             <button
               key={index}
               onClick={item.action}
-              className={`w-full flex items-center px-4 py-3 text-left cursor-pointer hover:bg-gray-200 transition-colors duration-150 ${
-                item.danger ? 'text-red-600 hover:bg-red-100' : 'text-gray-700'
+              className={`w-full flex items-center px-3 py-2 text-left cursor-pointer rounded-lg text-sm font-medium transition-all duration-200 ${
+                item.danger
+                  ? 'text-red-500 hover:bg-red-500/10'
+                  : 'text-muted-foreground hover:text-accent hover:bg-muted/50'
               }`}
             >
-              <span className={`mr-3 ${item.danger ? 'text-red-500' : 'text-gray-500'}`}>
+              <span className={`mr-2.5 ${item.danger ? 'text-red-500' : 'text-muted-foreground'}`}>
                 {item.icon}
               </span>
-              <span className="text-sm font-medium">{item.label}</span>
+              <span>{item.label}</span>
             </button>
           ))}
         </div>

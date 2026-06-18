@@ -14,87 +14,82 @@ type BulkActionOption = {
 };
 
 type Props = {
-  showStatusFilter?: boolean; // default: true
+  showStatusFilter?: boolean;
   statusFilter?: string;
   setStatusFilter?: (v: string) => void;
   statusOptions?: StatusOption[];
 
-  /** ----- Người tạo ----- */
+  // Creator identity filtering properties
   creatorFilter?: string;
   setCreatorFilter?: (v: string) => void;
   creatorOptions?: string[];
 
-  /** ----- Ngày ----- */
+  // Date filtering constraints
   dateFrom?: string;
   setDateFrom?: (v: string) => void;
   dateTo?: string;
   setDateTo?: (v: string) => void;
 
-  /** ----- Tìm kiếm ----- */
+  // Search input and handlers
   search?: string;
   setSearch?: (v: string) => void;
-  onSearchSubmit?: () => void; // callback khi nhấn Enter
+  onSearchSubmit?: () => void;
 
-  /** ----- Hành động & reset & tạo mới ----- */
+  // Form controls and submit actions
   onResetFilters?: () => void;
 
-  bulkActionOptions?: BulkActionOption[]; // nếu không truyền → ẩn luôn block “Hành động”
-  onApplyBulkAction?: (action: string) => void; // phải có callback thì mới hiện block bulk action
+  bulkActionOptions?: BulkActionOption[];
+  onApplyBulkAction?: (action: string) => void;
 
-  onCreateNew?: () => void; // truyền → hiện nút tạo mới
+  onCreateNew?: () => void;
   createLabel?: string;
 
-  onTrashClick?: () => void; // truyền → hiện nút thùng rác
+  onTrashClick?: () => void;
   trashLabel?: string;
 };
 
 export default function FilterBar({
-  // trạng thái
   showStatusFilter = true,
   statusFilter,
   setStatusFilter,
   statusOptions,
 
-  // người tạo
   creatorFilter,
   setCreatorFilter,
   creatorOptions = [],
 
-  // ngày
   dateFrom,
   setDateFrom,
   dateTo,
   setDateTo,
 
-  // search
   search,
   setSearch,
   onSearchSubmit,
 
-  // actions
   onResetFilters,
   bulkActionOptions,
   onApplyBulkAction,
 
   onCreateNew,
-  createLabel = "+ Tạo mới",
+  createLabel = "+ Create New",
 
   onTrashClick,
-  trashLabel = "Thùng rác",
+  trashLabel = "Trash",
 }: Props) {
-  // ===== EFFECTIVE OPTIONS =====
+  // Setup active status filters
   const effectiveStatusOptions: StatusOption[] = statusOptions ?? [
-    { value: "all", label: "Trạng thái" },
-    { value: "active", label: "Hoạt động" },
-    { value: "inactive", label: "Dừng" },
+    { value: "all", label: "Status" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
   ];
 
+  // Setup bulk data modify options
   const effectiveBulkActions: BulkActionOption[] = bulkActionOptions ?? [
-    { value: "hide", label: "Ẩn" },
-    { value: "delete", label: "Xóa" },
+    { value: "hide", label: "Hide" },
+    { value: "delete", label: "Delete" },
   ];
 
-  // ===== WHAT TO SHOW? =====
   const hasStatusFilter =
     showStatusFilter && statusFilter !== undefined && !!setStatusFilter;
 
@@ -118,10 +113,7 @@ export default function FilterBar({
 
   const hasBulkAction = !!onApplyBulkAction && !!effectiveBulkActions.length;
 
-  // state select "Hành động"
   const [selectedAction, setSelectedAction] = useState<string>("");
-
-  // state để xử lý IME (Input Method Editor) cho tiếng Việt
   const [isComposing, setIsComposing] = useState(false);
 
   const handleApplyClick = () => {
@@ -131,26 +123,26 @@ export default function FilterBar({
   };
 
   return (
-    <div className="mb-7 space-y-6">
-      {/* ===== HÀNG TRÊN: BỘ LỌC ===== */}
+    <div className="mb-7 space-y-6 text-foreground">
+      {/* Top section holding all structured filters */}
       {hasTopFilters && (
-        <div className="flex h-20 items-stretch rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm text-[15px] w-fit">
-          {/* Nhãn “Bộ lọc” */}
-          <div className="flex h-full items-center gap-2 px-5 border-r border-gray-200 font-medium text-gray-800">
-            <Filter className="w-5 h-5" />
-            <span>Bộ lọc</span>
+        <div className="flex h-14 items-stretch rounded-xl border border-border bg-card overflow-hidden shadow-sm text-sm w-fit transition-colors duration-300">
+          {/* Section banner */}
+          <div className="flex h-full items-center gap-2 px-4 border-r border-border font-medium text-foreground">
+            <Filter className="w-4 h-4 text-accent" />
+            <span>Filters</span>
           </div>
 
-          {/* Trạng thái */}
+          {/* Status selector filter */}
           {hasStatusFilter && (
-            <div className="flex h-full items-center gap-2 px-5 border-r border-gray-300">
+            <div className="flex h-full items-center gap-2 px-4 border-r border-border">
               <select
-                className="cursor-pointer bg-transparent outline-none font-medium"
+                className="cursor-pointer bg-transparent outline-none font-medium text-foreground text-sm"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter!(e.target.value)}
               >
                 {effectiveStatusOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="text-sm">
+                  <option key={opt.value} value={opt.value} className="bg-card text-foreground text-sm">
                     {opt.label}
                   </option>
                 ))}
@@ -158,19 +150,19 @@ export default function FilterBar({
             </div>
           )}
 
-          {/* Người tạo */}
+          {/* Creator selector filter */}
           {hasCreatorFilter && (
-            <div className=" flex items-center px-5 h-full border-r border-gray-300">
+            <div className="flex items-center px-4 h-full border-r border-border">
               <select
-                className="cursor-pointer bg-transparent outline-none font-medium"
+                className="cursor-pointer bg-transparent outline-none font-medium text-foreground text-sm"
                 value={creatorFilter}
                 onChange={(e) => setCreatorFilter!(e.target.value)}
               >
-                <option className="text-sm" value="">
-                  Người tạo
+                <option className="bg-card text-foreground text-sm" value="">
+                  Creator
                 </option>
                 {creatorOptions.map((c) => (
-                  <option className="text-sm" key={c} value={c}>
+                  <option className="bg-card text-foreground text-sm" key={c} value={c}>
                     {c}
                   </option>
                 ))}
@@ -178,52 +170,52 @@ export default function FilterBar({
             </div>
           )}
 
-          {/* Khoảng ngày */}
+          {/* Date range filter component */}
           {hasDateFilter && (
-            <div className="flex h-full items-center gap-3 px-5 border-r border-gray-300">
+            <div className="flex h-full items-center gap-3 px-4 border-r border-border">
               <input
                 type="date"
-                className="h-8 rounded-lg px-2 text-sm border border-gray-300"
+                className="h-8 rounded-lg px-2 text-sm border border-border bg-muted/30 text-foreground outline-none"
                 value={dateFrom}
                 onChange={(e) => setDateFrom!(e.target.value)}
               />
-              <span>-</span>
+              <span className="text-muted-foreground">-</span>
               <input
                 type="date"
-                className="h-8 rounded-lg px-2 text-sm border border-gray-300"
+                className="h-8 rounded-lg px-2 text-sm border border-border bg-muted/30 text-foreground outline-none"
                 value={dateTo}
                 onChange={(e) => setDateTo!(e.target.value)}
               />
             </div>
           )}
 
-          {/* Xóa bộ lọc */}
+          {/* Reset filter configurations */}
           {hasResetButton && (
             <button
               type="button"
               onClick={onResetFilters}
-              className="flex items-center gap-2 px-5 h-full text-sm font-semibold text-rose-500 hover:text-rose-600 cursor-pointer"
+              className="flex items-center gap-2 px-4 h-full text-sm font-semibold text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span>Xóa bộ lọc</span>
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Clear Filters</span>
             </button>
           )}
         </div>
       )}
 
-      {/* ===== HÀNG DƯỚI: HÀNH ĐỘNG + SEARCH + TẠO MỚI ===== */}
-      <div className="flex h-20 items-stretch gap-3">
-        {/* Hành động linh hoạt */}
+      {/* Bottom control row holding bulk action inputs and creation links */}
+      <div className="flex h-12 items-stretch gap-3">
+        {/* Bulk Action selector */}
         {hasBulkAction && (
-          <div className="flex rounded-xl bg-white border border-gray-200 overflow-hidden shadow-sm">
+          <div className="flex rounded-xl bg-card border border-border overflow-hidden shadow-sm transition-colors duration-300">
             <select
-              className="cursor-pointer h-full px-4 text-sm text-gray-800 bg-white outline-none border-none"
+              className="cursor-pointer h-full px-3 text-sm text-foreground bg-transparent outline-none border-none"
               value={selectedAction}
               onChange={(e) => setSelectedAction(e.target.value)}
             >
-              <option value="">-- Hành động --</option>
+              <option value="" className="bg-card text-foreground">-- Actions --</option>
               {effectiveBulkActions.map((act) => (
-                <option key={act.value} value={act.value}>
+                <option key={act.value} value={act.value} className="bg-card text-foreground">
                   {act.label}
                 </option>
               ))}
@@ -231,25 +223,24 @@ export default function FilterBar({
 
             <button
               type="button"
-              className=" cursor-pointer h-full px-5 text-sm font-semibold text-red-600 hover:bg-gray-50 border-l border-gray-200"
+              className="cursor-pointer h-full px-4 text-sm font-semibold text-destructive hover:bg-muted/30 border-l border-border transition-colors"
               onClick={handleApplyClick}
             >
-              Áp dụng
+              Apply
             </button>
           </div>
         )}
 
-        {/* Ô tìm kiếm */}
+        {/* Global search entry textfield */}
         {hasSearch && (
-          <div className="flex items-center space-x-2 h-full w-[500px] rounded-2xl border border-gray-200 bg-white px-4 shadow-sm">
-            <Search className="w-5 h-5" />
+          <div className="flex items-center space-x-2 h-full w-[400px] rounded-xl border border-border bg-card px-4 shadow-sm transition-colors duration-300">
+            <Search className="w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Tìm kiếm (nhấn Enter để tìm)"
-              className="flex-1 border-none bg-transparent text-sm outline-none placeholder:text-gray-400"
+              placeholder="Search (press Enter to apply)"
+              className="flex-1 border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               value={search}
               onChange={(e) => {
-                // Chỉ update state khi KHÔNG đang composition (gõ tiếng Việt)
                 if (!isComposing) {
                   setSearch!(e.target.value);
                 }
@@ -257,7 +248,6 @@ export default function FilterBar({
               onCompositionStart={() => setIsComposing(true)}
               onCompositionEnd={(e) => {
                 setIsComposing(false);
-                // Update state với giá trị cuối cùng sau khi IME hoàn tất
                 setSearch!((e.target as HTMLInputElement).value);
               }}
               onKeyDown={(e) => {
@@ -269,24 +259,25 @@ export default function FilterBar({
           </div>
         )}
 
-        {/* Nút tạo mới */}
+        {/* Standard create new trigger */}
         {onCreateNew && (
           <button
             type="button"
-            className="h-full px-6 rounded-2xl bg-blue-500 text-white text-[15px] font-semibold hover:bg-blue-600 cursor-pointer"
+            className="h-full px-5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm cursor-pointer"
             onClick={onCreateNew}
           >
             {createLabel}
           </button>
         )}
-        {/* Nút thùng rác */}
+
+        {/* Trash drawer selector trigger */}
         {onTrashClick && (
           <button
             type="button"
-            className="h-full px-4 rounded-2xl bg-red-500 text-white text-[15px] font-semibold hover:bg-red-600 cursor-pointer flex items-center gap-2"
+            className="h-full px-4 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90 transition-all shadow-sm cursor-pointer flex items-center gap-2"
             onClick={onTrashClick}
           >
-            <Trash2 size={16} />
+            <Trash2 size={15} />
             <span className="hidden sm:inline">{trashLabel}</span>
           </button>
         )}

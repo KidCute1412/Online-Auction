@@ -1,125 +1,116 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import {
   Shield,
-  Lock,
-  Users,
-  Zap,
   Star,
   Award,
   Crown,
   Sparkles,
   TrendingUp,
-  Heart
+  Heart,
+  Zap,
+  Sun,
+  Moon
 } from 'lucide-react';
-import bidding from "@/assets/icons/bid_turn.svg"
+import bidding from "@/assets/icons/bid_turn.svg";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function AuthLayout() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
-      {/* Elegant Background Pattern */}
-      <div className="absolute inset-0">
-        {/* Subtle Grid Pattern */}
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden transition-colors duration-300">
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        type="button"
+        className="absolute top-4 right-4 z-50 p-2.5 rounded-full border border-border bg-card text-foreground hover:bg-muted transition-colors duration-200 cursor-pointer shadow-sm"
+        aria-label="Toggle theme"
+      >
+        {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+      </button>
+
+      {/* Elegant background shapes */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Ambient grid */}
         <div className="absolute inset-0 opacity-5">
-          <div className="h-full w-full bg-gradient-to-br from-blue-100 to-transparent"></div>
+          <div className="h-full w-full bg-gradient-to-br from-accent/25 to-transparent"></div>
         </div>
 
-        {/* Floating Geometric Shapes */}
-        <div className="absolute top-20 left-16 w-32 h-32 border-2 border-blue-200 rounded-full opacity-10"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 border-2 border-gray-300 rotate-45 opacity-8"></div>
-        <div className="absolute bottom-32 left-24 w-28 h-28 border-2 border-blue-300 rounded-lg opacity-6"></div>
-        <div className="absolute bottom-20 right-16 w-20 h-20 bg-yellow-200 rounded-full opacity-20"></div>
+        {/* Floating elements */}
+        <div className="absolute top-20 left-16 w-32 h-32 border border-accent/20 rounded-full opacity-30"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 border border-border rotate-45 opacity-20"></div>
+        <div className="absolute bottom-32 left-24 w-28 h-28 border border-accent/10 rounded-lg opacity-20"></div>
+        <div className="absolute bottom-20 right-16 w-20 h-20 bg-accent/5 rounded-full opacity-30"></div>
 
-        {/* Decorative Icons */}
-        <div className="absolute top-1/4 left-1/5 text-blue-300 opacity-8">
-          <Shield size={48} />
+        {/* Floating tech icons */}
+        <div className="absolute top-1/4 left-[15%] text-accent opacity-20">
+          <Shield size={44} />
         </div>
-        <div className="absolute top-1/3 right-1/4 text-gray-400 opacity-6">
-          <Crown size={40} />
+        <div className="absolute top-1/3 right-[20%] text-muted-foreground opacity-15">
+          <Crown size={38} />
         </div>
-        <div className="absolute bottom-1/4 left-1/3 text-blue-400 opacity-7">
-          <Award size={44} />
+        <div className="absolute bottom-1/4 left-[30%] text-accent opacity-25">
+          <Award size={40} />
         </div>
-        <div className="absolute bottom-1/3 right-1/5 text-yellow-400 opacity-10">
-          <Sparkles size={36} />
+        <div className="absolute bottom-1/3 right-[15%] text-accent opacity-30 animate-pulse">
+          <Sparkles size={32} />
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-4">
+      {/* Primary body view */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-8">
         <div className="w-full max-w-6xl">
-          {/* Premium Header */}
-          <div className="text-center mb-4">
-            <div className="relative inline-block">
-              <img 
-                src={bidding} 
-                alt="Online Auction" 
-                className="w-16 h-16 object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800 mt-2">Online Auction</h1>
-            <p className="text-gray-600 text-sm font-medium">Nền tảng đấu giá trực tuyến hàng đầu</p>
+          {/* Brand header */}
+          <div className="text-center mb-6">
+            <h1 className="font-heading text-3xl font-bold text-foreground mt-3">Miracle</h1>
+            <p className="text-muted-foreground text-sm font-medium">Leading Online Auction Platform</p>
           </div>
 
-          {/* Auth Form Container */}
+          {/* Form wrapper */}
           <div className="mx-auto overflow-hidden">
             <Outlet />
 
-            {/* Footer */}
-            <div className="py-3 bg-gray-50 border-t border-gray-100 mt-4">
-              <div className="flex items-center justify-center space-x-6 text-xs text-gray-500">
+            {/* Quality indicators */}
+            <div className="py-4 border-t border-border mt-6 bg-card/20 rounded-xl max-w-md mx-auto">
+              <div className="flex items-center justify-center space-x-6 text-xs text-muted-foreground">
                 <div className="flex items-center">
-                  <Shield className="w-3 h-3 mr-1" />
-                  <span>An toàn</span>
+                  <Shield className="w-3.5 h-3.5 mr-1.5 text-accent" />
+                  <span>Secure</span>
                 </div>
                 <div className="flex items-center">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  <span>Đáng tin cậy</span>
+                  <TrendingUp className="w-3.5 h-3.5 mr-1.5 text-accent" />
+                  <span>Trustworthy</span>
                 </div>
                 <div className="flex items-center">
-                  <Heart className="w-3 h-3 mr-1" />
-                  <span>Uy tín</span>
+                  <Heart className="w-3.5 h-3.5 mr-1.5 text-accent" />
+                  <span>Reputable</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Luxury Bottom Section */}
-          <div className="text-center mt-4">
+          {/* Premium rating tag */}
+          <div className="text-center mt-6">
             <div className="flex justify-center space-x-1 mb-2">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <Star className="w-3.5 h-3.5 text-accent fill-current" />
+              <Star className="w-3.5 h-3.5 text-accent fill-current" />
+              <Star className="w-3.5 h-3.5 text-accent fill-current" />
+              <Star className="w-3.5 h-3.5 text-accent fill-current" />
+              <Star className="w-3.5 h-3.5 text-accent fill-current" />
             </div>
-            <p className="text-xs text-gray-600 font-medium">
-              Nền tảng đấu giá hàng đầu Việt Nam
+            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+              Vietnam's Premium Auction Platform
             </p>
           </div>
         </div>
       </div>
 
-      {/* Additional Floating Elements */}
-      <div className="absolute top-1/2 left-8 text-blue-300 opacity-20 animate-spin" style={{animationDuration: '20s'}}>
-        <Zap size={30} />
+      {/* Spinning side decorators */}
+      <div className="absolute top-1/2 left-8 text-accent/15 animate-spin pointer-events-none" style={{animationDuration: '20s'}}>
+        <Zap size={26} />
       </div>
-      <div className="absolute top-1/2 right-8 text-purple-300 opacity-20 animate-spin" style={{animationDuration: '25s'}}>
-        <Award size={35} />
-      </div>
-
-      {/* Corner Decorative Elements */}
-      <div className="absolute top-4 left-4 text-blue-400 opacity-15">
-        <Crown size={32} />
-      </div>
-      <div className="absolute top-4 right-4 text-yellow-400 opacity-15">
-        <Sparkles size={28} />
-      </div>
-      <div className="absolute bottom-4 left-4 text-gray-400 opacity-15">
-        <Shield size={30} />
-      </div>
-      <div className="absolute bottom-4 right-4 text-blue-400 opacity-15">
-        <Award size={26} />
+      <div className="absolute top-1/2 right-8 text-accent/15 animate-spin pointer-events-none" style={{animationDuration: '25s'}}>
+        <Award size={30} />
       </div>
     </div>
   );

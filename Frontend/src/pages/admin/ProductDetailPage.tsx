@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatToVN } from "@/utils/format_time";
 import Loading from "@/components/common/Loading";
 import { ChevronDown, ChevronUp } from "lucide-react";
+
 type ProductDetail = {
   product_id: number;
   product_name: string;
@@ -24,7 +24,6 @@ type ProductDetail = {
 export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const editorRef = useRef(null);
 
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +32,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!id) return;
 
+    // Fetch product details by product ID
     fetch(
       `${import.meta.env.VITE_API_URL}/${
         import.meta.env.VITE_PATH_ADMIN
@@ -53,32 +53,29 @@ export default function ProductDetailPage() {
 
   if (isLoading) {
     return (
-      <Loading className = "ml-[240px] bg-transparent"></Loading>
+      <Loading className="ml-[240px] bg-transparent"></Loading>
     );
   }
 
   if (!product) {
     return (
-      <div className="p-6">
-        <div className="text-center text-red-500">Không tìm thấy sản phẩm</div>
+      <div className="p-6 text-foreground">
+        <div className="text-center text-destructive">Product not found</div>
       </div>
     );
   }
 
-  // Parse product_images - có thể là JSON array hoặc string
   let productImages: string[] = [];
   if (product.product_images) {
     if (Array.isArray(product.product_images)) {
       productImages = product.product_images;
     } else if (typeof product.product_images === "string") {
       try {
-        // Thử parse JSON nếu là string
         const parsed = JSON.parse(product.product_images);
         productImages = Array.isArray(parsed)
           ? parsed
           : [product.product_images];
       } catch {
-        // Nếu không parse được, split by comma
         productImages = product.product_images
           .split(",")
           .filter((img) => img.trim());
@@ -87,174 +84,174 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-medium mb-6">Chi tiết sản phẩm</h2>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground bg-background">
+      <h2 className="text-xl sm:text-2xl font-heading font-bold mb-4 text-foreground">Product Details</h2>
 
-      <div className="rounded-2xl border-3 bg-white p-6 md:p-8">
-        <div className="space-y-8">
-          {/* Hàng 1: Tên + ID */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
+      <div className="rounded-xl border border-border bg-card p-4 sm:p-6 shadow-sm transition-colors duration-300">
+        <div className="space-y-4">
+          {/* Row 1: Product Name & Seller info */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1">
               <label
                 htmlFor="product_name"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Tên sản phẩm
+                Product Name
               </label>
               <input
                 id="product_name"
                 type="text"
                 value={product.product_name}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label
                 htmlFor="seller"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Người bán (Seller)
+                Seller
               </label>
               <input
                 id="seller"
                 type="text"
-                value={product.seller_name || product.seller_id || "Không rõ"}
+                value={product.seller_name || product.seller_id || "Unknown"}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
           </div>
 
-          {/* Hàng 3: Giá khởi điểm + Bước giá */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
+          {/* Row 2: Starting Price & Step Price info */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1">
               <label
                 htmlFor="start_price"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Giá khởi điểm
+                Starting Price
               </label>
               <input
                 id="start_price"
                 type="text"
-                value={product.start_price.toLocaleString("vi-VN") + " đ"}
+                value={product.start_price.toLocaleString() + " VND"}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label
                 htmlFor="step_price"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Bước giá
+                Step Price
               </label>
               <input
                 id="step_price"
                 type="text"
-                value={product.step_price.toLocaleString("vi-VN") + " đ"}
+                value={product.step_price.toLocaleString() + " VND"}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
           </div>
 
-          {/* Hàng 4: Thời gian */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
+          {/* Row 3: Timestamps */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1">
               <label
                 htmlFor="start_time"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Thời gian bắt đầu
+                Start Time
               </label>
               <input
                 id="start_time"
                 type="text"
                 value={formatToVN(product.start_time)}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label
                 htmlFor="end_time"
-                className="mb-4 block text-sm font-medium text-gray-700"
+                className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                Thời gian kết thúc
+                End Time
               </label>
               <input
                 id="end_time"
                 type="text"
                 value={formatToVN(product.end_time)}
                 disabled
-                className="w-full rounded-lg border bg-gray-50 px-4 py-2.5 text-sm outline-none cursor-default"
+                className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none cursor-default"
               />
             </div>
           </div>
 
-          {/* Hình ảnh sản phẩm */}
-          <div className="space-y-2">
-            <label className="mb-4 block text-sm font-medium text-gray-700">
-              Hình ảnh sản phẩm
+          {/* Product Gallery Images display */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Product Images
             </label>
-            <div className="border rounded-2xl bg-gray-50 p-4">
+            <div className="border border-border rounded-xl bg-muted/20 p-4 transition-colors">
               {productImages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="flex flex-wrap gap-4">
                   {productImages.map((img, index) => (
                     <img
                       key={index}
                       src={img.trim()}
                       alt={`${product.product_name} - ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-32 h-32 object-cover rounded-lg shadow-xs border border-border"
                     />
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center py-8">
-                  <span className="text-sm text-gray-400">
-                    Không có hình ảnh
+                <div className="flex items-center justify-center py-6">
+                  <span className="text-sm text-muted-foreground">
+                    No images available
                   </span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Mô tả sản phẩm */}
-          <div className="space-y-2">
-            <label className="mb-4 block text-sm font-medium text-gray-700">
-              Mô tả sản phẩm
+          {/* Detailed Product Description panel */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Product Description
             </label>
-            <div className="border rounded-2xl bg-gray-50 p-4">
-              <div 
+            <div className="border border-border rounded-xl bg-muted/20 p-4 transition-colors">
+              <div
                 className={`relative transition-all duration-300 ${
-                  isDescriptionExpanded ? '' : 'overflow-hidden'
+                  isDescriptionExpanded ? "" : "overflow-hidden"
                 }`}
                 style={{
-                  maxHeight: isDescriptionExpanded ? 'none' : '200px'
+                  maxHeight: isDescriptionExpanded ? "none" : "180px",
                 }}
               >
                 <div dangerouslySetInnerHTML={{ __html: product.description }}></div>
                 {!isDescriptionExpanded && product.description && product.description.length > 300 && (
-                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/90 to-transparent pointer-events-none" />
                 )}
               </div>
               {product.description && product.description.length > 300 && (
                 <button
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-all duration-200"
+                  className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-accent hover:bg-muted rounded-lg transition-colors cursor-pointer"
                 >
                   {isDescriptionExpanded ? (
                     <>
-                      Thu gọn <ChevronUp className="w-4 h-4" />
+                      Show less <ChevronUp className="w-3.5 h-3.5" />
                     </>
                   ) : (
                     <>
-                      Xem thêm <ChevronDown className="w-4 h-4" />
+                      Show more <ChevronDown className="w-3.5 h-3.5" />
                     </>
                   )}
                 </button>
@@ -262,15 +259,15 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Nút quay lại */}
-          <div className="flex flex-col items-center justify-center gap-5 pt-2">
+          {/* Action triggers */}
+          <div className="flex flex-col items-center justify-center pt-2">
             <span
-              className="text-[15px] font-medium cursor-pointer underline text-blue-400"
+              className="text-sm font-semibold cursor-pointer underline text-accent hover:opacity-90 transition-opacity"
               onClick={() => {
-                navigate(-1); // quay lại trang trước
+                navigate(-1);
               }}
             >
-              Quay lại danh sách
+              Back to list
             </span>
           </div>
         </div>

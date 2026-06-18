@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import JustValidate from "just-validate";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OTPForm from "@/components/common/OTPForm";
@@ -12,21 +11,22 @@ function AccountVerify() {
   const verifyType = params.get("type");
 
   useEffect(() => {
+    // Send request to verify account on component mount
     fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-account`, {
       method: "get",
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.code == "success") {
+        if (data.code === "success") {
           toast.success(data.message);
         }
-        if (data.code == "error") {
+        if (data.code === "error") {
           toast.error(data.message);
           navigate("/accounts/login");
         }
       });
-  }, []);
+  }, [navigate]);
 
   const [otpValue, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -35,11 +35,12 @@ function AccountVerify() {
     event.preventDefault();
 
     if (otpValue.trim().length !== 6) {
-      setError("Vui lòng nhập đủ 6 chữ số");
+      setError("Please enter all 6 digits!");
       return;
     }
     const finalData = { otp: otpValue };
-    if (verifyType == "forgot-password") {
+    if (verifyType === "forgot-password") {
+      // Send request to verify forgot password OTP
       fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-forgot-password`, {
         method: "PATCH",
         credentials: "include",
@@ -48,20 +49,21 @@ function AccountVerify() {
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.code == "success") {
+          if (data.code === "success") {
             toast.success(data.message);
             const email = params.get("email");
             navigate(`/accounts/reset-password?email=${email}`);
           }
-          if (data.code == "error") {
+          if (data.code === "error") {
             toast.error(data.message);
             navigate("/accounts/forgot-password");
           }
-          if (data.code == "otp error") {
+          if (data.code === "otp error") {
             toast.error(data.message);
           }
         });
     } else {
+      // Send request to verify register OTP
       fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-register`, {
         method: "POST",
         credentials: "include",
@@ -70,15 +72,15 @@ function AccountVerify() {
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.code == "success") {
+          if (data.code === "success") {
             toast.success(data.message);
             navigate("/accounts/login");
           }
-          if (data.code == "error") {
+          if (data.code === "error") {
             toast.error(data.message);
             navigate("/accounts/register");
           }
-          if (data.code == "otp error") {
+          if (data.code === "otp error") {
             toast.error(data.message);
           }
         });
@@ -86,65 +88,58 @@ function AccountVerify() {
   };
 
   return (
-    <div className="flex justify-center bg-gray-50 px-4 py-6">
-
-        
-
-
+    <div className="flex justify-center px-4 min-h-[calc(100vh-140px)] items-center py-4 transition-colors duration-300">
       <form
         id="registerVerify"
-        action=""
-        className="w-full max-w-md bg-white p-6 rounded-xl shadow-xl border border-gray-200"
+        className="w-full max-w-md bg-card p-6 sm:p-7 rounded-2xl shadow-gold-glow border border-border"
       >
-        {/* Header */}
-        <div className="text-center mb-5">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-600 rounded-full mb-3 shadow-lg">
-            <ShieldCheck className="w-6 h-6 text-white" />
+        {/* Header section with Shield Check icon */}
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full mb-2 border border-accent/20">
+            <ShieldCheck className="w-5 h-5 text-accent" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">
-            Nhập mã OTP
+          <h1 className="font-heading font-bold text-xl text-foreground mb-1">
+            Verify OTP
           </h1>
-          <p className="text-gray-600 text-xs">
-            Vui lòng nhập mã OTP để tiếp tục
+          <p className="text-muted-foreground text-xs">
+            Please enter the OTP code to continue
           </p>
         </div>
 
-        {/* OTP Input */}
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-full flex flex-col items-center">
+        {/* OTP inputs container */}
+        <div className="flex flex-col items-center space-y-3 mb-4">
+          <div className="w-full flex justify-center py-1">
             <OTPForm
-              className="flex scale-125"
+              className="flex scale-110 origin-center"
               onChange={(val) => {
                 setOtp(val);
               }}
             />
           </div>
-          <div className="text-red-500 text-xs">{error}</div>
+          {error && <div className="text-destructive text-xs font-medium">{error}</div>}
         </div>
 
-        {/* Submit Button */}
-        <div className="pt-3">
+        {/* Form controls with verification button */}
+        <div className="space-y-3">
           <button
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg cursor-pointer text-sm"
+            className="w-full cursor-pointer bg-primary text-primary-foreground font-semibold py-2 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm text-sm"
             type="submit"
             onClick={handleSubmit}
           >
             <CheckCircle className="w-4 h-4" />
-            Xác nhận mã OTP
+            Verify OTP
           </button>
-        </div>
 
-        {/* Back to Register Link */}
-        <div className="text-center pt-3">
-          <p className="text-xs text-gray-600">
-            Quay lại trang đăng ký?
+          {/* Registration navigation option */}
+          <div className="text-center pt-1">
+            <span className="text-xs text-muted-foreground">Back to registration?</span>
             <span
-              className="ml-1 text-blue-600 hover:text-blue-800 cursor-pointer font-semibold transition-colors duration-200"
+              className="ml-1 text-accent hover:underline cursor-pointer font-bold transition-colors duration-200 text-xs"
               onClick={() => navigate("/accounts/register")}
             >
-              Đăng ký ngay
+              Register now
             </span>
-          </p>
+          </div>
         </div>
       </form>
     </div>

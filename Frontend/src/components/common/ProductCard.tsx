@@ -1,4 +1,3 @@
-import LoveIcon from "@/assets/icons/love.svg";
 import { cn } from "@/lib/utils";
 import { DateTime } from "luxon";
 import { useState, useEffect } from "react";
@@ -6,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { slugify } from "@/utils/make_slug";
 import AddToLove from "@/components/common/AddToLove";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
-import {useAuth} from "@/routes/ProtectedRouter"
+import { useAuth } from "@/routes/ProtectedRouter";
+
 type Products = {
   product_id?: number;
   product_image?: string;
@@ -34,12 +34,14 @@ function ProductCard({
   ...data
 }: Products & { className?: string } & { onClick?: () => void }) {
   const navigate = useNavigate();
-  let [formattedStartTime, setFormatStartTime] = useState("");
-  let [timeLeft, setTimeLeft] = useState("");
-  const {auth} = useAuth();
-  // Start time take day, month, year
+  const [formattedStartTime, setFormatStartTime] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isUrgent, setIsUrgent] = useState(false);
+  const { auth } = useAuth();
+
   const startDate = DateTime.fromISO(start_time, { zone: "Asia/Ho_Chi_Minh" });
   const endDate = DateTime.fromISO(end_time, { zone: "Asia/Ho_Chi_Minh" });
+
   const handleClickProduct = (productId?: number, productName?: string) => {
     const slug = slugify(productName ?? "");
     navigate(`/product/${slug}-${productId}`);
@@ -50,42 +52,39 @@ function ProductCard({
       setFormatStartTime(startDate.toFormat("dd-MM-yyyy HH:mm"));
     }
   };
+
   const formatEndTime = () => {
     if (!end_time) return;
 
-    // Lấy thời điểm hiện tại đúng timezone
     const present_time = DateTime.now().setZone("Asia/Ho_Chi_Minh");
-    // Parse endDate nếu chưa parse
     const endDateValid = DateTime.isDateTime(endDate)
       ? endDate
       : DateTime.fromISO(end_time, { zone: "Asia/Ho_Chi_Minh" });
-    // Kiểm tra valid trước khi diff
+
     if (!endDateValid.isValid) {
-      console.error("endDate invalid:", endDateValid.invalidReason);
-      timeLeft = "";
+      setTimeLeft("");
       return;
     }
 
-    const diff = endDateValid
-      .diff(present_time, ["days", "hours", "minutes", "seconds"])
-      .toObject();
+    const diff = endDateValid.diff(present_time, ["days", "hours", "minutes", "seconds"]).toObject();
+    const diffSeconds = endDateValid.diff(present_time, "seconds").seconds;
 
-    // diff luôn có keys nhưng values có thể NaN → gán mặc định 0
     const days = diff.days ?? 0;
     const hours = diff.hours ?? 0;
     const minutes = diff.minutes ?? 0;
     const seconds = diff.seconds ?? 0;
-    let result;
-    if (days >= 1) {
-      result = `Còn ${Math.floor(days)} ngày ${Math.floor(hours)} giờ`;
+
+    setIsUrgent(diffSeconds > 0 && diffSeconds < 300);
+
+    if (diffSeconds <= 0) {
+      setTimeLeft("Ended");
+    } else if (days >= 1) {
+      setTimeLeft(`${Math.floor(days)}d ${Math.floor(hours)}h left`);
     } else if (hours >= 1) {
-      result = `Còn ${Math.floor(hours)} giờ ${Math.floor(minutes)} phút`;
-    } else if (minutes >= 0) {
-      result = `Còn ${Math.floor(minutes)} phút ${Math.floor(seconds)} giây`;
+      setTimeLeft(`${Math.floor(hours)}h ${Math.floor(minutes)}m left`);
     } else {
-      result = "Đã hết hạn";
+      setTimeLeft(`${Math.floor(minutes)}m ${Math.floor(seconds)}s left`);
     }
-    setTimeLeft(result);
   };
 
   useEffect(() => {
@@ -97,10 +96,9 @@ function ProductCard({
     return () => clearInterval(timer);
   });
 
-  // Function to mask buyer name (hide half with ***)
   const maskName = (name: string) => {
     const len = name.length;
-    if (len >= 20){
+    if (len >= 20) {
       return name.substring(0, 10) + "*****";
     }
     const thirdLen = Math.floor(len / 2);
@@ -108,21 +106,14 @@ function ProductCard({
   };
 
   const { ref, hasIntersected } = useIntersectionObserver();
+
   return (
-    // Container with glassmorphism - Gray/Blue theme
     <div
       ref={ref}
       className={cn(
-        "group relative w-80 h-110 cursor-pointer overflow-hidden rounded-3xl",
-        "bg-gray-100/50 backdrop-blur-xl border border-gray-300/30",
-        "hover:bg-white/10 hover:border-gray-400/40",
-        "transition-all duration-500 ease-out",
-        "hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20",
-        "before:absolute before:inset-0 before:rounded-3xl",
-        "before:bg-gradient-to-br before:from-blue-500/10 before:to-gray-500/10",
-        "before:opacity-0 before:transition-opacity before:duration-500",
-        "hover:before:opacity-100 shadow-xl shadow-gray-300/20",
-        "flex flex-col items-center shrink-0",
+        "group relative w-80 h-112 cursor-pointer overflow-hidden rounded-2xl flex flex-col items-center shrink-0 transition-all duration-500 ease-out",
+        "bg-card/40 backdrop-blur-xl border border-border",
+        "hover:scale-[1.01] hover:shadow-gold-glow hover:border-accent/30",
         hasIntersected ? "animate__animated animate__fadeInUp" : "opacity-0",
         data.className
       )}
@@ -133,15 +124,14 @@ function ProductCard({
         })
       }
     >
-      {/* Background pattern - Gray/Blue theme */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-400/20 to-transparent rounded-full blur-xl"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-gray-400/20 to-transparent rounded-full blur-xl"></div>
+      {/* Background radial highlight */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/20 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-xl"></div>
       </div>
 
-      {/* Image Container */}
-      <div className="relative w-full h-[50%] shrink-0 overflow-hidden rounded-t-3xl">
-        {/* Love Button - Top Right */}
+      {/* Product Image Cover */}
+      <div className="relative w-full h-[48%] shrink-0 overflow-hidden rounded-t-2xl border-b border-border">
         <div
           onClick={(e) => e.stopPropagation()}
           className="absolute top-0 right-0 z-20"
@@ -152,111 +142,83 @@ function ProductCard({
         <img
           src={product_image}
           loading="lazy"
-          className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
+          alt={product_name}
+          className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 group-hover:brightness-110"
         />
 
-        {/* Image overlay gradient - Gray/Blue theme */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-gray-900/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
-
-        {/* Hover overlay with icon */}
-        <div className="absolute inset-0 bg-gray-900/20 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
-          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
+        <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-full bg-background/50 backdrop-blur-md border border-accent/35 flex items-center justify-center">
+              <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Name Product */}
-      <div className="relative text-xl font-bold mx-2 flex h-[15%] pt-2 grow-0 self-start limit-to-2-lines text-gray-700 group-hover:text-gray-900 transition-colors duration-500">
-        {product_name ?? "Ronaldo"}
+      {/* Product Title Section */}
+      <div className="relative text-lg font-heading font-bold mx-4 mt-3 flex h-[12%] leading-snug grow-0 self-start limit-to-2-lines text-foreground group-hover:text-accent transition-colors duration-300">
+        {product_name ?? "Product Name"}
       </div>
 
-      {/* Decorative line - Gray/Blue theme */}
-      <div className="relative w-[90%] h-px bg-gradient-to-r from-transparent via-blue-400/60 to-transparent group-hover:via-blue-500 transition-all duration-500"></div>
+      {/* Accent Separator */}
+      <div className="relative w-[90%] h-px bg-gradient-to-r from-transparent via-border to-transparent group-hover:via-accent/40 transition-colors duration-300 my-2"></div>
 
-      {/* Product Details */}
-      <div className="relative flex-1 mx-2 w-full p-2 pt-1 grid grid-cols-2 gap-2">
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Giá:
-          </div>
-          <span className="text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-            {current_price?.toLocaleString() ?? "0"} đồng
-          </span>
+      {/* Detail Attributes */}
+      <div className="relative flex-1 mx-4 w-[calc(100%-2rem)] pb-4 grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <div className="font-semibold text-muted-foreground">Current Bid:</div>
+          <span className="text-foreground font-medium">{current_price?.toLocaleString() ?? "0"} VND</span>
         </div>
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Giá mua ngay:
-          </div>
-          <span className="text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-            {buy_now_price?.toLocaleString() ?? "0"} đồng
-          </span>
+        <div>
+          <div className="font-semibold text-muted-foreground">Buy Now:</div>
+          <span className="text-foreground font-medium">{buy_now_price?.toLocaleString() ?? "0"} VND</span>
         </div>
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Thời điểm đăng:
-          </div>
-          <span className="text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
-            {formattedStartTime}
-          </span>
+        <div>
+          <div className="font-semibold text-muted-foreground">Posted:</div>
+          <span className="text-foreground/85">{formattedStartTime}</span>
         </div>
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Thời gian kết thúc:
-          </div>
-          <span className="text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
+        <div>
+          <div className="font-semibold text-muted-foreground">Ends In:</div>
+          <span
+            className={cn(
+              "font-medium transition-colors",
+              isUrgent ? "text-red-500 animate-pulse font-bold" : "text-chart-2"
+            )}
+          >
             {timeLeft}
           </span>
         </div>
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Người giữ giá:
-          </div>
-          <span className="text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
-            {price_owner_username 
-              ? (price_owner_id == auth?.user_id 
-                  ? <span className="inline-flex items-center px-2 py-0.5 rounded-md text-sm bg-yellow-100 text-gray-800 border border-yellow-300">
-                      {price_owner_username}
-                    </span>
-                  : maskName(price_owner_username))
-              : "..."}
+        <div>
+          <div className="font-semibold text-muted-foreground">Top Bidder:</div>
+          <span className="text-foreground font-medium">
+            {price_owner_username ? (
+              price_owner_id === auth?.user_id ? (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-accent/15 text-accent font-semibold border border-accent/30">
+                  You
+                </span>
+              ) : (
+                maskName(price_owner_username)
+              )
+            ) : (
+              "-"
+            )}
           </span>
         </div>
-        <div className="text-[85%] transition-colors duration-300">
-          <div className="font-semibold text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-            Số lượt đấu giá:
-          </div>
-          <span className="text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
-            {bid_turns}
-          </span>
+        <div>
+          <div className="font-semibold text-muted-foreground">Bids:</div>
+          <span className="text-foreground/85 font-medium">{bid_turns}</span>
         </div>
       </div>
 
-      {/* Shine effect - Gray/Blue theme */}
-      <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-blue-400/20 to-transparent -skew-x-12 animate-shine"></div>
+      {/* Shine Hover Effect */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+        <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-accent/10 to-transparent -skew-x-12 animate-shine"></div>
       </div>
     </div>
   );
 }
+
 export default ProductCard;

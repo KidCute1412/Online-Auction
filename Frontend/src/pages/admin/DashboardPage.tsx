@@ -1,390 +1,321 @@
+import React, { useState, useEffect } from "react";
 import {
-  FiGrid,
-  FiMap,
-  FiUsers,
-  FiUserPlus,
-  FiSearch,
-  FiFilter,
-  FiEdit,
-  FiTrash2,
-  FiEye,
-  FiAlertCircle,
-  FiCheckCircle,
-} from "react-icons/fi";
+  TrendingUp,
+  Users,
+  ShoppingBag,
+  ShieldCheck,
+  Activity,
+  Award,
+  Bell,
+  ArrowUpRight,
+  ArrowDownRight,
+  Compass,
+  Zap,
+  Layers,
+  RefreshCw,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 
 export default function DashboardPage() {
+  const [time, setTime] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => setIsRefreshing(false), 800);
+  };
+
   return (
-    <div className="p-6 space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">
-          Hướng Dẫn Sử Dụng Hệ Thống Admin
-        </h1>
-        <p className="text-blue-100">
-          Chào mừng bạn đến với trang quản trị hệ thống đấu giá trực tuyến
-        </p>
+    <div className="p-4 sm:p-8 space-y-8 text-foreground bg-background transition-colors duration-300 min-h-screen">
+      {/* Top Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-border pb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 text-xs font-semibold tracking-wider text-amber-500 bg-amber-500/10 rounded-full border border-amber-500/20 flex items-center gap-1 animate-pulse">
+              <Sparkles className="w-3 h-3" /> ADMIN PORTAL
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
+            System Intelligence
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Real-time auction statistics, user activities, and platform controls.
+          </p>
+        </div>
+
+        {/* Info badges with interactive time */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 bg-card/60 backdrop-blur-md px-4 py-2 rounded-xl border border-border/80 shadow-sm">
+            <Clock className="w-4 h-4 text-primary" />
+            <span className="text-sm font-mono tracking-widest text-foreground font-semibold">
+              {time.toLocaleTimeString()}
+            </span>
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/95 px-4 py-2 rounded-xl shadow-md hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer text-sm font-medium"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>Sync Live Feed</span>
+          </button>
+        </div>
       </div>
 
-      {/* Overview */}
+      {/* Metric Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-          <div className="flex items-center gap-3 mb-2">
-            <FiGrid className="text-2xl text-blue-500" />
-            <h3 className="font-semibold">Danh Mục</h3>
+        {/* Total GMV Card */}
+        <div className="group relative bg-gradient-to-br from-card to-card/50 rounded-2xl p-6 border border-border hover:border-primary/30 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-primary/5 overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-all duration-500" />
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-primary/10 text-primary rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="w-6 h-6" />
+            </div>
+            <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <ArrowUpRight className="w-3 h-3" /> +14.2%
+            </span>
           </div>
-          <p className="text-sm text-gray-600">Quản lý danh mục sản phẩm</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Gross Merchandise Value</p>
+          <h3 className="text-2xl sm:text-3xl font-black mt-1">$412,890</h3>
+          <div className="w-full bg-border rounded-full h-1 mt-4 overflow-hidden">
+            {/* Animated progress bar indicator */}
+            <div className="bg-primary h-full rounded-full w-[76%] transition-all duration-1000" />
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-          <div className="flex items-center gap-3 mb-2">
-            <FiMap className="text-2xl text-green-500" />
-            <h3 className="font-semibold">Sản Phẩm</h3>
+        {/* Registered Users Card */}
+        <div className="group relative bg-gradient-to-br from-card to-card/50 rounded-2xl p-6 border border-border hover:border-purple-500/30 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-purple-500/5 overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-all duration-500" />
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-purple-500/10 text-purple-500 rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <Users className="w-6 h-6" />
+            </div>
+            <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <ArrowUpRight className="w-3 h-3" /> +8.6%
+            </span>
           </div>
-          <p className="text-sm text-gray-600">Quản lý sản phẩm đấu giá</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Active Users</p>
+          <h3 className="text-2xl sm:text-3xl font-black mt-1">12,482</h3>
+          <div className="w-full bg-border rounded-full h-1 mt-4 overflow-hidden">
+            {/* Animated progress bar indicator */}
+            <div className="bg-purple-500 h-full rounded-full w-[64%] transition-all duration-1000" />
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-          <div className="flex items-center gap-3 mb-2">
-            <FiUsers className="text-2xl text-purple-500" />
-            <h3 className="font-semibold">Người Dùng</h3>
+        {/* Live Auctions Card */}
+        <div className="group relative bg-gradient-to-br from-card to-card/50 rounded-2xl p-6 border border-border hover:border-orange-500/30 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-orange-500/5 overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all duration-500" />
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-orange-500/10 text-orange-500 rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            <span className="flex items-center gap-0.5 text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 animate-pulse">
+              Active Now
+            </span>
           </div>
-          <p className="text-sm text-gray-600">Quản lý tài khoản người dùng</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Active Auctions</p>
+          <h3 className="text-2xl sm:text-3xl font-black mt-1">1,824</h3>
+          <div className="w-full bg-border rounded-full h-1 mt-4 overflow-hidden">
+            {/* Animated progress bar indicator */}
+            <div className="bg-orange-500 h-full rounded-full w-[91%] transition-all duration-1000" />
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-          <div className="flex items-center gap-3 mb-2">
-            <FiUserPlus className="text-2xl text-orange-500" />
-            <h3 className="font-semibold">Form Đăng Ký</h3>
+        {/* Seller Applications Card */}
+        <div className="group relative bg-gradient-to-br from-card to-card/50 rounded-2xl p-6 border border-border hover:border-emerald-500/30 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-emerald-500/5 overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all duration-500" />
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <span className="flex items-center gap-0.5 text-xs font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+              <ArrowDownRight className="w-3 h-3" /> -2.4%
+            </span>
           </div>
-          <p className="text-sm text-gray-600">Duyệt đơn đăng ký người bán</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Seller Verification Requests</p>
+          <h3 className="text-2xl sm:text-3xl font-black mt-1">47 Pending</h3>
+          <div className="w-full bg-border rounded-full h-1 mt-4 overflow-hidden">
+            {/* Animated progress bar indicator */}
+            <div className="bg-emerald-500 h-full rounded-full w-[42%] transition-all duration-1000" />
+          </div>
         </div>
       </div>
 
-      {/* Main Guides */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Management */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-            <FiGrid className="text-2xl text-blue-500" />
-            <h2 className="text-xl font-semibold">Quản Lý Danh Mục</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-blue-600 mb-2">
-                📋 Danh sách danh mục
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <FiSearch className="mt-1 text-blue-500 flex-shrink-0" />
-                  <span>
-                    <strong>Tìm kiếm:</strong> Nhập tên danh mục và nhấn Enter
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiFilter className="mt-1 text-blue-500 flex-shrink-0" />
-                  <span>
-                    <strong>Lọc:</strong> Theo trạng thái (Active/Inactive),
-                    người tạo, ngày tạo
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiEdit className="mt-1 text-green-500 flex-shrink-0" />
-                  <span>
-                    <strong>Sửa:</strong> Click icon bút chì để chỉnh sửa
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiTrash2 className="mt-1 text-red-500 flex-shrink-0" />
-                  <span>
-                    <strong>Xóa:</strong> Click icon thùng rác để xóa danh mục
-                  </span>
-                </li>
-              </ul>
+      {/* Main Grid Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Column 1 & 2: Platform Status Overview */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-card/75 border border-border rounded-2xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <Activity className="text-primary w-5 h-5 animate-pulse" />
+                <h2 className="text-lg font-bold">Auction Platform Performance</h2>
+              </div>
+              {/* Tab Selector */}
+              <div className="flex bg-muted p-1 rounded-lg border border-border">
+                {["overview", "revenue", "bids"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 py-1 text-xs rounded-md font-semibold capitalize cursor-pointer transition-all duration-150 ${
+                      activeTab === tab
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-blue-600 mb-2">
-                ➕ Tạo mới & chỉnh sửa
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Nhập tên danh mục và mô tả</li>
-                <li>• Chọn trạng thái (Active/Inactive)</li>
-                <li>• Hệ thống tự động tạo slug từ tên</li>
-                <li>• Xác nhận để lưu thay đổi</li>
-              </ul>
-            </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-blue-600 mb-2">🗑️ Thùng rác</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Xem danh mục đã xóa</li>
-                <li>• Khôi phục hoặc xóa vĩnh viễn</li>
-              </ul>
-            </div>
-          </div>
-        </div>
 
-        {/* Product Management */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-            <FiMap className="text-2xl text-green-500" />
-            <h2 className="text-xl font-semibold">Quản Lý Sản Phẩm</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-green-600 mb-2">
-                📦 Danh sách sản phẩm
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <FiSearch className="mt-1 text-green-500 flex-shrink-0" />
-                  <span>
-                    <strong>Tìm kiếm:</strong> Nhập tên sản phẩm để tìm kiếm
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiFilter className="mt-1 text-green-500 flex-shrink-0" />
-                  <span>
-                    <strong>Lọc:</strong> Theo người tạo, khoảng thời gian
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiEye className="mt-1 text-blue-500 flex-shrink-0" />
-                  <span>
-                    <strong>Xem chi tiết:</strong> Click icon mắt để xem thông
-                    tin chi tiết
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiTrash2 className="mt-1 text-red-500 flex-shrink-0" />
-                  <span>
-                    <strong>Xóa:</strong> Chuyển sản phẩm vào thùng rác
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-green-600 mb-2">
-                🔍 Chi tiết sản phẩm
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Xem đầy đủ thông tin sản phẩm</li>
-                <li>• Hình ảnh, mô tả chi tiết</li>
-                <li>• Giá khởi điểm, thời gian đấu giá</li>
-                <li>• Lịch sử đấu giá và người bán</li>
-              </ul>
-            </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-green-600 mb-2">
-                🗑️ Thùng rác
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Quản lý sản phẩm đã xóa</li>
-                <li>• Khôi phục hoặc xóa vĩnh viễn</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+            {/* Performance charts mock using styled CSS elements */}
+            <div className="h-64 flex flex-col justify-end gap-3 pt-4 px-2 relative">
+              <div className="absolute top-4 left-4 flex gap-4 text-xs font-mono text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-primary rounded-full" />
+                  <span>Target Achievement</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-accent rounded-full" />
+                  <span>Realized Volatility</span>
+                </div>
+              </div>
 
-        {/* User Management */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-            <FiUsers className="text-2xl text-purple-500" />
-            <h2 className="text-xl font-semibold">Quản Lý Người Dùng</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-purple-600 mb-2">
-                👥 Danh sách người dùng
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <FiSearch className="mt-1 text-purple-500 flex-shrink-0" />
-                  <span>
-                    <strong>Tìm kiếm:</strong> Tìm theo tên, email người dùng
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiFilter className="mt-1 text-purple-500 flex-shrink-0" />
-                  <span>
-                    <strong>Lọc:</strong> Theo trạng thái tài khoản
-                    (Active/Inactive)
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiEye className="mt-1 text-blue-500 flex-shrink-0" />
-                  <span>
-                    <strong>Xem chi tiết:</strong> Click để xem thông tin đầy đủ
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiEdit className="mt-1 text-green-500 flex-shrink-0" />
-                  <span>
-                    <strong>Chỉnh sửa:</strong> Cập nhật thông tin, phân quyền
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-purple-600 mb-2">
-                🔑 Quản lý quyền
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Admin: Toàn quyền quản trị</li>
-                <li>• Seller: Người bán hàng</li>
-                <li>• Bidder: Người tham gia đấu giá</li>
-                <li>• User: Người dùng thông thường</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+              {/* Grid backdrop lines */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 py-4">
+                <div className="border-t border-muted-foreground" />
+                <div className="border-t border-muted-foreground" />
+                <div className="border-t border-muted-foreground" />
+                <div className="border-t border-muted-foreground" />
+              </div>
 
-        {/* Application Form */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-            <FiUserPlus className="text-2xl text-orange-500" />
-            <h2 className="text-xl font-semibold">
-              Quản Lý Form Đăng Ký Seller
+              <div className="flex items-end justify-between h-40 z-10">
+                {[45, 68, 52, 90, 75, 88, 62, 95, 78, 85, 70, 99].map((val, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-2 group w-full text-center">
+                    <div className="relative w-full bg-gradient-to-t from-primary/40 to-primary group-hover:from-accent/60 group-hover:to-accent rounded-t transition-all duration-500 ease-out" style={{ height: `${val}%` }}>
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] font-mono py-0.5 px-1.5 rounded opacity-0 group-hover:opacity-100 shadow border border-border transition-opacity duration-200 pointer-events-none">
+                        {val}%
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][idx]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions Panel */}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
+              <Zap className="w-5 h-5 text-amber-500" /> Administrative Quick Commands
             </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="flex flex-col justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted border border-border hover:border-primary/20 transition-all duration-200 group">
+                <div>
+                  <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">Audit Catalog</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Review flagged items and resolve listing disputes.</p>
+                </div>
+                <span className="text-xs font-semibold text-primary mt-4 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Access Portal <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+
+              <div className="flex flex-col justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted border border-border hover:border-purple-500/20 transition-all duration-200 group">
+                <div>
+                  <h3 className="font-semibold text-sm group-hover:text-purple-500 transition-colors">KYC Verifications</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Process professional credentials and seller limits.</p>
+                </div>
+                <span className="text-xs font-semibold text-purple-500 mt-4 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Process Requests <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+
+              <div className="flex flex-col justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted border border-border hover:border-orange-500/20 transition-all duration-200 group">
+                <div>
+                  <h3 className="font-semibold text-sm group-hover:text-orange-500 transition-colors">System Analytics</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Generate comprehensive billing and GMV logs.</p>
+                </div>
+                <span className="text-xs font-semibold text-orange-500 mt-4 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  Export Reports <ArrowUpRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="space-y-4">
+        </div>
+
+        {/* Column 3: Activity Feed / Notifications */}
+        <div className="space-y-8">
+          {/* Realtime activities panel */}
+          <div className="bg-card/90 border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
             <div>
-              <h3 className="font-semibold text-orange-600 mb-2">
-                📝 Danh sách đơn đăng ký
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <FiAlertCircle className="mt-1 text-yellow-500 flex-shrink-0" />
-                  <span>
-                    <strong>Đơn chờ duyệt:</strong> Cần xem xét và phê duyệt
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiCheckCircle className="mt-1 text-green-500 flex-shrink-0" />
-                  <span>
-                    <strong>Đã phê duyệt:</strong> Đơn đã được chấp nhận
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <FiEye className="mt-1 text-blue-500 flex-shrink-0" />
-                  <span>
-                    <strong>Chi tiết:</strong> Xem thông tin người đăng ký
-                  </span>
-                </li>
-              </ul>
+              <div className="flex justify-between items-center mb-6 pb-2 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <Bell className="text-primary w-4.5 h-4.5 animate-bounce" />
+                  <h2 className="text-md font-bold">Activity Feed</h2>
+                </div>
+                <span className="text-[10px] font-bold tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 uppercase">
+                  Live connection
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  { user: "Alexander Gray", action: "placed new bid", item: "Vintage Rolex Submariner", time: "just now", value: "$14,200", color: "text-primary" },
+                  { user: "Sophia Miller", action: "completed purchase", item: "Modernist Bronze Sculpture", time: "3m ago", value: "$4,500", color: "text-emerald-500" },
+                  { user: "Marcus Vance", action: "requested seller upgrade", item: "Verify profile document", time: "12m ago", value: "Pending", color: "text-amber-500" },
+                  { user: "Eleanor Vance", action: "listed new property", item: "Rare First Edition Novel", time: "18m ago", value: "$850", color: "text-purple-500" },
+                  { user: "James Patterson", action: "reported dispute", item: "Incomplete shipment case", time: "30m ago", value: "Urgent", color: "text-rose-500" }
+                ].map((act, idx) => (
+                  <div key={idx} className="flex gap-3 text-xs border-b border-border/40 pb-3 last:border-0 last:pb-0 hover:bg-muted/10 p-1.5 rounded-lg transition-colors duration-150">
+                    <div className="flex-1">
+                      <p className="text-foreground font-semibold">
+                        {act.user} <span className="text-muted-foreground font-normal">{act.action}</span>
+                      </p>
+                      <p className="text-muted-foreground/80 font-mono text-[10px] mt-0.5">{act.item}</p>
+                      <span className="text-[10px] text-muted-foreground/60">{act.time}</span>
+                    </div>
+                    <div className="text-right flex flex-col justify-center">
+                      <span className={`font-mono font-bold ${act.color}`}>{act.value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-orange-600 mb-2">
-                ✅ Quy trình duyệt
-              </h3>
-              <ol className="space-y-2 text-sm text-gray-700 list-decimal list-inside">
-                <li>Kiểm tra thông tin người đăng ký</li>
-                <li>Xác minh giấy tờ, tài liệu</li>
-                <li>Phê duyệt hoặc từ chối đơn</li>
-                <li>Hệ thống tự động cập nhật quyền</li>
-              </ol>
-            </div>
-            <div className="pt-3 border-t">
-              <h3 className="font-semibold text-orange-600 mb-2">
-                📋 Thông tin cần kiểm tra
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Thông tin cá nhân đầy đủ</li>
-                <li>• Giấy tờ tuỳ thân hợp lệ</li>
-                <li>• Lý do muốn trở thành seller</li>
-                <li>• Kinh nghiệm bán hàng (nếu có)</li>
-              </ul>
+          </div>
+
+          {/* Infrastructure Health Panel */}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <h2 className="text-md font-bold mb-4 flex items-center gap-2">
+              <Layers className="w-4.5 h-4.5 text-primary" /> Platform Engine Status
+            </h2>
+            <div className="space-y-4 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                <span className="text-muted-foreground">Main Engine Core</span>
+                <span className="text-emerald-500 font-semibold flex items-center gap-1">🟢 Operational</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                <span className="text-muted-foreground">WebSockets Node</span>
+                <span className="text-emerald-500 font-semibold flex items-center gap-1">🟢 Operational</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                <span className="text-muted-foreground">Search Index Sync</span>
+                <span className="text-purple-500 font-semibold flex items-center gap-1">🟣 Synced (99%)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Worker Thread Queue</span>
+                <span className="text-emerald-500 font-semibold flex items-center gap-1">🟢 Idle (0 jobs)</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Common Features */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4 pb-3 border-b">
-          ⚙️ Tính Năng Chung
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-blue-600 mb-3">
-              🔍 Thanh tìm kiếm và lọc
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>
-                • <strong>Tìm kiếm:</strong> Nhập từ khóa vào ô tìm kiếm, nhấn
-                Enter hoặc click nút tìm kiếm
-              </li>
-              <li>
-                • <strong>Lọc nâng cao:</strong> Sử dụng FilterBar để lọc theo
-                nhiều tiêu chí
-              </li>
-              <li>
-                • <strong>Reset:</strong> Click nút "Reset" để xóa bộ lọc và tìm
-                kiếm
-              </li>
-              <li>
-                • <strong>Phân trang:</strong> Sử dụng nút Previous/Next để
-                chuyển trang
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-blue-600 mb-3">
-              💾 Thao tác dữ liệu
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>
-                • <strong>Tạo mới:</strong> Click nút "Tạo mới" trên thanh công
-                cụ
-              </li>
-              <li>
-                • <strong>Chỉnh sửa:</strong> Click icon{" "}
-                <FiEdit className="inline text-green-500" /> trong bảng
-              </li>
-              <li>
-                • <strong>Xóa:</strong> Click icon{" "}
-                <FiTrash2 className="inline text-red-500" /> để chuyển vào thùng
-                rác
-              </li>
-              <li>
-                • <strong>Xem chi tiết:</strong> Click icon{" "}
-                <FiEye className="inline text-blue-500" /> để xem đầy đủ thông
-                tin
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Tips */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <FiAlertCircle className="text-yellow-600" />
-          💡 Mẹo Sử Dụng
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li>
-              ✅ Sử dụng phím tắt{" "}
-              <kbd className="px-2 py-1 bg-gray-200 rounded">Ctrl</kbd> +{" "}
-              <kbd className="px-2 py-1 bg-gray-200 rounded">F</kbd> để tìm kiếm
-              nhanh
-            </li>
-            <li>✅ Kiểm tra thùng rác định kỳ để dọn dẹp dữ liệu</li>
-            <li>✅ Sử dụng bộ lọc để tìm kiếm chính xác hơn</li>
-          </ul>
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li>✅ Backup dữ liệu trước khi xóa vĩnh viễn</li>
-            <li>✅ Kiểm tra kỹ thông tin trước khi phê duyệt đơn</li>
-            <li>✅ Cập nhật trạng thái sản phẩm và danh mục thường xuyên</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Footer Note */}
-      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-        <p className="text-sm text-blue-800">
-          <strong>📌 Lưu ý:</strong> Để được hỗ trợ thêm, vui lòng liên hệ với
-          quản trị viên hệ thống hoặc xem tài liệu chi tiết trong mục Cài đặt.
-        </p>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import { formatPrice, parsePrice } from '@/utils/format_price';
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { DateTime } from "luxon";
@@ -17,6 +16,7 @@ import PreviewImage from "./components/PreviewProductModal";
 import Loading from "@/components/common/Loading";
 import { slugify } from "@/utils/make_slug";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+
 type ProductType = {
   product_id: number;
   product_name: string;
@@ -45,11 +45,9 @@ type ProductType = {
 };
 
 function DetailProductPage() {
-  // Auth user useContext
   const navigator = useNavigate();
   const { auth } = useAuth();
   const [isSeller, setIsSeller] = useState(false);
-  // Sample product data - in a real app, this would come from props or API
   const [products, setProduct] = useState<ProductType>();
   const { slugid } = useParams();
   let product_id: number | undefined;
@@ -59,10 +57,7 @@ function DetailProductPage() {
     product_id = Number(parts.pop());
     product_slug = parts.join("-");
   }
-  // Socket for bidding
   const socket = useSocketBidding(product_id || null);
-
-  // Custome time
 
   const [formattedStartTime, setFormatStartTime] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
@@ -70,12 +65,10 @@ function DetailProductPage() {
 
   const [isLoading, setLoading] = useState(true);
   const { setBreadcrumbs } = useBreadcrumb();
-  // Initial loading data
+
   useEffect(() => {
-    // Fetch product data from API
     async function fetchProduct() {
       try {
-        // param is slug-id
         setLoading(true);
         const response = await fetch(
           `${
@@ -84,12 +77,12 @@ function DetailProductPage() {
         );
         const data = await response.json();
         if (!response.ok) {
-          toast.error("Lỗi khi tải sản phẩm");
+          toast.error("Error loading product");
         } else {
           setProduct(data.data);
         }
       } catch (e) {
-        toast.error("Lỗi kết nối đến server");
+        toast.error("Error connecting to server");
         console.log(e);
       }
       setLoading(false);
@@ -106,16 +99,15 @@ function DetailProductPage() {
       )
         .then((response) => {
           if (!response.ok) {
-            toast.error("Có lỗi khi lấy tên danh mục");
+            toast.error("Error fetching category details");
             throw new Error("Network response was not ok");
           }
           return response.json();
         })
         .then((data) => {
-          // Update breadcrumb
           setBreadcrumbs([
-            { label: "Trang chủ", path: "/" },
-            { label: "Danh mục", path: "/categories" },
+            { label: "Home", path: "/" },
+            { label: "Categories", path: "/categories" },
             {
               label: data.data.cat1_name,
               path: `/categories/${slugify(data.data.cat1_name)}-${
@@ -127,21 +119,21 @@ function DetailProductPage() {
               path: `/products?cat2_id=${data.data.cat2_id}`,
             },
             {
-              label: products?.product_name || "Chi tiết sản phẩm",
+              label: products?.product_name || "Product Details",
               path: null,
             },
           ]);
         })
         .catch((error) => {
-          toast.error(error.message || "Lỗi kết nối máy chủ");
+          toast.error(error.message || "Server connection error");
         });
     }
     if (products) {
       fetchBreadCrumbs();
     }
   }, [products]);
+
   useEffect(() => {
-    // Check if auth user is seller of this product
     if (auth && products) {
       setIsSeller(auth.user_id === products.seller_id);
     }
@@ -151,7 +143,6 @@ function DetailProductPage() {
     if (!socket) return;
     socket.on("new_bid", (data: any) => {
       console.log("Received new bid data via socket: ", data.data);
-      // Update product data with new bid info
       setProduct(data.data);
     });
     return () => {
@@ -161,15 +152,14 @@ function DetailProductPage() {
     };
   }, [socket]);
 
-  // Update time every second
   useEffect(() => {
     if (products) {
       formatStartTime(
         DateTime.fromISO(products.start_time).setZone("Asia/Ho_Chi_Minh")
       );
       const end = DateTime.fromISO(products.end_time).setZone(
-          "Asia/Ho_Chi_Minh"
-        );
+        "Asia/Ho_Chi_Minh"
+      );
       formatEndTime(end);
       const interval = setInterval(() => {
         const end = DateTime.fromISO(products.end_time).setZone(
@@ -177,46 +167,40 @@ function DetailProductPage() {
         );
         formatEndTime(end);
       }, 1000);
-      return () => clearInterval(interval );
+      return () => clearInterval(interval);
     }
   }, [products]);
-
-  // Start time take day, month, year
 
   const formatStartTime = (start_time: DateTime) => {
     if (start_time) {
       setFormatStartTime(start_time.toFormat("dd-MM-yyyy HH:mm"));
     }
   };
+
   const formatEndTime = (end_time: DateTime) => {
     if (!end_time) return;
 
-    // Lấy thời điểm hiện tại đúng timezone
     const present_time = DateTime.now().setZone("Asia/Ho_Chi_Minh");
-
-    // Parse endDate nếu chưa parse
-
     const diff = end_time
       .diff(present_time, ["days", "hours", "minutes", "seconds"])
       .toObject();
 
-    // diff luôn có keys nhưng values có thể NaN → gán mặc định 0
     const days = diff.days ?? 0;
     const hours = diff.hours ?? 0;
     const minutes = diff.minutes ?? 0;
     const seconds = diff.seconds ?? 0;
     let result;
     if (days >= 1) {
-      result = `Còn ${Math.floor(days)} ngày ${Math.floor(hours)} giờ`;
+      result = `${Math.floor(days)}d ${Math.floor(hours)}h left`;
       setIsExpired(false);
     } else if (hours >= 1) {
-      result = `Còn ${Math.floor(hours)} giờ ${Math.floor(minutes)} phút`;
+      result = `${Math.floor(hours)}h ${Math.floor(minutes)}m left`;
       setIsExpired(false);
     } else if (minutes >= 0 && seconds >= 0) {
-      result = `Còn ${Math.floor(minutes)} phút ${Math.floor(seconds)} giây`;
+      result = `${Math.floor(minutes)}m ${Math.floor(seconds)}s left`;
       setIsExpired(false);
     } else {
-      result = "Đã hết hạn";
+      result = "Expired";
       setIsExpired(true);
     }
     setTimeLeft(result);
@@ -230,7 +214,6 @@ function DetailProductPage() {
     setImageModalOpen(true);
   };
 
-  // Function to mask buyer name (hide half with ***)
   const maskName = (name: string) => {
     const len = name.length;
     const thirdLen = Math.floor(len / 2);
@@ -238,16 +221,15 @@ function DetailProductPage() {
   };
 
   return isLoading ? (
-    <Loading></Loading>
+    <Loading />
   ) : (
-    <div className=" mx-auto px-4 py-8">
+    <div className="mx-auto px-4 py-8 bg-background text-foreground transition-colors duration-300">
       {/* Product Name */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+      <h1 className="text-2xl md:text-3xl font-heading font-extrabold text-foreground mb-6">
         {products?.product_name}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)] gap-8">
-        {/* Main Image and Related Images */}
         <ProductImageGallery
           product_id={products?.product_id}
           product_name={products?.product_name}
@@ -258,29 +240,29 @@ function DetailProductPage() {
         {/* Product Details - Right Column */}
         <div className="space-y-4">
           {/* Pricing Section */}
-          <div className="bg-white border border-gray-200 p-5 rounded-lg shadow-sm">
+          <div className="bg-card border border-border p-5 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Giá đấu giá
+              <TrendingUp className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold text-foreground">
+                Pricing Details
               </h3>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">
-                  Giá hiện tại:
+                <span className="text-sm font-medium text-muted-foreground">
+                  Current Price:
                 </span>
-                <span className="text-2xl font-bold text-blue-600">
-                  {products?.current_price?.toLocaleString()} VNĐ
+                <span className="text-2xl font-bold text-accent">
+                  {products?.current_price?.toLocaleString()} VND
                 </span>
               </div>
               {products?.buy_now_price && (
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <span className="text-sm font-medium text-gray-600">
-                    Giá mua ngay:
+                <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Buy Now Price:
                   </span>
-                  <span className="text-lg font-bold text-rose-600">
-                    {products.buy_now_price?.toLocaleString()} VNĐ
+                  <span className="text-lg font-bold text-rose-500">
+                    {products.buy_now_price?.toLocaleString()} VND
                   </span>
                 </div>
               )}
@@ -288,36 +270,36 @@ function DetailProductPage() {
           </div>
 
           {/* Auction Timing */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+          <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-blue-600" />
-              <h4 className="text-lg font-semibold text-gray-900">
-                Thời gian đấu giá
+              <Clock className="w-5 h-5 text-accent" />
+              <h4 className="text-lg font-semibold text-foreground">
+                Auction Schedule
               </h4>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Calendar className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <Calendar className="w-5 h-5 text-emerald-500" />
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 mb-1">Bắt đầu</p>
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-xs text-muted-foreground mb-1">Start Time</p>
+                  <p className="text-sm font-semibold text-foreground">
                     {formattedStartTime}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
-                <Clock className="w-5 h-5 text-red-600" />
+              <div className="flex items-center gap-3 p-3 bg-red-500/10 rounded-lg">
+                <Clock className="w-5 h-5 text-red-500" />
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 mb-1">Còn lại</p>
-                  {<p className="text-lg font-bold text-red-600">{timeLeft ?? "Waiting..."}</p>}
+                  <p className="text-xs text-muted-foreground mb-1">Time Left</p>
+                  <p className="text-lg font-bold text-red-500">{timeLeft ?? "Waiting..."}</p>
                 </div>
               </div>
               {products?.auto_extended && (
-                <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg border border-accent/20">
                   <div className="flex items-center gap-1.5 flex-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <p className="text-xs font-medium text-blue-700">
-                      Tự động gia hạn
+                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                    <p className="text-xs font-medium text-accent">
+                      Auto Extended Enable
                     </p>
                   </div>
                 </div>
@@ -326,10 +308,10 @@ function DetailProductPage() {
           </div>
 
           {/* Seller Info */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+          <div className="bg-card rounded-lg border border-border p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-indigo-600" />
-              <h4 className="text-lg font-semibold text-gray-900">Người bán</h4>
+              <User className="w-5 h-5 text-indigo-500" />
+              <h4 className="text-lg font-semibold text-foreground">Seller</h4>
             </div>
             <Link
               to={`/profile/${products?.seller_username}_${products?.seller_id}`}
@@ -343,16 +325,16 @@ function DetailProductPage() {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-lg">
                       {products?.seller_username?.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card"></div>
               </div>
               <div className="flex-1">
-                <h5 className="text-base font-semibold text-gray-900 mb-1">
+                <h5 className="text-base font-semibold text-foreground mb-1">
                   {products?.seller_username}
                 </h5>
                 <div className="flex items-center gap-2">
@@ -363,12 +345,12 @@ function DetailProductPage() {
                         className={`w-3 h-3 ${
                           i < Math.floor(products?.seller_rating || 0)
                             ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300"
+                            : "text-muted-foreground/30"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-muted-foreground">
                     {products?.seller_rating?.toFixed(1)}
                   </span>
                 </div>
@@ -378,24 +360,20 @@ function DetailProductPage() {
 
           {/* Highest Bidder Info */}
           {products?.price_owner_username && (
-            <div className={`bg-white rounded-lg border p-5 shadow-sm ${
+            <div className={`bg-card rounded-lg border p-5 shadow-sm ${
               products.price_owner_id === auth?.user_id 
-                ? 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50' 
-                : 'border-gray-200'
+                ? 'border-yellow-500/50 bg-gradient-to-br from-yellow-500/10 to-amber-500/5' 
+                : 'border-border'
             }`}>
               <div className="flex items-center gap-2 mb-4">
-                <Award className={`w-5 h-5 ${
-                  products.price_owner_id === auth?.user_id 
-                    ? 'text-amber-600' 
-                    : 'text-amber-600'
-                }`} />
-                <h4 className="text-lg font-semibold text-gray-900">
-                  Người dẫn đầu
+                <Award className="w-5 h-5 text-yellow-500" />
+                <h4 className="text-lg font-semibold text-foreground">
+                  Highest Bidder
                 </h4>
                 {products.price_owner_id === auth?.user_id && (
-                  <div className="ml-auto flex items-center gap-2 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg animate-pulse">
+                  <div className="ml-auto flex items-center gap-2 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
                     <Award className="w-4 h-4" />
-                    <span>Bạn đang dẫn đầu!</span>
+                    <span>You are leading!</span>
                   </div>
                 )}
               </div>
@@ -428,12 +406,12 @@ function DetailProductPage() {
                       </span>
                     </div>
                   )}
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <Award className="w-3 h-3 text-white" />
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full border-2 border-card flex items-center justify-center">
+                    <Award className="w-3 h-3 text-black" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h5 className="text-base font-semibold text-gray-900 mb-1">
+                  <h5 className="text-base font-semibold text-foreground mb-1">
                     {products.price_owner_id === auth?.user_id 
                       ? products.price_owner_username 
                       : maskName(products.price_owner_username)}
@@ -446,28 +424,28 @@ function DetailProductPage() {
                           className={`w-3 h-3 ${
                             i < Math.floor(products?.price_owner_rating || 0)
                               ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300"
+                              : "text-muted-foreground/30"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-gray-600">
+                    <span className="text-xs text-muted-foreground">
                       {products?.price_owner_rating?.toFixed(1)}
                     </span>
                   </div>
                 </div>
               </div>
               {products.price_owner_id === auth?.user_id && (
-                <div className="mt-3 p-3 bg-amber-100 border border-amber-300 rounded-lg">
-                  <p className="text-sm text-amber-900 font-medium text-center flex items-center justify-center gap-2">
+                <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                  <p className="text-sm text-yellow-500 font-semibold text-center flex items-center justify-center gap-2">
                     <Award className="w-4 h-4" />
-                    Bạn đang giữ giá cao nhất hiện tại
+                    You currently hold the highest bid
                   </p>
                 </div>
               )}
               {products.price_owner_id === auth?.user_id &&
                 new Date(products.end_time).getTime() < Date.now() && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <button
                       onClick={() => {
                         navigator(
@@ -476,23 +454,23 @@ function DetailProductPage() {
                       }}
                       className="cursor-pointer w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                     >
-                      Xác nhận đơn hàng
+                      Confirm Order
                     </button>
                   </div>
                 )}
               {products.seller_id === auth?.user_id &&
                 new Date(products.end_time).getTime() < Date.now() &&
                 products.price_owner_id && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <button
                       onClick={() => {
                         navigator(
                           `/seller-order?product_id=${products.product_id}`
                         );
                       }}
-                      className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                      className="cursor-pointer w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                     >
-                      Xem hóa đơn
+                      View Invoice
                     </button>
                   </div>
                 )}
@@ -503,7 +481,7 @@ function DetailProductPage() {
 
       {/* Bid Section - Full Width */}
       {!isExpired && (
-        <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm animate__animated animate__fadeIn">
+        <div className="mt-8 bg-card border border-border rounded-lg shadow-sm animate__animated animate__fadeIn">
           <PlayBidSection
             product_id={products?.product_id}
             current_price={products?.current_price}
@@ -521,7 +499,7 @@ function DetailProductPage() {
       )}
 
       {/* Tab Section */}
-      <TabSection products={products} isSeller={isSeller} isExpired = {isExpired}/>
+      <TabSection products={products} isSeller={isSeller} isExpired={isExpired} />
 
       {/* Related Products */}
       <RelatedProductsSection
@@ -539,7 +517,6 @@ function DetailProductPage() {
           setImageModalOpen={setImageModalOpen}
         />
       )}
-      
     </div>
   );
 }
@@ -560,45 +537,40 @@ function TabSection({
 
   return (
     <>
-      {/* Tabs Section */}
       <div className="mt-8">
-        {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 mb-6">
+        <div className="flex border-b border-border mb-6">
           <button
             onClick={() => setActiveTab("description")}
             className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
               activeTab === "description"
-                ? "border-b-2 b order-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-accent text-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Mô tả sản phẩm
+            Description
           </button>
-          {
-            <button
-              onClick={() => setActiveTab("bidHistory")}
-              className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
-                activeTab === "bidHistory"
-                  ? "border-b-2 border-blue-500 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Lịch sử đấu giá
-            </button>
-          }
+          <button
+            onClick={() => setActiveTab("bidHistory")}
+            className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
+              activeTab === "bidHistory"
+                ? "border-b-2 border-accent text-accent"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Bid History
+          </button>
           <button
             onClick={() => setActiveTab("qa")}
             className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
               activeTab === "qa"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-accent text-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Hỏi đáp
+            Q&A
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="min-h-fit pb-20">
           {activeTab === "description" && products?.description && (
             <ProductDescriptionSection
@@ -608,12 +580,12 @@ function TabSection({
             />
           )}
           {activeTab === "bidHistory" && authUser && (
-            <div className="bg-white py-2 px-2 rounded-lg">
-              <BidHistorySection product={products} isSeller={isSeller} isExpired = {isExpired}/>
+            <div className="bg-card py-2 px-2 rounded-lg">
+              <BidHistorySection product={products} isSeller={isSeller} isExpired={isExpired} />
             </div>
           )}
           {activeTab === "qa" && (
-            <div className="bg-white py-2 px-2 rounded-lg">
+            <div className="bg-card py-2 px-2 rounded-lg">
               <QASection
                 seller_id={products?.seller_id}
                 product_id={products?.product_id}
@@ -627,3 +599,4 @@ function TabSection({
 }
 
 export default DetailProductPage;
+

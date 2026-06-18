@@ -18,14 +18,14 @@ const ConfirmDeleteButton: React.FC<ConfirmDeleteButtonProps> = ({
 }) => {
   const handleClick = () => {
     Swal.fire({
-      title: "Bạn có chắc muốn xóa bản ghi này?",
-      text: "Hành động này sẽ không được khôi phục được",
+      title: "Are you sure you want to delete this item?",
+      text: "This action cannot be undone.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Vẫn xóa",
-      cancelButtonText: "Không xóa",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
         fetch(apiUrl, {
@@ -40,8 +40,8 @@ const ConfirmDeleteButton: React.FC<ConfirmDeleteButtonProps> = ({
               onError(data.message);
             }
           })
-          .catch((error) => {
-            onError("Có lỗi xảy ra khi xóa.");
+          .catch(() => {
+            onError("An error occurred during deletion.");
           });
       }
     });
