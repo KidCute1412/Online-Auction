@@ -3,4 +3,5 @@ Backend/node_modules/
 Backend/.env
 Python/.venv/
 data/.venv
+data/.env
 .vscode/

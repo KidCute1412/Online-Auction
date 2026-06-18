@@ -1,123 +1,22 @@
--- Auto-generated INSERT statements for categories table
-
--- Generated at: 2025-12-27 12:27:14
-
-
-
--- ============================================
-
--- PARENT CATEGORIES (3 categories mới)
-
--- ============================================
-
--- Reset sequence and truncate
+-- Reset categories table
 TRUNCATE TABLE categories RESTART IDENTITY CASCADE;
 
--- Insert parent categories with explicit IDs to make child references completely deterministic
-INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES
-(1, 'Điện Tử', NULL, 'active', FALSE, 'Danh mục Điện Tử', 'dien-tu', 'https://shop-images.imgix.net/291430_2.jpg'),
-(2, 'Thời Trang', NULL, 'active', FALSE, 'Danh mục Thời Trang', 'thoi-trang', 'https://shop-images.imgix.net/291631_2.jpg'),
-(7, 'Nội Thất & Gia Dụng', NULL, 'active', FALSE, 'Danh mục Nội Thất & Gia Dụng', 'noi-that-gia-dung', 'https://shop-images.imgix.net/291872_2.jpg'),
-(8, 'Thể Thao & Du Lịch', NULL, 'active', FALSE, 'Danh mục Thể Thao & Du Lịch', 'the-thao-du-lich', 'https://shop-images.imgix.net/291300_2.jpg'),
-(9, 'Sách & Văn Phòng Phẩm', NULL, 'active', FALSE, 'Danh mục Sách & Văn Phòng Phẩm', 'sach-van-phong-pham', 'https://shop-images.imgix.net/291736_2.jpg');
+-- Insert parent categories
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (1, 'Thời Trang', NULL, 'active', FALSE, 'Category Thời Trang', 'thoi-trang', 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (2, 'Điện Tử', NULL, 'active', FALSE, 'Category Điện Tử', 'dien-tu', 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (3, 'Nghệ Thuật & Trang Sức', NULL, 'active', FALSE, 'Category Nghệ Thuật & Trang Sức', 'nghe-thuat-trang-suc', 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500');
 
--- Adjust the sequence so that subsequent auto-generated IDs start after the max ID (9)
+-- Insert child subcategories
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (4, 'Thời Trang Nam', 1, 'active', FALSE, 'Thời Trang Nam under Thời Trang', 'thoi-trang-nam', 'https://file.hstatic.net/1000284478/file/phong-cach-thoi-trang-nam-2024-b_26df758c91ef4fc78b185be0ff9f4cb0.jpg');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (5, 'Thời Trang Nữ', 1, 'active', FALSE, 'Thời Trang Nữ under Thời Trang', 'thoi-trang-nu', 'https://uvi.vn/wp-content/uploads/2022/03/Chan-vay-xoe-duoi-ca.jpg');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (6, 'Giày Dép', 1, 'active', FALSE, 'Giày Dép under Thời Trang', 'giay-dep', 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (7, 'Điện Thoại & Máy Tính Bảng', 2, 'active', FALSE, 'Điện Thoại & Máy Tính Bảng under Điện Tử', 'dien-thoai-may-tinh-bang', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (8, 'Laptop & PC', 2, 'active', FALSE, 'Laptop & PC under Điện Tử', 'laptop-pc', 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (9, 'Phụ Kiện Số', 2, 'active', FALSE, 'Phụ Kiện Số under Điện Tử', 'phu-kien-so', 'https://storage.googleapis.com/48877118-7272-4a4d-b302-0465d8aa4548/f646d3c1-f6c3-4227-92ba-bd451d0401ea/8a9fa536-61df-4faa-9217-0033791bf9a5.jpg');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (10, 'Máy Ảnh & Quay Phim', 2, 'active', FALSE, 'Máy Ảnh & Quay Phim under Điện Tử', 'may-anh-quay-phim', 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (11, 'Tranh Ảnh', 3, 'active', FALSE, 'Tranh Ảnh under Nghệ Thuật & Trang Sức', 'tranh-anh', 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (12, 'Tượng & Điêu Khắc', 3, 'active', FALSE, 'Tượng & Điêu Khắc under Nghệ Thuật & Trang Sức', 'tuong-dieu-khac', 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500');
+INSERT INTO categories (id, name, parent_id, status, deleted, description, slug, cat_image) VALUES (13, 'Trang Sức', 3, 'active', FALSE, 'Trang Sức under Nghệ Thuật & Trang Sức', 'trang-suc', 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500');
+
+-- Adjust ID sequence
 SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories));
-
-
-
--- ============================================
-
--- CHILD CATEGORIES (25 categories con)
-
--- ============================================
-
-
--- Child categories của 'Điện Tử' (parent_id = 1)
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Điện Thoại', 1, 'active', FALSE, 'Điện Thoại thuộc Điện Tử', 'ien-thoai', 'https://shop-images.imgix.net/291430_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Laptop', 1, 'active', FALSE, 'Laptop thuộc Điện Tử', 'laptop', 'https://shop-images.imgix.net/291742_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Máy Tính Bảng', 1, 'active', FALSE, 'Máy Tính Bảng thuộc Điện Tử', 'may-tinh-bang', 'https://shop-images.imgix.net/291300_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Phụ Kiện Điện Tử', 1, 'active', FALSE, 'Phụ Kiện Điện Tử thuộc Điện Tử', 'phu-kien-ien-tu', 'https://shop-images.imgix.net/291336_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Thiết Bị Âm Thanh', 1, 'active', FALSE, 'Thiết Bị Âm Thanh thuộc Điện Tử', 'thiet-bi-am-thanh', 'https://shop-images.imgix.net/291333_2.jpg');
-
-
--- Child categories của 'Thời Trang' (parent_id = 2)
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Áo Nam', 2, 'active', FALSE, 'Áo Nam thuộc Thời Trang', 'ao-nam', 'https://shop-images.imgix.net/291631_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Áo Nữ', 2, 'active', FALSE, 'Áo Nữ thuộc Thời Trang', 'ao-nu', 'https://shop-images.imgix.net/291662_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Quần Jeans', 2, 'active', FALSE, 'Quần Jeans thuộc Thời Trang', 'quan-jeans', 'https://shop-images.imgix.net/291703_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Giày Dép', 2, 'active', FALSE, 'Giày Dép thuộc Thời Trang', 'giay-dep', 'https://shop-images.imgix.net/291299_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Phụ Kiện Thời Trang', 2, 'active', FALSE, 'Phụ Kiện Thời Trang thuộc Thời Trang', 'phu-kien-thoi-trang', 'https://shop-images.imgix.net/291704_2.jpg');
-
-
--- Child categories của 'Nội Thất & Gia Dụng' (parent_id = 7)
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Bàn Ghế', 7, 'active', FALSE, 'Bàn Ghế thuộc Nội Thất & Gia Dụng', 'ban-ghe', 'https://shop-images.imgix.net/291858_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Sofa', 7, 'active', FALSE, 'Sofa thuộc Nội Thất & Gia Dụng', 'sofa', 'https://shop-images.imgix.net/291351_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Đồ Dùng Nhà Bếp', 7, 'active', FALSE, 'Đồ Dùng Nhà Bếp thuộc Nội Thất & Gia Dụng', 'o-dung-nha-bep', 'https://shop-images.imgix.net/291704_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Đèn Trang Trí', 7, 'active', FALSE, 'Đèn Trang Trí thuộc Nội Thất & Gia Dụng', 'en-trang-tri', 'https://shop-images.imgix.net/291656_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Chăn Ga Gối', 7, 'active', FALSE, 'Chăn Ga Gối thuộc Nội Thất & Gia Dụng', 'chan-ga-goi', 'https://shop-images.imgix.net/291669_2.jpg');
-
-
--- Child categories của 'Thể Thao & Du Lịch' (parent_id = 8)
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Dụng Cụ Tập Gym', 8, 'active', FALSE, 'Dụng Cụ Tập Gym thuộc Thể Thao & Du Lịch', 'dung-cu-tap-gym', 'https://shop-images.imgix.net/291859_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Xe Đạp', 8, 'active', FALSE, 'Xe Đạp thuộc Thể Thao & Du Lịch', 'xe-ap', 'https://shop-images.imgix.net/291300_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Giày Thể Thao', 8, 'active', FALSE, 'Giày Thể Thao thuộc Thể Thao & Du Lịch', 'giay-the-thao', 'https://shop-images.imgix.net/291847_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Phụ Kiện Du Lịch', 8, 'active', FALSE, 'Phụ Kiện Du Lịch thuộc Thể Thao & Du Lịch', 'phu-kien-du-lich', 'https://shop-images.imgix.net/291443_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Dụng Cụ Camping', 8, 'active', FALSE, 'Dụng Cụ Camping thuộc Thể Thao & Du Lịch', 'dung-cu-camping', 'https://shop-images.imgix.net/291697_2.jpg');
-
-
--- Child categories của 'Sách & Văn Phòng Phẩm' (parent_id = 9)
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Sách Văn Học', 9, 'active', FALSE, 'Sách Văn Học thuộc Sách & Văn Phòng Phẩm', 'sach-van-hoc', 'https://shop-images.imgix.net/291625_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Sách Kỹ Năng', 9, 'active', FALSE, 'Sách Kỹ Năng thuộc Sách & Văn Phòng Phẩm', 'sach-ky-nang', 'https://shop-images.imgix.net/291695_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Văn Phòng Phẩm', 9, 'active', FALSE, 'Văn Phòng Phẩm thuộc Sách & Văn Phòng Phẩm', 'van-phong-pham', 'https://shop-images.imgix.net/291626_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Dụng Cụ Học Tập', 9, 'active', FALSE, 'Dụng Cụ Học Tập thuộc Sách & Văn Phòng Phẩm', 'dung-cu-hoc-tap', 'https://shop-images.imgix.net/291535_2.jpg');
-
-INSERT INTO categories (name, parent_id, status, deleted, description, slug, cat_image)
-VALUES ('Sổ Tay', 9, 'active', FALSE, 'Sổ Tay thuộc Sách & Văn Phòng Phẩm', 'so-tay', 'https://shop-images.imgix.net/291704_2.jpg');
