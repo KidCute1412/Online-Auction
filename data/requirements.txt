@@ -2,3 +2,5 @@ requests
 psycopg2-binary
 python-dotenv
 ipykernel
+bcrypt
+faker

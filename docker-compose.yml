@@ -15,7 +15,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./data/database.sql:/docker-entrypoint-initdb.d/01-database.sql
       - ./data/category/category.insert.sql:/docker-entrypoint-initdb.d/02-category.insert.sql
-      - ./data/product/tikiAPI/product.insert.sql:/docker-entrypoint-initdb.d/03-product.insert.sql
+      - ./data/user/user.insert.sql:/docker-entrypoint-initdb.d/03-user.insert.sql
+      - ./data/product/tikiAPI/product.insert.sql:/docker-entrypoint-initdb.d/04-product.insert.sql
 
   # Local Redis cache and rate limiting service
   redis:
