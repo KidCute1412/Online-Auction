@@ -3,10 +3,10 @@ const route = express.Router();
 
 import homeRoute from "./home.route.ts";
 import accountRoutes from "@/modules/accounts/accounts.routes.ts";
-import categoriesRoutes from "./categories.route.ts";
+import { clientCategoryRouter as categoriesRoutes } from "@/modules/categories/categories.routes.ts";
 import productsRoutes from "./products.route.ts";
 import meRoutes from "./me.route.ts";
-import bidRoutes from "./bid.route.ts";
+import bidRoutes from "@/modules/bids/bids.routes.ts";
 import userRotes from "./user.route.ts";
 import profileRoutes from "./profile.route.ts";
 import settingRoutes from "./setting.route.ts";

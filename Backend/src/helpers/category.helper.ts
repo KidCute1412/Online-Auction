@@ -1,4 +1,4 @@
-interface Category {
+export interface Category {
   id: number;
   name: string;
   parent_id: number | null;
@@ -6,7 +6,7 @@ interface Category {
   cat_image?: string;
 }
 
-interface CategoryNode {
+export interface CategoryNode {
   id: number;
   name: string;
   slug: string;
