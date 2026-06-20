@@ -10,7 +10,8 @@
     /* ================== Paths ================== */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@modules/*": ["src/modules/*"]
     },
     "rootDir": "./src",
     "outDir": "./dist",

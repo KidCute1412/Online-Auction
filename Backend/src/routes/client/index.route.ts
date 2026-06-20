@@ -2,7 +2,7 @@ import express from "express";
 const route = express.Router();
 
 import homeRoute from "./home.route.ts";
-import accountRoutes from "./account.route.ts";
+import accountRoutes from "@/modules/accounts/accounts.routes.ts";
 import categoriesRoutes from "./categories.route.ts";
 import productsRoutes from "./products.route.ts";
 import meRoutes from "./me.route.ts";
