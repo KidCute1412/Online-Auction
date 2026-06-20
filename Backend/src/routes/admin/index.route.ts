@@ -7,28 +7,28 @@ import * as authMiddleware from "../../middlewares/auth.middleware.ts";
 const route = express.Router();
 
 route.use(
-  "/api/category",
+  "/categories",
   authMiddleware.verifyToken,
   authMiddleware.verifyRole("admin"),
   categoryRoute
 );
 
 route.use(
-  "/api/application-form",
+  "/seller-registrations",
   authMiddleware.verifyToken,
   authMiddleware.verifyRole("admin"),
   applicationFormRoute
 );
 
 route.use(
-  "/api/user",
+  "/users",
   authMiddleware.verifyToken,
   authMiddleware.verifyRole("admin"),
   userRoute
 );
 
 route.use(
-  "/api/product",
+  "/products",
   authMiddleware.verifyToken,
   authMiddleware.verifyRole("admin"),
   productRoute

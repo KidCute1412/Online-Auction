@@ -8,20 +8,21 @@ export const adminUserRouter = Router();
 export const adminApplicationRouter = Router();
 
 // Client routes
-clientUserRouter.post("/register-seller", verifyToken, clientController.registerSellerRequest);
-clientUserRouter.post("/rate", verifyToken, clientController.rateUser);
-clientUserRouter.get("/rating-count", clientController.getUserRatingCount);
-clientUserRouter.get("/rating-history", clientController.getUserRatingHistory);
+clientUserRouter.post("/seller-registrations", verifyToken, clientController.registerSellerRequest);
+clientUserRouter.post("/ratings", verifyToken, clientController.rateUser);
+clientUserRouter.get("/ratings/count", clientController.getUserRatingCount);
+clientUserRouter.get("/ratings", clientController.getUserRatingHistory);
 
 // Admin user routes
-adminUserRouter.post("/list", adminController.list);
-adminUserRouter.post("/number-of-users", adminController.calNumberOfUsers);
-adminUserRouter.get("/detail/:user_id", adminController.detail);
-adminUserRouter.patch("/edit/:user_id", adminController.editRole);
-adminUserRouter.patch("/reset-password/:user_id", adminController.resetPassword);
+adminUserRouter.get("/", adminController.list);
+adminUserRouter.get("/count", adminController.calNumberOfUsers);
+adminUserRouter.get("/:id", adminController.detail);
+adminUserRouter.patch("/:id/role", adminController.editRole);
+adminUserRouter.patch("/:id/password", adminController.resetPassword);
 
-// Admin application routes
-adminApplicationRouter.get("/list", adminController.applications);
-adminApplicationRouter.get("/detail/:id", adminController.applicationDetail);
-adminApplicationRouter.patch("/edit/:id", adminController.setStatus);
-adminApplicationRouter.post("/number-of-applications", adminController.calTotalApplications);
+// Admin seller registration (application) routes
+adminApplicationRouter.get("/", adminController.applications);
+adminApplicationRouter.get("/count", adminController.calTotalApplications);
+adminApplicationRouter.get("/:id", adminController.applicationDetail);
+adminApplicationRouter.patch("/:id", adminController.setStatus);
+adminApplicationRouter.patch("/:id/status", adminController.setStatus);

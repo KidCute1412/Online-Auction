@@ -4,92 +4,89 @@ const ADMIN_PATH = import.meta.env.VITE_PATH_ADMIN;
 
 export const userService = {
   registerSeller: async (body: any): Promise<any> => {
-    return apiRequest(`/api/user/register-seller`, {
+    return apiRequest(`/users/seller-registrations`, {
       method: "POST",
       body,
     });
   },
 
   rateUser: async (body: any): Promise<any> => {
-    return apiRequest(`/api/user/rate`, {
+    return apiRequest(`/users/ratings`, {
       method: "POST",
       body,
     });
   },
 
   getRatingCount: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/api/user/rating-count`, { params });
+    return apiRequest(`/users/ratings/count`, { params });
   },
 
   getRatingHistory: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/api/user/rating-history`, { params });
+    return apiRequest(`/users/ratings`, { params });
   },
 
-  adminList: async (params?: Record<string, any>, body?: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/user/list`, {
-      method: "POST",
+  adminList: async (params?: Record<string, any>): Promise<any> => {
+    return apiRequest(`/${ADMIN_PATH}/users`, {
+      method: "GET",
       params,
-      body,
     });
   },
 
   adminGetTotal: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/user/number-of-users`, {
-      method: "POST",
+    return apiRequest(`/${ADMIN_PATH}/users/count`, {
+      method: "GET",
       params,
     });
   },
 
   adminDetail: async (id: number): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/user/detail/${id}`);
+    return apiRequest(`/${ADMIN_PATH}/users/${id}`);
   },
 
   adminEditRole: async (id: number, body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/user/edit-role/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/users/${id}/role`, {
       method: "PATCH",
       body,
     });
   },
 
   adminResetPassword: async (id: number, body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/user/reset-password/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/users/${id}/password`, {
       method: "PATCH",
       body,
     });
   },
 
   adminListApplications: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/list`, { params });
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations`, { params });
   },
 
   adminGetApplicationDetail: async (id: number): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/detail/${id}`);
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations/${id}`);
   },
 
   adminEditApplication: async (id: number, body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/edit/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations/${id}`, {
       method: "PATCH",
       body,
     });
   },
 
   adminGetApplicationsTotal: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/number-of-applications`, {
-      method: "POST",
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations/count`, {
+      method: "GET",
       params,
     });
   },
 
   adminSetApplicationStatus: async (id: number, body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/set-status/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations/${id}/status`, {
       method: "PATCH",
       body,
     });
   },
 
   adminGetFormsTotal: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/application-form/number-of-forms`, {
-      params,
-    });
+    return apiRequest(`/${ADMIN_PATH}/seller-registrations/count`, { params });
   },
 };
