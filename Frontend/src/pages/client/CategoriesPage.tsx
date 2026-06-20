@@ -6,23 +6,16 @@ import { slugify } from "@/utils/make_slug";
 import Loading from "@/components/common/Loading";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 
-const getLevelCategoriesList = async (level: number, catId?: number, catSlug?: string) => {
-  let linkFetch = "";
-  if (level === 1) {
-    linkFetch = `${import.meta.env.VITE_API_URL}/api/categories/level1`;
-  } else if (level === 2) {
-    linkFetch = `${import.meta.env.VITE_API_URL}/api/categories/level2?cat_id=${catId}&cat_slug=${catSlug}`;
-  }
-  try {
-    const response = await fetch(linkFetch);
-    const data = await response.json();
+import { categoryService } from "@/services/category.service.ts";
 
-    if (!response.ok) {
-      console.log("Error: ", data.message);
-      toast.error("An error occurred");
-      return null;
+const getLevelCategoriesList = async (level: number, catId?: number, catSlug?: string) => {
+  try {
+    if (level === 1) {
+      return await categoryService.getLevel1();
+    } else if (level === 2) {
+      return await categoryService.getLevel2({ cat_id: catId, cat_slug: catSlug });
     }
-    return data;
+    return null;
   } catch (e) {
     console.log("Error connecting backend: ", e);
     toast.error("Connection error");

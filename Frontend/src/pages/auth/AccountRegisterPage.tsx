@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { UserPlus, User, Mail, MapPin, Lock } from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { accountService } from "@/services/account.service.ts";
 
 function AccountRegister() {
   const navigate = useNavigate();
@@ -14,13 +15,7 @@ function AccountRegister() {
     const { credential } = credentialResponse;
     const dataFinal = { credential: credential, rememberMe: false };
 
-    fetch(`${import.meta.env.VITE_API_URL}/accounts/google-login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataFinal),
-      credentials: "include",
-    })
-      .then((res) => res.json())
+    accountService.googleLogin(dataFinal as any)
       .then((data) => {
         if (data.code === "error") {
           toast.error(data.message);
@@ -37,46 +32,30 @@ function AccountRegister() {
   };
 
   useEffect(() => {
-    const validation = new JustValidate("#registerForm");
-    validation
+    const validate = new JustValidate("#registerForm");
+    validate
       .addField(
         "#full_name",
-        [
-          { rule: "required", errorMessage: "Please enter your full name!" },
-          { rule: "minLength", value: 5, errorMessage: "Full name must be at least 5 characters!" },
-          { rule: "maxLength", value: 50, errorMessage: "Full name cannot exceed 50 characters!" },
-        ],
-        { errorContainer: "#full_nameError" }
+        [{ rule: "required", errorMessage: "Please enter your name!" }],
+        { errorContainer: "#fullNameError" }
       )
       .addField(
         "#email",
         [
           { rule: "required", errorMessage: "Please enter your email!" },
-          { rule: "email", errorMessage: "Invalid email format!" },
+          { rule: "email", errorMessage: "Invalid email address!" },
         ],
         { errorContainer: "#emailError" }
+      )
+      .addField(
+        "#password",
+        [{ rule: "required", errorMessage: "Please enter your password!" }],
+        { errorContainer: "#passwordError" }
       )
       .addField(
         "#address",
         [{ rule: "required", errorMessage: "Please enter your address!" }],
         { errorContainer: "#addressError" }
-      )
-      .addField(
-        "#password",
-        [
-          { rule: "required", errorMessage: "Please enter your password!" },
-          { validator: (value: string) => value.length >= 8, errorMessage: "Password must be at least 8 characters" },
-          { validator: (value: string) => /[A-Z]/.test(value), errorMessage: "Password must contain an uppercase letter!" },
-          { validator: (value: string) => /[a-z]/.test(value), errorMessage: "Password must contain a lowercase letter!" },
-          { validator: (value: string) => /\d/.test(value), errorMessage: "Password must contain a number!" },
-          { validator: (value: string) => /[@$!%*?&]/.test(value), errorMessage: "Password must contain a special character!" },
-        ],
-        { errorContainer: "#passwordError" }
-      )
-      .addField(
-        "#agree",
-        [{ rule: "required", errorMessage: "Please agree to the terms of service!" }],
-        { errorContainer: "#agreeError" }
       )
       .onSuccess((event: any) => {
         const full_name = event.target.full_name.value;
@@ -91,13 +70,7 @@ function AccountRegister() {
           address: address,
         };
 
-        fetch(`${import.meta.env.VITE_API_URL}/accounts/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(finalData),
-        })
-          .then((res) => res.json())
+        accountService.register(finalData)
           .then((data) => {
             if (data.code === "error") {
               toast.error(data.message);

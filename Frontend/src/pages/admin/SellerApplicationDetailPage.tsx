@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { formatToVN } from "@/utils/format_time";
 import Loading from "@/components/common/Loading";
+import { userService } from "@/services/user.service";
 
 interface ApplicationInfo {
   full_name: string;
@@ -25,15 +26,8 @@ export default function SellerApplicationDetailPage() {
     setHasError(false);
     
     // Fetch application details by form ID
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/application-form/detail/${id}`,
-      {
-        credentials: "include",
-      }
-    )
-      .then((res) => res.json())
+    userService
+      .adminGetApplicationDetail(Number(id))
       .then((data) => {
         if (data.code === "success") {
           const app = data.applicationInfo;
@@ -61,20 +55,8 @@ export default function SellerApplicationDetailPage() {
 
   const handleConfirmApplication = (status: string) => {
     // Send request to set application status
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/application-form/set-status/${id}`,
-      {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      }
-    )
-      .then((res) => res.json())
+    userService
+      .adminSetApplicationStatus(Number(id), { status })
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message);

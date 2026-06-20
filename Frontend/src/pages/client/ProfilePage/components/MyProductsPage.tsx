@@ -7,6 +7,7 @@ import Loading from "@/components/common/Loading";
 import { Heart, Package, ShoppingCart, Trophy, TrendingUp, Archive } from "lucide-react";
 import LoginRequest from "@/components/common/LoginRequest";
 import { useAuth } from "@/routes/ProtectedRouter";
+import { productService } from "@/services/product.service.ts";
 
 type Products = {
   product_id: number;
@@ -106,17 +107,11 @@ export default function MyProductsPage() {
         setLoading(true);
         const page = searchParams.get("page") ? parseInt(searchParams.get("page") as string) : 1;
         const type = searchParams.get("type") || "my-favorites";
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/my-products?type=${type}&page=${page}`,
-          { credentials: "include" }
-        );
-        const data = await response.json();
+        const response = await productService.getPageList({ type, page });
+        const data = response;
 
-        if (!response.ok) {
+        if (!data || data.status === "error") {
           setLoading(false);
-          if (response.status === 403) {
-            navigate(-1);
-          }
           return;
         }
         setLoading(false);

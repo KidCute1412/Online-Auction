@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import ProductCard from "@/components/common/ProductCard";
 import PaginationComponent from "@/components/common/Pagination";
+import { productService } from "@/services/product.service.ts";
 
 type Products = {
   product_id: number;
@@ -38,17 +39,7 @@ export default function ListSearchProductPage() {
     setCurrentPage(Number(searchParams.get("page")) || 1);
     setLoading(true);
     
-    // Fetch products based on search query parameters
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/products/search?query=${searchParams.get("query")}&page=${currentPage}`
-    )
-      .then((response) => {
-        if (!response.ok) {
-          toast.error("Error retrieving products");
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
+    productService.search({ query: searchParams.get("query"), page: currentPage })
       .then((data) => {
         setProducts(data.data.products);
         setNumberOfPages(data.data.total_pages);

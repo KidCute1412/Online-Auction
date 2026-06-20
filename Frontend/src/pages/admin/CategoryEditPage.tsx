@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom";
+import { categoryService } from "@/services/category.service";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 import JustValidate from "just-validate";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -70,19 +71,9 @@ export default function CategoryEdit() {
           slug: slug,
         };
 
-        // Submit patch request to update category details
-        fetch(
-          `${import.meta.env.VITE_API_URL}/${
-            import.meta.env.VITE_PATH_ADMIN
-          }/api/category/edit/${id}`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dataFinal),
-            credentials: "include",
-          }
-        )
-          .then((res) => res.json())
+        // Submit update request for category
+        categoryService
+          .update(Number(id), dataFinal)
           .then((data) => {
             setIsLoading(false);
             if (data.code === "error") {

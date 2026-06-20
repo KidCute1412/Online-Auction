@@ -4,6 +4,7 @@ import { ThumbsUp, ThumbsDown, X, Calendar, Eye } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
 import { Link } from "react-router-dom";
+import { userService } from "@/services/user.service.ts";
 
 interface RatingItem {
   rating_id: number;
@@ -44,10 +45,7 @@ export default function RatingHistoryPage() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/user/rate/count?user_id=${user_id}&username=${username}`, {
-      credentials: "include",
-    })
-      .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch stats"))
+    userService.getRatingCount({ user_id, username })
       .then(data => {
         setRatingStats(data.data || { rating_count: 0, positive_rating_count: 0 });
       })
@@ -60,15 +58,7 @@ export default function RatingHistoryPage() {
     if (!username || !user_id) return;
     setIsLoading(true);
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/user/rate/history?user_id=${user_id}&username=${username}&page=${currentPage}&limit=${itemsPerPage}`, {
-      credentials: "include",
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch ratings");
-        }
-        return res.json();
-      })
+    userService.getRatingHistory({ user_id, username, page: currentPage, limit: itemsPerPage })
       .then(data => {
         setRatings(data.data || []);
         setTotalPages(Math.ceil((data.data[0]?.total_count || 0) / itemsPerPage));

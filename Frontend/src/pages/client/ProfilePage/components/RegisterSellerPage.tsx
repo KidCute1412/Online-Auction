@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/routes/ProtectedRouter";
 import justValidate from "just-validate";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
+import { userService } from "@/services/user.service.ts";
 
 interface UserInfo {
   username: string;
@@ -61,24 +62,9 @@ export default function RegisterSellerPage() {
         e.preventDefault();
         setIsSubmitting(true);
 
-        fetch(`${import.meta.env.VITE_API_URL}/api/user/register-seller`, {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            reason: e.target.reason.value,
-          }),
+        userService.registerSeller({
+          reason: e.target.reason.value,
         })
-          .then((res) => {
-            if (!res.ok) {
-              return res.json().then((data) => {
-                throw new Error(data.message || "An error occurred");
-              });
-            }
-            return res.json();
-          })
           .then((data) => {
             toast.success(data.message || "Request submitted successfully");
             navigate(-1);

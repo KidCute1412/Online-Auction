@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Star, ThumbsUp, ThumbsDown, Send } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import { toast } from "sonner";
+import { profileService } from "@/services/profile.service.ts";
+import { userService } from "@/services/user.service.ts";
 
 interface UserToRate {
   username: string;
@@ -29,21 +31,7 @@ export default function RateUserPage() {
       return;
     }
 
-    // Fetch user details to evaluate
-    fetch(
-      `${
-        import.meta.env.VITE_API_URL
-      }/api/profile/detail?username=${username}&user_id=${user_id}`,
-      {
-        credentials: "include",
-      }
-    )
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch user profile");
-        }
-        return res.json();
-      })
+    profileService.getProfileDetail({ username, user_id })
       .then((data) => {
         setUserToRate(data.data);
       })
@@ -76,23 +64,11 @@ export default function RateUserPage() {
         return;
       }
       
-      // Submit user score evaluate request
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/rate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          user_id: parseInt(user_id),
-          score,
-          comment: comment.trim(),
-        }),
+      await userService.rateUser({
+        user_id: parseInt(user_id),
+        score,
+        comment: comment.trim(),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit rating");
-      }
 
       navigate(-1);
     } catch (error) {

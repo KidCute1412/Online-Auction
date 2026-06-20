@@ -13,6 +13,7 @@ import {
   Camera
 } from "lucide-react";
 import { toast } from "sonner";
+import { profileService } from "@/services/profile.service.ts";
 
 interface ProfileData {
   username: string;
@@ -107,19 +108,7 @@ export default function EditProfilePage() {
       formSubmitData.append("avatar", avatarFile);
     }
     
-    fetch(`${import.meta.env.VITE_API_URL}/api/profile/edit`, {
-      method: "PATCH",
-      credentials: "include",
-      body: formSubmitData
-    })
-      .then((res) => { 
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.message || "An error occurred");
-          });
-        }
-        return res.json();
-      })
+    profileService.editProfile(formSubmitData)
       .then((data) => {
         toast.success(data.message || "Profile updated successfully");
         setAuth(data.data);

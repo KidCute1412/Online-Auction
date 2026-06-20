@@ -9,6 +9,7 @@ import { slugify } from "@/utils/make_slug";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
+import { categoryService } from "@/services/category.service";
 
 const LIMIT = 5;
 
@@ -40,22 +41,19 @@ export default function CategoryList() {
   const fetchItems = () => {
     setIsPageLoading(true);
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/list?page=${currentPage}&limit=${LIMIT}&status=${statusFilter}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${slugify(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ deleted: false }),
-        headers: {
-          "Content-Type": "application/json",
+    categoryService
+      .list(
+        {
+          page: currentPage,
+          limit: LIMIT,
+          status: statusFilter,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: slugify(searchFromUrl),
         },
-      }
-    )
-      .then((res) => res.json())
+        { deleted: false }
+      )
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -69,24 +67,19 @@ export default function CategoryList() {
   };
 
   const fetchTotal = () => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/number-of-categories?status=${statusFilter}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${slugify(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ deleted: false }),
-        headers: {
-          "Content-Type": "application/json",
+    categoryService
+      .list(
+        {
+          status: statusFilter,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: slugify(searchFromUrl),
         },
-      }
-    )
-      .then((res) => res.json())
+        { deleted: false }
+      )
       .then((data) => {
-        const total = data.total as number;
+        const total = data.list.length;
         setTotalPages(Math.ceil(total / LIMIT));
         const newTotalPages = Math.ceil(total / LIMIT);
         if (currentPage > newTotalPages && newTotalPages > 0) {
@@ -95,6 +88,9 @@ export default function CategoryList() {
             page: "1",
           }));
         }
+      })
+      .catch(() => {
+        setTotalPages(1);
       });
   };
 
@@ -165,16 +161,8 @@ export default function CategoryList() {
   };
 
   const handleDelete = (id: number) => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/delete/${id}`,
-      {
-        credentials: "include",
-        method: "PATCH",
-      }
-    )
-      .then((res) => res.json())
+    categoryService
+      .delete(id)
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message || "Category deleted successfully!");
@@ -183,6 +171,9 @@ export default function CategoryList() {
         } else {
           toast.error(data.message || "Failed to delete category!");
         }
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to delete category!");
       });
   };
 

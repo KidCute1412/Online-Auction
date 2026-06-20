@@ -7,6 +7,7 @@ import { useFilters } from "@/hooks/useFilters";
 import { slugify } from "@/utils/make_slug";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
+import { userService } from "@/services/user.service";
 
 type UserItem = {
   user_id: number;
@@ -14,9 +15,11 @@ type UserItem = {
   avatar: string;
   email: string;
   role: string;
+  status: string;
+  created_at: string;
 };
 
-const LIMIT = 5;
+const LIMIT = 10;
 
 export default function UserListPage() {
   const navigate = useNavigate();
@@ -52,13 +55,7 @@ export default function UserListPage() {
 
   useEffect(() => {
     // Fetch user counts to set total pages
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/user/number-of-users?&search=${search}&status=${statusFilter}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    userService.adminGetTotal({ search, status: statusFilter })
       .then((data) => {
         if (data.code === "success") {
           const total = data.total as number;
@@ -78,17 +75,12 @@ export default function UserListPage() {
 
   useEffect(() => {
     // Fetch users listings
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/user/list?&search=${encodeURIComponent(
-        search
-      )}&page=${currentPage}&limit=${LIMIT}&status=${statusFilter}`,
-      {
-        credentials: "include",
-      }
-    )
-      .then((res) => res.json())
+    userService.adminList({
+      search,
+      page: currentPage,
+      limit: LIMIT,
+      status: statusFilter,
+    })
       .then((data) => {
         if (data.code === "success") {
           setItems(data.list);

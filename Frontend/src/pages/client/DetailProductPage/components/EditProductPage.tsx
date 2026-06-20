@@ -5,6 +5,7 @@ import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 import { Package, DollarSign, Calendar, Tag, Save, ArrowLeft, Check, X } from "lucide-react";
 import Loading from "@/components/common/Loading";
 import { useAuth } from "@/routes/ProtectedRouter";
+import { productService } from "@/services/product.service.ts";
 
 interface ProductDetail {
   product_id: number;
@@ -73,16 +74,10 @@ export default function EditProductPage() {
 
   const fetchProductDetail = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/detail?product_id=${product_id}&product_slug=${product_slug}`, {
-        method: "GET",
-        credentials: "include",
+      const data = await productService.getDetail({
+        product_id,
+        product_slug,
       });
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch product");
-      }
-      
       setProduct(data.data);
     } catch (error: any) {
       toast.error(error.message || "Failed to load product details");
@@ -118,23 +113,10 @@ export default function EditProductPage() {
       
       const updatedDescription = (product?.description || "") + timestampDiv + newDescription;
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/update/description`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          product_id: product_id,
-          description: updatedDescription
-        })
+      await productService.updateDescription({
+        product_id: product_id!,
+        description: updatedDescription
       });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update description");
-      }
 
       toast.success("Description updated successfully!");
       setProduct(product ? { ...product, description: updatedDescription } : null);

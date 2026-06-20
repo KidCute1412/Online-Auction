@@ -2,6 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatToVN } from "@/utils/format_time";
+import { productService } from "@/services/product.service";
 import Loading from "@/components/common/Loading";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,13 +36,8 @@ export default function ProductDetailPage() {
     if (!id) return;
 
     // Fetch product details by product ID
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/detail/${id}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    productService
+      .adminDetail(Number(id))
       .then((data) => {
         if (data.code === "success") {
           setProduct(data.product);

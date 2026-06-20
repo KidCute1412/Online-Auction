@@ -16,6 +16,8 @@ import PreviewImage from "./components/PreviewProductModal";
 import Loading from "@/components/common/Loading";
 import { slugify } from "@/utils/make_slug";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { productService } from "@/services/product.service.ts";
+import { categoryService } from "@/services/category.service.ts";
 
 type ProductType = {
   product_id: number;
@@ -70,17 +72,11 @@ function DetailProductPage() {
     async function fetchProduct() {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/api/products/detail?product_id=${product_id}&product_slug=${product_slug}`
-        );
-        const data = await response.json();
-        if (!response.ok) {
-          toast.error("Error loading product");
-        } else {
-          setProduct(data.data);
-        }
+        const data = await productService.getDetail({
+          product_id,
+          product_slug,
+        });
+        setProduct(data.data);
       } catch (e) {
         toast.error("Error connecting to server");
         console.log(e);
@@ -92,18 +88,8 @@ function DetailProductPage() {
 
   useEffect(() => {
     async function fetchBreadCrumbs() {
-      fetch(
-        `${import.meta.env.VITE_API_URL}/api/categories/cat2?cat2_id=${
-          products?.cat2_id
-        }`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            toast.error("Error fetching category details");
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
+      if (!products?.cat2_id) return;
+      categoryService.getClientCat2(products.cat2_id)
         .then((data) => {
           setBreadcrumbs([
             { label: "Home", path: "/" },

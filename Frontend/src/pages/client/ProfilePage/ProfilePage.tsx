@@ -12,18 +12,21 @@ import {
   Award,
   Edit,
 } from "lucide-react";
+import { profileService } from "@/services/profile.service.ts";
 
-interface UserProfile {
+export type UserProfile = {
+  id: number;
   username: string;
-  full_name: string;
   email: string;
-  address: string;
-  role: string;
-  date_of_birth: string;
+  full_name: string;
+  avatar_url: string;
+  role: "bidder" | "seller" | "admin";
   rating: number;
   rating_count: number;
+  address: string;
+  date_of_birth: string;
   avatar?: string;
-}
+};
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -40,15 +43,7 @@ export default function ProfilePage() {
       navigate("/");
       return;
     }
-    fetch(`${import.meta.env.VITE_API_URL}/api/profile/detail?username=${username}&user_id=${user_id}`, {
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch user profile");
-        }
-        return res.json();
-      })
+    profileService.getProfileDetail({ username, user_id })
       .then((data) => {
         setUserProfile(data.data);
         setIsOwner(data.is_owner);

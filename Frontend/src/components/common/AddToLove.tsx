@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
+import { productService } from "@/services/product.service";
 
 export default function AddToLove({ product_id, className }: { product_id: number; className?: string }) {
   const [loveCount, setLoveCount] = useState(0);
@@ -24,17 +25,17 @@ export default function AddToLove({ product_id, className }: { product_id: numbe
       "polygon(20% 0%, 100% 20%, 50% 100%)"
     ];
     
-    const newShards = Array.from({ length: 10 }).map((_, i) => {
-      const angle = (i / 10) * 360 + (Math.random() * 30 - 15);
-      const distance = 40 + Math.random() * 45;
-      const tx = Math.cos((angle * Math.PI) / 180) * distance;
-      const ty = Math.sin((angle * Math.PI) / 180) * distance;
+    const newShards = Array.from({ length: 12 }).map((_, i) => {
+      const angle = (i / 12) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+      const velocity = 80 + Math.random() * 120;
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity;
       const rotate = Math.random() * 360;
       const clipPath = clipPaths[Math.floor(Math.random() * clipPaths.length)];
       const colorClass = shardColors[Math.floor(Math.random() * shardColors.length)];
 
       return {
-        id: Math.random() + i,
+        id: i,
         colorClass,
         style: {
           "--tx": `${tx}px`,
@@ -49,29 +50,16 @@ export default function AddToLove({ product_id, className }: { product_id: numbe
     setTimeout(() => setShards([]), 750);
 
     isLovedRef.current = newLoveStatus;
-    fetch(`${import.meta.env.VITE_API_URL}/api/products/update_love_status`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        product_id: product_id,
-        love_status: newLoveStatus,
-      }),
+    productService.updateLoveStatus({
+      product_id: product_id,
+      love_status: newLoveStatus,
     })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Login is required to add favorites");
-        }
-        return res.json();
-      })
       .then(() => {
         setIsLoved(newLoveStatus);
         setLoveCount((prev) => (newLoveStatus ? prev + 1 : prev - 1));
       })
       .catch((error) => {
-        toast.error(error.message);
+        toast.error("Login is required to add favorites");
       })
       .finally(() => {
         setIsSubmit(false);
@@ -81,15 +69,7 @@ export default function AddToLove({ product_id, className }: { product_id: numbe
   useEffect(() => {
     const fetchLoveStatus = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/love_status?product_id=${product_id}`, {
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch love status");
-        }
-
-        const data = await response.json();
+        const data = await productService.getLoveStatus(product_id);
         setIsLoved(data.data.is_loved);
         setLoveCount(data.data.total_loves);
         isLovedRef.current = data.data.is_loved;

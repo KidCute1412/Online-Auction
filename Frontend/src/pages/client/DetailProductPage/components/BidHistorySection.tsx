@@ -5,6 +5,7 @@ import { Ban } from "lucide-react";
 import { useAuth } from "@/routes/ProtectedRouter";
 import Loading from "@/components/common/Loading";
 import BanBidderModal from "./BanBidderModal";
+import { bidService } from "@/services/bid.service.ts";
 
 type ProductType = {
   product_id: number;
@@ -34,17 +35,10 @@ export default function BidHistorySection({ product, isSeller, isExpired }: { pr
   useEffect(() => {
     setLoading(true);
     async function fetchBidHistory() {
+      if (!product?.product_id) return;
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bid/history?product_id=${product?.product_id}`, {
-          method: "GET",
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          return;
-        } else {
-          setBidHistory(data.data);
-        }
+        const data = await bidService.getHistory({ product_id: product.product_id });
+        setBidHistory(data.data);
       } catch (e) {
         console.log(e);
       }

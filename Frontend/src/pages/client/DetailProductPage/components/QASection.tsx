@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { MessageCircle, User, HelpCircle, Send, MessageSquare, Crown } from "lucide-react";
 import PaginationComponent from "@/components/common/Pagination";
 import Loading from "@/components/common/Loading";
+import { productService } from "@/services/product.service.ts";
 
 interface QuestionType {
   question_id: number;
@@ -33,11 +34,11 @@ export default function QASection({ product_id, seller_id }: { product_id?: numb
     setIsLoading(true);
     async function fetchQuestions() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/questions?product_id=${product_id}&page=${currentPage}&limit=${limit}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
-        }
-        const data = await response.json();
+        const data = await productService.getQuestions({
+          product_id,
+          page: currentPage,
+          limit,
+        });
         setQuestions(data.data);
         setTotalQuestions(Number(data.totalQuestions) || 0);
         setTotalPages(Math.ceil(Number(data.totalQuestions) / limit) || 1);
@@ -65,18 +66,7 @@ export default function QASection({ product_id, seller_id }: { product_id?: numb
 
     async function postQuestion() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/questions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(dataToSend),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to post question");
-        }
-        const data = await response.json();
+        const data = await productService.postQuestion(dataToSend);
         toast.success(data.message || "Question/reply submitted successfully");
 
         setQuestions((prev) => [...prev, data.data]);

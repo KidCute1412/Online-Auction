@@ -4,6 +4,7 @@ import type { UserItem } from "@/interface/user.interface";
 import { formatDateOfBirth } from "@/utils/format_time";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { userService } from "@/services/user.service.ts";
 
 export default function UserDetailPage() {
   const { id } = useParams();
@@ -11,16 +12,9 @@ export default function UserDetailPage() {
   const [userDetail, setUserDetail] = useState<UserItem | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-
   useEffect(() => {
-    // Fetch detailed user profile by user ID
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/user/detail/${id}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    if (!id) return;
+    userService.adminDetail(Number(id))
       .then((data) => {
         setUserDetail(data.user);
         setSelectedRole(data.user.role);
@@ -32,33 +26,18 @@ export default function UserDetailPage() {
   }, [id]);
 
   const handleSave = () => {
-    // Send request to edit user role and status
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/user/edit-role/${id}`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: selectedRole, status: selectedStatus }),
-        credentials: "include",
-      }
-    )
-      .then((res) => res.json())
+    if (!id) return;
+    userService.adminEditRole(Number(id), { role: selectedRole, status: selectedStatus })
       .then((data) => {
         if (data.code === "success") {
-          toast.success("Updated successfully!");
-          setUserDetail((prev) =>
-            prev
-              ? { ...prev, role: selectedRole, status: selectedStatus }
-              : null
-          );
+          toast.success(data.message);
+          window.location.reload();
         } else {
-          toast.error("Failed to update.");
+          toast.error(data.message);
         }
       })
       .catch(() => {
-        toast.error("An error occurred while updating.");
+        toast.error("An error occurred, please try again!");
       });
   };
 
@@ -75,16 +54,8 @@ export default function UserDetailPage() {
       cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(
-          `${import.meta.env.VITE_API_URL}/${
-            import.meta.env.VITE_PATH_ADMIN
-          }/api/user/reset-password/${id}`,
-          {
-            method: "PATCH",
-            credentials: "include",
-          }
-        )
-          .then((res) => res.json())
+        if (!id) return;
+        userService.adminResetPassword(Number(id), {})
           .then((data) => {
             if (data.code === "success") {
               toast.success(data.message);
@@ -93,7 +64,7 @@ export default function UserDetailPage() {
             }
           })
           .catch(() => {
-            toast.error("An error occurred while resetting the password.");
+            toast.error("An error occurred, please try again!");
           });
       }
     });

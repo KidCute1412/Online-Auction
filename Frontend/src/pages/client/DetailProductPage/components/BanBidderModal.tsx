@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, AlertTriangle, Ban, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { bidService } from "@/services/bid.service.ts";
 
 interface BanBidderModalProps {
   isOpen: boolean;
@@ -30,32 +31,17 @@ export default function BanBidderModal({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bid/ban_bidder`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            product_id: productId,
-            banned_user_id: userId,
-            reason: reason,
-          }),
-        }
-      );
+      const data = await bidService.banBidder({
+        product_id: productId,
+        banned_user_id: userId,
+        reason: reason,
+      });
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success(`Successfully banned user ${username}`);
-        onClose();
-      } else {
-        toast.error(data.message || "Unable to ban this user");
-      }
-    } catch (error) {
+      toast.success(`Successfully banned user ${username}`);
+      onClose();
+    } catch (error: any) {
       console.error(error);
-      toast.error("An error occurred while banning the user");
+      toast.error(error.message || "An error occurred while banning the user");
     } finally {
       setIsSubmitting(false);
     }

@@ -2,6 +2,7 @@ import HorizontalBar from "@/components/common/HorizontalBar";
 import ProductCard from "@/components/common/ProductCard";
 import { useEffect, useState } from "react";
 import { Clock, TrendingUp, DollarSign } from "lucide-react";
+import { productService } from "@/services/product.service.ts";
 
 function Section2() {
   return (
@@ -34,14 +35,7 @@ function Section21() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch top ending soon products
-        const promise = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/ending_soon?limit=5`
-        );
-        const response = await promise.json();
-        if (!promise.ok) {
-          throw new Error(response.message || "Failed to fetch top ending soon products");
-        }
+        const response = await productService.getEndingSoon();
         setProducts(response.data);
       } catch (err) {
         console.error(err);
@@ -106,14 +100,7 @@ function Section22() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch top products with highest bid counts
-        const promise = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/most_bids?limit=5`
-        );
-        const response = await promise.json();
-        if (!promise.ok) {
-          throw new Error(response.message || "Failed to fetch top most bids products");
-        }
+        const response = await productService.getMostBids();
         setProducts(response.data);
       } catch (err) {
         console.error(err);
@@ -178,14 +165,7 @@ function Section23() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch top highest priced products
-        const promise = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/highest_price?limit=5`
-        );
-        const response = await promise.json();
-        if (!promise.ok) {
-          throw new Error(response.message || "Failed to fetch top highest priced products");
-        }
+        const response = await productService.getHighestPrice();
         setProducts(response.data);
       } catch (err) {
         console.error(err);

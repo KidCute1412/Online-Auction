@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
+import { categoryService } from "@/services/category.service";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
 import JustValidate from "just-validate";
 import { useEffect, useMemo, useRef } from "react";
@@ -41,7 +42,7 @@ export default function CategoryCreate() {
     const validate = new JustValidate("#CategoryCreateForm");
     validate
       .addField(
-        "#name",
+          "#name",
         [{ rule: "required", errorMessage: "Please enter a category name!" }],
         { errorContainer: "#nameError" }
       )
@@ -64,19 +65,9 @@ export default function CategoryCreate() {
           slug: slug,
         };
 
-        // Submit post request to create new category
-        fetch(
-          `${import.meta.env.VITE_API_URL}/${
-            import.meta.env.VITE_PATH_ADMIN
-          }/api/category/create`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dataFinal),
-            credentials: "include",
-          }
-        )
-          .then((res) => res.json())
+        // Submit request to create a new category
+        categoryService
+          .create(dataFinal)
           .then((data) => {
             if (data.code === "error") {
               toast.error(data.message);
@@ -84,6 +75,9 @@ export default function CategoryCreate() {
             if (data.code === "success") {
               toast.success(data.message);
             }
+          })
+          .catch((error) => {
+            toast.error(error.message || "Failed to create category");
           });
       });
   }, []);

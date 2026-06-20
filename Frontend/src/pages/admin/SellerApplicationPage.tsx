@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Eye } from "lucide-react";
 import FilterBar from "@/components/admin/FilterBar";
@@ -8,6 +7,7 @@ import { formatToVN } from "@/utils/format_time";
 import { slugify } from "@/utils/make_slug";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
+import { userService } from "@/services/user.service";
 
 type BidderForm = {
   id: number;
@@ -56,13 +56,13 @@ export default function BidderFormListPage() {
 
   useEffect(() => {
     // Fetch total number of applications for pagination
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/application-form/number-of-forms?status=${statusFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${searchFromUrl}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    userService
+      .adminGetFormsTotal({
+        status: statusFilter,
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+      })
       .then((data) => {
         const total = data.total as number;
         setTotalPages(Math.ceil(total / LIMIT));
@@ -78,13 +78,15 @@ export default function BidderFormListPage() {
 
   useEffect(() => {
     // Fetch list of application forms
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/application-form/list?page=${currentPage}&limit=${LIMIT}&status=${statusFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${searchFromUrl}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    userService
+      .adminListApplications({
+        page: currentPage,
+        limit: LIMIT,
+        status: statusFilter,
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+      })
       .then((data) => {
         if (data.code === "success") {
           setList(data.list);

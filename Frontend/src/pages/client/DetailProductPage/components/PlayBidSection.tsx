@@ -5,6 +5,7 @@ import { TrendingUp, AlertCircle, Zap, ChevronDown, X, AlertTriangle, CheckCircl
 import JustValidate from "just-validate";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { bidService } from "@/services/bid.service";
 
 export default function PlayBidSection({ product_id, current_price, step_price, buy_now_price }: { product_id?: number; current_price?: number; step_price?: number; buy_now_price?: number }) {
   const [isSubmit, setIsSubmit] = useState(false);
@@ -13,9 +14,10 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [successBidAmount, setSuccessBidAmount] = useState<number>(0);
-  const [pendingBidData, setPendingBidData] = useState<{ product_id?: number; max_price: number } | null>(null);
+  const [pendingBidData, setPendingBidData] = useState<any>(null);
   const [isFlashing, setIsFlashing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -35,7 +37,8 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
   }, [showSuggestions]);
   
   useEffect(() => {
-    const validate = new JustValidate("#bidForm");
+    if (!product_id || !formRef.current) return;
+    const validate = new JustValidate(formRef.current);
     validate.addField(
       "#max_price", [
         { rule: "required", errorMessage: "Please enter your bid price!" },
@@ -63,6 +66,7 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
       
       setPendingBidData({
         product_id: product_id,
+        price: current_price,
         max_price: parseFloat(maxPriceSubmit)
       });
       setShowConfirmModal(true);
@@ -80,21 +84,12 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
     setIsSubmit(true);
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bid/play`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", 
-        },
-        credentials: "include",
-        body: JSON.stringify(pendingBidData)
+      const data = await bidService.play({
+        product_id: pendingBidData.product_id,
+        bid_price: pendingBidData.price,
+        max_bid_price: pendingBidData.max_price,
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Error connecting to server to place bid!");
-      }
-
-      const data = await response.json();
       if (data.status === "success") {
         setSuccessBidAmount(pendingBidData.max_price);
         setShowSuccessOverlay(true);

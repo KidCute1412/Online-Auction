@@ -8,6 +8,7 @@ import { useFilters } from "@/hooks/useFilters";
 import { toast } from "sonner";
 import ConfirmDeleteButton from "@/components/common/ConfirmDeleteButton";
 import Loading from "@/components/common/Loading";
+import { productService } from "@/services/product.service";
 
 const LIMIT = 10;
 
@@ -47,22 +48,18 @@ export default function ProductTrashPage() {
   const fetchItems = () => {
     setIsPageLoading(true);
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/list?page=${currentPage}&limit=${LIMIT}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${encodeURIComponent(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ is_removed: true }),
-        headers: {
-          "Content-Type": "application/json",
+    productService
+      .adminList(
+        {
+          page: currentPage,
+          limit: LIMIT,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: searchFromUrl,
         },
-      }
-    )
-      .then((res) => res.json())
+        { is_removed: true }
+      )
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -76,22 +73,16 @@ export default function ProductTrashPage() {
   };
 
   const fetchTotal = () => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/number-of-products?creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${encodeURIComponent(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ is_removed: true }),
-        headers: {
-          "Content-Type": "application/json",
+    productService
+      .adminGetTotal(
+        {
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: searchFromUrl,
         },
-      }
-    )
-      .then((res) => res.json())
+        { is_removed: true }
+      )
       .then((data) => {
         const total = data.total as number;
         setTotalPages(Math.ceil(total / LIMIT));
@@ -126,16 +117,8 @@ export default function ProductTrashPage() {
   }, [currentPage, creatorFilter, dateFrom, dateTo, searchFromUrl]);
 
   const handleRestore = (id: number) => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/restore/${id}`,
-      {
-        credentials: "include",
-        method: "PATCH",
-      }
-    )
-      .then((res) => res.json())
+    productService
+      .adminRestore(id)
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message || "Product restored successfully!");
@@ -144,6 +127,9 @@ export default function ProductTrashPage() {
         } else {
           toast.error(data.message || "Failed to restore product!");
         }
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to restore product!");
       });
   };
 
@@ -304,9 +290,7 @@ export default function ProductTrashPage() {
                           <RotateCcw size={16} />
                         </button>
                         <ConfirmDeleteButton
-                          apiUrl={`${import.meta.env.VITE_API_URL}/${
-                            import.meta.env.VITE_PATH_ADMIN
-                          }/api/product/destroy/${item.product_id}`}
+                          onConfirm={() => productService.adminDestroy(item.product_id)}
                           onSuccess={(data) => {
                             toast.success(data.message);
                             fetchItems();
@@ -395,9 +379,7 @@ export default function ProductTrashPage() {
                   <span className="font-medium">Restore</span>
                 </button>
                 <ConfirmDeleteButton
-                  apiUrl={`${import.meta.env.VITE_API_URL}/${
-                    import.meta.env.VITE_PATH_ADMIN
-                  }/api/product/destroy/${item.product_id}`}
+                  onConfirm={() => productService.adminDestroy(item.product_id)}
                   onSuccess={(data) => {
                     toast.success(data.message);
                     fetchItems();

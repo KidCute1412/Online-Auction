@@ -15,7 +15,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { useAuth } from "@/routes/ProtectedRouter";
+import { orderService } from "@/services/order.service.ts";
+import { productService } from "@/services/product.service.ts";
 
 type ProductInfo = {
   product_id: number;
@@ -60,11 +61,7 @@ export default function WinnerOrderCompletionPage() {
         setPhoneNumber(auth?.phone_number || "");
         setAddress(auth?.address || "");
 
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/detail-for-winner?product_id=${product_id}`,
-          { credentials: "include" }
-        );
-        const data = await response.json();
+        const data = await productService.getDetailForWinner({ product_id });
 
         if (data.status === "error") {
           setOrderInfo(null);
@@ -74,11 +71,7 @@ export default function WinnerOrderCompletionPage() {
           setInfoUser(data.infoSeller);
         }
 
-        const orderResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/order/status?product_id=${product_id}`,
-          { credentials: "include" }
-        );
-        const orderDataResult = await orderResponse.json();
+        const orderDataResult = await orderService.getOrderDetail({ product_id });
 
         if (orderDataResult.status === "success" && orderDataResult.data) {
           setOrderData(orderDataResult.data);
@@ -177,13 +170,7 @@ export default function WinnerOrderCompletionPage() {
       formData.append("shipping_address", address.trim());
       formData.append("payment_proof", paymentProofImage);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/order/create`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      const data = await response.json();
+      const data = await orderService.createOrder(formData);
       if (data.status === "success") {
         toast.success("Order created successfully!");
         setCurrentStep(2);

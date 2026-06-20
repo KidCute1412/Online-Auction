@@ -7,6 +7,7 @@ import { useFilters } from "@/hooks/useFilters";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
+import { productService } from "@/services/product.service";
 
 const LIMIT = 10;
 
@@ -46,22 +47,18 @@ export default function ProductListPage() {
   const fetchItems = () => {
     setIsPageLoading(true);
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/list?page=${currentPage}&limit=${LIMIT}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${encodeURIComponent(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    productService
+      .adminList(
+        {
+          page: currentPage,
+          limit: LIMIT,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: searchFromUrl,
         },
-        body: JSON.stringify({ is_removed: false }),
-      }
-    )
-      .then((res) => res.json())
+        { is_removed: false }
+      )
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -75,22 +72,16 @@ export default function ProductListPage() {
   };
 
   const fetchTotal = () => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/number-of-products?creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${encodeURIComponent(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    productService
+      .adminGetTotal(
+        {
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: searchFromUrl,
         },
-        body: JSON.stringify({ is_removed: false }),
-      }
-    )
-      .then((res) => res.json())
+        { is_removed: false }
+      )
       .then((data) => {
         const total = data.total as number;
         setTotalPages(Math.ceil(total / LIMIT));
@@ -168,16 +159,8 @@ export default function ProductListPage() {
   };
 
   const handleDelete = (id: number) => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/product/delete/${id}`,
-      {
-        credentials: "include",
-        method: "PATCH",
-      }
-    )
-      .then((res) => res.json())
+    productService
+      .adminDelete(id)
       .then((data) => {
         if (data.code === "success") {
           fetchItems();

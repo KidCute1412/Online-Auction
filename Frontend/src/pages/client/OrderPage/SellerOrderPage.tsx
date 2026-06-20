@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/routes/ProtectedRouter";
 import Swal from "sweetalert2";
+import { orderService } from "@/services/order.service.ts";
 
 type OrderInfo = {
   order_id: number;
@@ -53,11 +54,7 @@ export default function SellerOrderPage() {
       }
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/order/seller-view?product_id=${product_id}`,
-          { credentials: "include" }
-        );
-        const data = await response.json();
+        const data = await orderService.getSellerOrderView({ product_id });
 
         if (data.status === "error" || !data.data) {
           toast.error(data.message || "No orders yet for this product");
@@ -125,16 +122,7 @@ export default function SellerOrderPage() {
             formData.append("shipping_label", shippingLabelImage);
           }
 
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/order/approve?product_id=${product_id}`,
-            {
-              method: "POST",
-              credentials: "include",
-              body: formData,
-            }
-          );
-
-          const data = await response.json();
+          const data = await orderService.approveOrder(formData);
           if (data.status === "success") {
             toast.success("Order confirmed successfully!");
             window.location.reload();
@@ -161,17 +149,7 @@ export default function SellerOrderPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/order/reject?product_id=${product_id}`,
-            {
-              method: "POST",
-              credentials: "include",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ product_id }),
-            }
-          );
-
-          const data = await response.json();
+          const data = await orderService.rejectOrder({ product_id: product_id } as any);
           if (data.status === "success") {
             toast.success("Order rejected successfully");
             navigate(-1);

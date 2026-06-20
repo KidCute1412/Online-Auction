@@ -9,6 +9,8 @@ import { slugify } from "@/utils/make_slug";
 import Loading from "@/components/common/Loading";
 import { Search } from "lucide-react";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { categoryService } from "@/services/category.service.ts";
+import { productService } from "@/services/product.service.ts";
 
 type Products = {
   product_id: number;
@@ -50,14 +52,7 @@ function ListProductsPage() {
   useEffect(() => {
     const cat2_id = searchParams.get("cat2_id");
     // Fetch categories information
-    fetch(`${import.meta.env.VITE_API_URL}/api/categories/cat2?cat2_id=${cat2_id}`)
-      .then((response) => {
-        if (!response.ok) {
-          toast.error("Error retrieving category name");
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
+    categoryService.getClientCat2(Number(cat2_id))
       .then((data) => {
         setCat2({
           cat_id: data.data.cat2_id,
@@ -95,15 +90,15 @@ function ListProductsPage() {
         setFilterTime(timeFilter || "");
         setSearchText(searchFilter || "");
         
-        // Fetch paginated products filtered by conditions
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/api/products/page_list?cat2_id=${cat2_id}&page=${page}&price=${priceFilter}&time=${timeFilter}&search=${searchFilter || ""}`
-        );
-        const data = await response.json();
+        const data = await productService.getPageList({
+          cat2_id,
+          page,
+          price: priceFilter,
+          time: timeFilter,
+          search: searchFilter || "",
+        });
 
-        if (!response.ok) {
+        if (!data || data.status === "error") {
           toast.error("Error retrieving data");
           setLoading(false);
           return;

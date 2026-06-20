@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/routes/ProtectedRouter";
 import { cn } from "@/lib/utils";
+import { bidService } from "@/services/bid.service.ts";
 
 interface BuyNowSectionProps {
   product_id?: number;
@@ -33,23 +34,9 @@ export default function BuyNowSection({ product_id, buy_now_price, product_name 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bid/buy_now`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          product_id: product_id,
-          buy_price: buy_now_price,
-        }),
+      const data = await bidService.buyNow({
+        product_id: product_id,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "An error occurred while purchasing the product!");
-      }
 
       if (data.status === "success") {
         setShowSuccessOverlay(true);

@@ -7,6 +7,7 @@ import { Lock, Mail, LogIn, Eye, EyeOff } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
+import { accountService } from "@/services/account.service.ts";
 
 function AccountLogin() {
   const navigate = useNavigate();
@@ -18,25 +19,24 @@ function AccountLogin() {
 
   useEffect(() => {
     const validate = new JustValidate("#loginForm", { lockForm: false });
-
     validate
-      .addField(
-        "#email",
-        [
-          { rule: "required", errorMessage: "Please enter your email!" },
-          { rule: "email", errorMessage: "Invalid email format" },
-        ],
-        { errorContainer: "#emailError" }
-      )
-      .addField(
-        "#password",
-        [{ rule: "required", errorMessage: "Please enter your password!" }],
-        { errorContainer: "#passwordError" }
-      )
-      .onSuccess(async (event: any) => {
-        const email = event.target.email.value;
-        const password = event.target.password.value;
-        const rememberPassword = event.target.rememberPassword.checked;
+      .addField("#email", [
+        { rule: "required", errorMessage: "Please enter your email!" },
+        { rule: "email", errorMessage: "Invalid email address!" },
+      ])
+      .addField("#password", [
+        { rule: "required", errorMessage: "Please enter your password!" },
+      ])
+      .onSuccess((e) => {
+        e.preventDefault();
+
+        const form = e.target as HTMLFormElement;
+        const email = (form.querySelector("#email") as HTMLInputElement).value;
+        const password = (form.querySelector("#password") as HTMLInputElement)
+          .value;
+        const rememberPassword = (
+          form.querySelector("#rememberPassword") as HTMLInputElement
+        ).checked;
 
         if (!isCaptchaChecked || !captchaToken) {
           toast.error("Please verify that you are not a robot!");
@@ -50,13 +50,7 @@ function AccountLogin() {
           captchaToken: captchaToken,
         };
 
-        fetch(`${import.meta.env.VITE_API_URL}/accounts/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dataFinal),
-          credentials: "include",
-        })
-          .then((res) => res.json())
+        accountService.login(dataFinal)
           .then((data) => {
             if (data.code === "error") {
               toast.error(data.message);
@@ -80,13 +74,7 @@ function AccountLogin() {
   const handleSuccessGoogleLogin = async (credentialResponse: any) => {
     const { credential } = credentialResponse;
     const dataFinal = { credential: credential, rememberMe: false };
-    fetch(`${import.meta.env.VITE_API_URL}/accounts/google-login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataFinal),
-      credentials: "include",
-    })
-      .then((res) => res.json())
+    accountService.googleLogin(dataFinal as any)
       .then((data) => {
         if (data.code === "error") {
           toast.error(data.message);

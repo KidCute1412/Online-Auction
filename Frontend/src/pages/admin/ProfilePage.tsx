@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { Camera, Save, X, User, Mail, Shield } from "lucide-react";
 import { useAuth } from "@/routes/ProtectedRouter";
 import { toast } from "sonner";
+import { profileService } from "@/services/profile.service";
 
 export default function ProfilePage() {
   const { auth: user, setAuth } = useAuth();
@@ -56,16 +57,8 @@ export default function ProfilePage() {
       if (selectedFile) {
         formDataToSend.append("avatar", selectedFile);
       }
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/profile/edit`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          body: formDataToSend,
-        }
-      );
-
-      const data = await response.json();
+      
+      const data = await profileService.editProfile(formDataToSend);
 
       if (data.status === "success") {
         toast.success("Profile updated successfully!");

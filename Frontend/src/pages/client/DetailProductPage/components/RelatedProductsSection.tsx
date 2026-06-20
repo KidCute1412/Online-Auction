@@ -3,6 +3,7 @@ import ProductCard from "@/components/common/ProductCard";
 import HorizontalBar from "@/components/common/HorizontalBar";
 import { Package, Sparkles } from "lucide-react";
 import Loading from "@/components/common/Loading";
+import { productService } from "@/services/product.service.ts";
 
 type Products = {
   product_id: number;
@@ -24,11 +25,11 @@ export default function RelatedProductsSection({ category_id, product_id }: { ca
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/related?category_id=${category_id}&product_id=${product_id}&limit=5`);
-        const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to fetch related products");
-        }
+        const result = await productService.getRelated({
+          category_id,
+          product_id,
+          limit: 5,
+        });
         setProducts(result.data || []);
       } catch (err) {
         console.error(err);

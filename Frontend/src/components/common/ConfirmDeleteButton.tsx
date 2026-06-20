@@ -2,7 +2,7 @@ import React from "react";
 import Swal from "sweetalert2";
 
 interface ConfirmDeleteButtonProps {
-  apiUrl: string;
+  onConfirm: () => Promise<any>;
   onSuccess: (data: any) => void;
   onError: (message: string) => void;
   className?: string;
@@ -10,7 +10,7 @@ interface ConfirmDeleteButtonProps {
 }
 
 const ConfirmDeleteButton: React.FC<ConfirmDeleteButtonProps> = ({
-  apiUrl,
+  onConfirm,
   onSuccess,
   onError,
   className,
@@ -28,11 +28,7 @@ const ConfirmDeleteButton: React.FC<ConfirmDeleteButtonProps> = ({
       cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(apiUrl, {
-          method: "DELETE",
-          credentials: "include",
-        })
-          .then((res) => res.json())
+        onConfirm()
           .then((data) => {
             if (data.code === "success") {
               onSuccess(data);
@@ -40,8 +36,8 @@ const ConfirmDeleteButton: React.FC<ConfirmDeleteButtonProps> = ({
               onError(data.message);
             }
           })
-          .catch(() => {
-            onError("An error occurred during deletion.");
+          .catch((error: any) => {
+            onError(error.message || "An error occurred during deletion.");
           });
       }
     });

@@ -1,5 +1,6 @@
 // src/hooks/useCategory.ts
 import { useEffect, useState } from "react";
+import { categoryService } from "@/services/category.service.ts";
 
 export interface CategoryNode {
   id: number;
@@ -34,18 +35,10 @@ export type CategoryEditItem = {
 export function useBuildTree() {
   const [tree, setTree] = useState<CategoryNode[] | null>(null);
   useEffect(() => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/build-tree`,
-      {
-        credentials: "include",
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.tree.length != 0) {
-          setTree(data.tree);
+    categoryService.buildTree()
+      .then((treeData) => {
+        if (treeData && treeData.length !== 0) {
+          setTree(treeData);
         } else {
           setTree(null);
         }
@@ -62,13 +55,7 @@ export function useCategories() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/list`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
+    categoryService.list()
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -88,26 +75,13 @@ export function useCategoryWithID(id: number) {
   useEffect(() => {
     if (!id) return;
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/edit/${id}`,
-      { credentials: "include" }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const it = data.item;
-
-        setItem({
-          id: it.id,
-          name: it.name,
-          status: it.status,
-          parent_id: it.parent_id ?? null,
-          description: it.description ?? "",
-        });
+    categoryService.getById(id)
+      .then((editItem) => {
+        setItem(editItem);
       })
       .catch(() => setItem(null));
   }, [id]);
 
   return { item };
 }
+

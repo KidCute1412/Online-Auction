@@ -4,6 +4,7 @@ import JustValidate from "just-validate";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Key, Mail, Send } from "lucide-react";
+import { accountService } from "@/services/account.service.ts";
 
 function ForgotPassword() {
   const navigate = useNavigate();
@@ -25,14 +26,7 @@ function ForgotPassword() {
         const email = event.target.email.value;
         const dataFinal = { email: email };
 
-        // Send forgot password request to server
-        fetch(`${import.meta.env.VITE_API_URL}/accounts/forgot-password`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dataFinal),
-          credentials: "include",
-        })
-          .then((res) => res.json())
+        accountService.forgotPassword(dataFinal)
           .then((data) => {
             if (data.code === "error") {
               toast.error(data.message);

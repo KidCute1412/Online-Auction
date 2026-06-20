@@ -4,6 +4,7 @@ import Ronaldo from "@/assets/images/Cristiano.jpg";
 import { toast } from "sonner";
 import { slugify } from "@/utils/make_slug";
 import { ChevronRight, Grid3X3, ArrowRight } from "lucide-react";
+import { categoryService } from "@/services/category.service.ts";
 
 import {
   NavigationMenu,
@@ -91,12 +92,7 @@ function CatagoriesDropdownMenu() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/categories/all`);
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to load categories");
-        }
+        const data = await categoryService.getAllClient();
         setCatData(data.data);
       } catch (error: any) {
         console.error("Error loading categories: ", error);

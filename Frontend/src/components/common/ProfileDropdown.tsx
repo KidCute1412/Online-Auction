@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/routes/ProtectedRouter";
 import { ChevronDown, User, Package, Lock, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { accountService } from "@/services/account.service";
 
 interface ProfileMenuItem {
   label: string;
@@ -73,14 +74,9 @@ export default function ProfileDropdown({ menuItems }: ProfileDropdownProps) {
       label: "Log Out",
       icon: <LogOut size={16} />,
       action: () => {
-        fetch(`${import.meta.env.VITE_API_URL}/accounts/logout`, {
-          method: "POST",
-          credentials: "include"
-        }).then((res) => {
-          if (res.ok) {
-            setAuth(null);
-            navigate("/");
-          }
+        accountService.logout().then(() => {
+          setAuth(null);
+          navigate("/");
         })
         .catch(() => {
           toast.error("Unable to connect to the server for logout!");

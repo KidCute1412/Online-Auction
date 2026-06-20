@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import OTPForm from "@/components/common/OTPForm";
 import { toast } from "sonner";
 import { ShieldCheck, CheckCircle } from "lucide-react";
+import { accountService } from "@/services/account.service.ts";
 
 function AccountVerify() {
   const navigate = useNavigate();
@@ -11,12 +12,7 @@ function AccountVerify() {
   const verifyType = params.get("type");
 
   useEffect(() => {
-    // Send request to verify account on component mount
-    fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-account`, {
-      method: "get",
-      credentials: "include",
-    })
-      .then((res) => res.json())
+    accountService.verifyAccount({ email: "" }) // backend session validates this
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message);
@@ -40,14 +36,7 @@ function AccountVerify() {
     }
     const finalData = { otp: otpValue };
     if (verifyType === "forgot-password") {
-      // Send request to verify forgot password OTP
-      fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-forgot-password`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(finalData),
-      })
-        .then((res) => res.json())
+      accountService.verifyForgotPassword(finalData as any)
         .then((data) => {
           if (data.code === "success") {
             toast.success(data.message);
@@ -63,14 +52,7 @@ function AccountVerify() {
           }
         });
     } else {
-      // Send request to verify register OTP
-      fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-register`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(finalData),
-      })
-        .then((res) => res.json())
+      accountService.verifyRegister(finalData as any)
         .then((data) => {
           if (data.code === "success") {
             toast.success(data.message);

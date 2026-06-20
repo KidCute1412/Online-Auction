@@ -4,17 +4,14 @@ import JustValidate from "just-validate";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { KeyRound, Key, Check, RotateCcw } from "lucide-react";
+import { accountService } from "@/services/account.service.ts";
 
 function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check account verification status on mount
-    fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-account`, {
-      method: "get",
-      credentials: "include",
-    })
-      .then((res) => res.json())
+    accountService.verifyAccount({ email: "" })
       .then((data) => {
         if (data.code === "error") {
           toast.error(data.message);
@@ -98,14 +95,7 @@ function ResetPassword() {
             password,
           };
 
-          // Send request to reset password
-          fetch(`${import.meta.env.VITE_API_URL}/accounts/reset-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dataFinal),
-            credentials: "include",
-          })
-            .then((res) => res.json())
+          accountService.resetPassword(dataFinal)
             .then((data) => {
               if (data.code === "error") {
                 toast.error(data.message);

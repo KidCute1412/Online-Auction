@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { accountService } from "@/services/account.service.ts";
 
 const baseLinkClass =
   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
@@ -114,11 +115,7 @@ export default function Sidebar() {
         <div
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer transition-colors duration-200"
           onClick={() => {
-            fetch(`${import.meta.env.VITE_API_URL}/accounts/logout`, {
-              credentials: "include",
-              method: "POST",
-            })
-              .then((res) => res.json())
+            accountService.logout()
               .then((data) => {
                 if (data.code === "success") {
                   toast.success(data.message);

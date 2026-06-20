@@ -10,6 +10,9 @@ import { usePreventBodyLock } from "@/hooks/usePreventBodyLock";
 import formatToUTC from "@/utils/format_time";
 import { toast } from "sonner";
 import { NumericFormat } from "react-number-format";
+import { settingService } from "@/services/setting.service.ts";
+import { categoryService } from "@/services/category.service.ts";
+import { productService } from "@/services/product.service.ts";
 
 type CatType = {
   id: number;
@@ -35,8 +38,7 @@ function PostProductPage() {
   const [extendTime, setExtendTime] = useState<ExtendSettingType>();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/categories/level1`)
-      .then((res) => res.json())
+    categoryService.getLevel1()
       .then((data) => {
         setCatlv1(data.data);
       });
@@ -44,8 +46,7 @@ function PostProductPage() {
 
   useEffect(() => {
     if (selectedCat1) {
-      fetch(`${import.meta.env.VITE_API_URL}/api/categories/level2/noslug?cat_id=${selectedCat1}`)
-        .then((res) => res.json())
+      categoryService.getLevel2NoSlug({ cat_id: selectedCat1 })
         .then((data) => {
           setCatlv2(data.data);
         });
@@ -55,8 +56,7 @@ function PostProductPage() {
   }, [selectedCat1]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/setting/auto_extend_time`)
-      .then((res) => res.json())
+    settingService.getAutoExtendTime()
       .then((data) => {
         if (data.status === "success") {
           setExtendTime(data.data);
@@ -168,12 +168,7 @@ function PostProductPage() {
         }
       }
 
-      fetch(`${import.meta.env.VITE_API_URL}/api/products/post-product`, {
-        method: "POST",
-        credentials: "include",
-        body: formPayLoad
-      })
-      .then(res => res.json())
+      productService.postProduct(formPayLoad)
       .then(data => {
         setIsSubmitting(false);
         if (data.status === "success") {

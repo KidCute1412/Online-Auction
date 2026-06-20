@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { KeyRound, Key, Check, Lock, ShieldCheck, CheckCircle, Eye, EyeOff } from "lucide-react";
 import OTPForm from "@/components/common/OTPForm";
+import { accountService } from "@/services/account.service.ts";
 
 interface ChangePasswordFormProps {
   onSuccess: () => void;
@@ -105,13 +106,7 @@ function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
           newPassword,
         };
 
-        fetch(`${import.meta.env.VITE_API_URL}/accounts/change-password`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dataFinal),
-          credentials: "include",
-        })
-          .then((res) => res.json())
+        accountService.changePassword(dataFinal)
           .then((data) => {
             if (data.code === "error") {
               toast.error(data.message);
@@ -273,13 +268,7 @@ function OTPVerifyForm({ onBack }: OTPVerifyFormProps) {
 
     const finalData = { otp: otpValue };
 
-    fetch(`${import.meta.env.VITE_API_URL}/accounts/verify-change-password`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(finalData),
-    })
-      .then((res) => res.json())
+    accountService.verifyChangePassword(finalData as any)
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message);

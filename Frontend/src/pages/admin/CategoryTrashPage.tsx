@@ -10,6 +10,7 @@ import { slugify } from "@/utils/make_slug";
 import { toast } from "sonner";
 import ConfirmDeleteButton from "@/components/common/ConfirmDeleteButton";
 import Loading from "@/components/common/Loading";
+import { categoryService } from "@/services/category.service";
 
 const LIMIT = 5;
 
@@ -42,22 +43,19 @@ export default function CategoryTrashPage() {
   const fetchItems = () => {
     setIsPageLoading(true);
 
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/list?page=${currentPage}&limit=${LIMIT}&status=${statusFilter}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${slugify(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ deleted: true }),
-        headers: {
-          "Content-Type": "application/json",
+    categoryService
+      .list(
+        {
+          page: currentPage,
+          limit: LIMIT,
+          status: statusFilter,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: slugify(searchFromUrl),
         },
-      }
-    )
-      .then((res) => res.json())
+        { deleted: true }
+      )
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -71,24 +69,19 @@ export default function CategoryTrashPage() {
   };
 
   const fetchTotal = () => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/number-of-categories?status=${statusFilter}&creator=${creatorFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&search=${slugify(
-        searchFromUrl
-      )}`,
-      {
-        credentials: "include",
-        method: "POST",
-        body: JSON.stringify({ deleted: true }),
-        headers: {
-          "Content-Type": "application/json",
+    categoryService
+      .list(
+        {
+          status: statusFilter,
+          creator: creatorFilter,
+          dateFrom,
+          dateTo,
+          search: slugify(searchFromUrl),
         },
-      }
-    )
-      .then((res) => res.json())
+        { deleted: true }
+      )
       .then((data) => {
-        const total = data.total as number;
+        const total = data.list.length;
         setTotalPages(Math.ceil(total / LIMIT));
         const newTotalPages = Math.ceil(total / LIMIT);
         if (currentPage > newTotalPages && newTotalPages > 0) {
@@ -97,6 +90,9 @@ export default function CategoryTrashPage() {
             page: "1",
           }));
         }
+      })
+      .catch(() => {
+        setTotalPages(1);
       });
   };
 
@@ -130,16 +126,8 @@ export default function CategoryTrashPage() {
   ]);
 
   const handleRestore = (id: number) => {
-    fetch(
-      `${import.meta.env.VITE_API_URL}/${
-        import.meta.env.VITE_PATH_ADMIN
-      }/api/category/restore/${id}`,
-      {
-        credentials: "include",
-        method: "PATCH",
-      }
-    )
-      .then((res) => res.json())
+    categoryService
+      .restore(id)
       .then((data) => {
         if (data.code === "success") {
           toast.success(data.message || "Category restored successfully!");
@@ -148,6 +136,9 @@ export default function CategoryTrashPage() {
         } else {
           toast.error(data.message || "Failed to restore category!");
         }
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to restore category!");
       });
   };
 
@@ -325,9 +316,7 @@ export default function CategoryTrashPage() {
                           <RotateCcw size={16} />
                         </button>
                         <ConfirmDeleteButton
-                          apiUrl={`${import.meta.env.VITE_API_URL}/${
-                            import.meta.env.VITE_PATH_ADMIN
-                          }/api/category/destroy/${item.id}`}
+                          onConfirm={() => categoryService.destroy(item.id)}
                           onSuccess={(data) => {
                             toast.success(data.message);
                             fetchItems();
@@ -426,9 +415,7 @@ export default function CategoryTrashPage() {
                   <span className="font-medium">Restore</span>
                 </button>
                 <ConfirmDeleteButton
-                  apiUrl={`${import.meta.env.VITE_API_URL}/${
-                    import.meta.env.VITE_PATH_ADMIN
-                  }/api/category/${item.id}`}
+                  onConfirm={() => categoryService.destroy(item.id)}
                   onSuccess={(data) => {
                     toast.success(data.message);
                     fetchItems();

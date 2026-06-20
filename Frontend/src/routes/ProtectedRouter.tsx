@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { profileService } from "@/services/profile.service.ts";
 
 const AuthContext = createContext<any>(null);
 export type AuthType = {
@@ -17,15 +18,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function getUserData() {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, {
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setUser(data.data);
-      } else {
-        setUser(null);
-      }
+      const data = await profileService.getMe();
+      setUser(data.data);
     } catch (error) {
       setUser(null);
       console.error("Error fetching user data:", error);
