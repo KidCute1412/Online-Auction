@@ -11,6 +11,18 @@ export const adminProductRouter = Router();
 clientProductRouter.get("/", clientController.getProductsPageList);
 
 // Get product detail by ID
+clientProductRouter.get("/featured/ending-soon", clientController.getTopEndingSoonProducts);
+
+// Get most bid products
+clientProductRouter.get("/featured/most-bids", clientController.getTopMostBidProducts);
+
+// Get highest price products
+clientProductRouter.get("/featured/highest-price", clientController.getTopHighestPriceProducts);
+
+// Get current user's product listings
+clientProductRouter.get("/me", verifyToken, clientController.getMyProductsList);
+
+// Get product detail by ID
 clientProductRouter.get("/:id", justDecodeToken, clientController.getProductDetailBySlugId);
 
 // Create a new product listing
@@ -19,8 +31,6 @@ clientProductRouter.post("/", verifyToken, verifyRole("seller", "admin"), upload
 // Update product description by ID
 clientProductRouter.patch("/:id/description", verifyToken, verifyRole("seller", "admin"), clientController.updateProductDescription);
 
-// Get current user's product listings
-clientProductRouter.get("/me", verifyToken, clientController.getMyProductsList);
 
 // Get like status for a product
 clientProductRouter.get("/:id/likes", justDecodeToken, clientController.getLoveStatus);

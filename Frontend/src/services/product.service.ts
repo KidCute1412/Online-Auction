@@ -56,15 +56,15 @@ export const productService = {
   },
 
   getEndingSoon: async (): Promise<any> => {
-    return apiRequest(`/products`, { params: { sort: "ending_soon" } });
+    return apiRequest(`/products/featured/ending-soon`);
   },
 
   getHighestPrice: async (): Promise<any> => {
-    return apiRequest(`/products`, { params: { sort: "highest_price" } });
+    return apiRequest(`/products/featured/highest-price`);
   },
 
   getMostBids: async (): Promise<any> => {
-    return apiRequest(`/products`, { params: { sort: "most_bids" } });
+    return apiRequest(`/products/featured/most-bids`);
   },
 
   getDetailForWinner: async (id: string | number): Promise<any> => {

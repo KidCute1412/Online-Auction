@@ -157,7 +157,7 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
         </div>
 
         {/* Bid Form */}
-        <form className="space-y-4" id="bidForm">
+        <form ref={formRef} className="space-y-4" id="bidForm">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2">
               Enter your bid amount
