@@ -1,66 +1,63 @@
 import { Request, Response } from "express";
-import * as userModel from "../../models/users.model.ts";
+import * as UsersService from "./users.service.ts";
 
+// Handle user seller request submission
 export async function registerSellerRequest(req: Request, res: Response) {
   const { reason } = req.body;
-  console.log("Register seller request reason:", reason);
   const user = (req as any).user;
-  // check if they have already sent a request
-  const existingRequest = await userModel.checkRegisterSellerRequest(
-    user.user_id
-  );
+  const existingRequest = await UsersService.checkRegisterSellerRequest(user.user_id);
   if (existingRequest) {
     return res.status(400).json({
       status: "error",
-      message: "Bạn đã gửi yêu cầu nâng cấp lên người bán. Vui lòng chờ xử lý.",
+      message: "You have already submitted a seller upgrade request. Please wait for processing.",
     });
   }
-  await userModel.registerSellerRequest(user.user_id, reason);
+  await UsersService.registerSellerRequest(user.user_id, reason);
   return res.status(200).json({
     status: "success",
-    message: "Yêu cầu nâng cấp lên người bán đã được gửi thành công.",
+    message: "Seller upgrade request submitted successfully.",
   });
 }
 
+// Handle rating and score feedback submission
 export async function rateUser(req: Request, res: Response) {
   try {
     const rater_id = (req as any).user.user_id;
     const { user_id, score, comment } = req.body;
-    await userModel.rateUser({ user_id, rater_id, score, comment });
+    await UsersService.rateUser(user_id, rater_id, score, comment);
     return res.status(200).json({
       status: "success",
-      message: "Đánh giá người dùng thành công.",
+      message: "User rated successfully.",
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       status: "error",
-      message: "Đã xảy ra lỗi khi đánh giá người dùng.",
+      message: "An error occurred while rating the user.",
     });
   }
 }
 
+// Retrieve ratings counts for a user
 export async function getUserRatingCount(req: Request, res: Response) {
   try {
     const user_id = parseInt(req.query.user_id as string);
     const username = req.query.username as string;
-    const ratingData = await userModel.getUserRatingCount({
-      user_id,
-      username,
-    });
+    const ratingData = await UsersService.getUserRatingCount(user_id, username);
     return res.status(200).json({
       status: "success",
       data: ratingData,
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       status: "error",
-      message: "Đã xảy ra lỗi khi lấy dữ liệu đánh giá người dùng.",
+      message: "An error occurred while fetching user rating data.",
     });
   }
 }
 
+// Fetch user rating histories
 export async function getUserRatingHistory(req: Request, res: Response) {
   try {
     const user_id = parseInt(req.query.user_id as string);
@@ -68,21 +65,17 @@ export async function getUserRatingHistory(req: Request, res: Response) {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const offset = (page - 1) * limit;
-    const ratingHistory = await userModel.getUserRatingHistory({
-      user_id,
-      username,
-      offset,
-      limit,
-    });
+
+    const ratingHistory = await UsersService.getUserRatingHistory(user_id, username, offset, limit);
     return res.status(200).json({
       status: "success",
       data: ratingHistory,
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       status: "error",
-      message: "Đã xảy ra lỗi khi lấy lịch sử đánh giá người dùng.",
+      message: "An error occurred while fetching user rating history.",
     });
   }
 }

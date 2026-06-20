@@ -7,7 +7,7 @@ import { clientCategoryRouter as categoriesRoutes } from "@/modules/categories/c
 import { clientProductRouter as productsRoutes } from "@/modules/products/products.routes.ts";
 import { meRouter as meRoutes } from "@/modules/profiles/profiles.routes.ts";
 import bidRoutes from "@/modules/bids/bids.routes.ts";
-import userRotes from "./user.route.ts";
+import { clientUserRouter as userRotes } from "@/modules/users/users.routes.ts";
 import { profileRouter as profileRoutes } from "@/modules/profiles/profiles.routes.ts";
 import settingRoutes from "./setting.route.ts";
 import orderRoutes from "@/modules/orders/orders.routes.ts";

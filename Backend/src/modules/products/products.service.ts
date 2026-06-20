@@ -1,5 +1,5 @@
 import * as ProductsModel from "./products.model.ts";
-import * as usersModel from "@/models/users.model.ts";
+import * as usersModel from "@/modules/users/users.model.ts";
 import * as AccountsModel from "@/modules/accounts/accounts.model.ts";
 import { uploadToCloudinary } from "@/config/cloud.config.ts";
 import fs from "fs";

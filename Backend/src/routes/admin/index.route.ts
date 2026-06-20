@@ -1,7 +1,6 @@
 import express from "express";
 import { adminCategoryRouter as categoryRoute } from "@/modules/categories/categories.routes.ts";
-import applicationFormRoute from "./application-form.route.ts";
-import userRoute from "./user.route.ts";
+import { adminApplicationRouter as applicationFormRoute, adminUserRouter as userRoute } from "@/modules/users/users.routes.ts";
 import { adminProductRouter as productRoute } from "@/modules/products/products.routes.ts";
 import * as authMiddleware from "../../middlewares/auth.middleware.ts";
 

@@ -1,5 +1,5 @@
 import * as BidsModel from "./bids.model.ts";
-import * as userModels from "@/models/users.model.ts";
+import * as userModels from "@/modules/users/users.model.ts";
 import * as productsService from "@/modules/products/products.service.ts";
 
 // Extend bidding time automatically if the bid occurs close to the end time
