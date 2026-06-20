@@ -1,5 +1,6 @@
-import db from "../config/database.config.ts";
+import db from "@/config/database.config.ts";
 
+// Create a new order in the database
 export async function createOrder(data: any) {
   try {
     await db("orders").insert(data);
@@ -9,18 +10,17 @@ export async function createOrder(data: any) {
   }
 }
 
+// Retrieve order details by buyer user ID and product ID
 export async function getOrderDetail(user_id: number, product_id: number) {
   try {
-    const orderDetail = await db("orders")
-      .where({ user_id, product_id })
-      .first();
-    return orderDetail;
+    return await db("orders").where({ user_id, product_id }).first();
   } catch (error) {
     console.error("Error fetching order detail:", error);
     throw error;
   }
 }
 
+// Retrieve order details combined with product and bidder info for the seller
 export async function getSellerOrderView(product_id: number) {
   try {
     const result = await db.raw(
@@ -50,16 +50,17 @@ export async function getSellerOrderView(product_id: number) {
   }
 }
 
+// Fetch order details by product ID
 export async function getOrderByProductId(product_id: number) {
   try {
-    const order = await db("orders").where({ product_id }).first();
-    return order;
+    return await db("orders").where({ product_id }).first();
   } catch (error) {
     console.error("Error fetching order by product ID:", error);
     throw error;
   }
 }
 
+// Update order status and optional shipping label URL
 export async function updateOrderStatus(
   order_id: number,
   status: string,
@@ -70,7 +71,7 @@ export async function updateOrderStatus(
     if (shipping_label_image_url) {
       updateData.shipping_label_image_url = shipping_label_image_url;
     }
-    await db("orders").where({ order_id: order_id }).update(updateData);
+    await db("orders").where({ order_id }).update(updateData);
   } catch (error) {
     console.error("Error updating order status:", error);
     throw error;

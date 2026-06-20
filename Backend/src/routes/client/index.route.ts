@@ -10,7 +10,7 @@ import bidRoutes from "@/modules/bids/bids.routes.ts";
 import userRotes from "./user.route.ts";
 import profileRoutes from "./profile.route.ts";
 import settingRoutes from "./setting.route.ts";
-import orderRoutes from "./order.route.ts";
+import orderRoutes from "@/modules/orders/orders.routes.ts";
 
 import { verifyToken } from "../../middlewares/auth.middleware.ts";
 route.use("/", homeRoute);
