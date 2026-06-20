@@ -54,7 +54,7 @@ export default function SellerOrderPage() {
       }
       try {
         setIsLoading(true);
-        const data = await orderService.getSellerOrderView({ product_id });
+        const data = await orderService.getSellerOrderView({ product_id: Number(product_id) });
 
         if (data.status === "error" || !data.data) {
           toast.error(data.message || "No orders yet for this product");

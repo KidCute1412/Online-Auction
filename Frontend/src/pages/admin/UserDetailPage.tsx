@@ -216,7 +216,7 @@ export default function UserDetailPage() {
                 {userDetail.status}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">User ID: #{userDetail.user_id}</p>
+            <p className="text-xs text-muted-foreground mt-1">User ID: #{userDetail.id}</p>
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ function AccountLogin() {
       .addField("#password", [
         { rule: "required", errorMessage: "Please enter your password!" },
       ])
-      .onSuccess((e) => {
+      .onSuccess((e: any) => {
         e.preventDefault();
 
         const form = e.target as HTMLFormElement;

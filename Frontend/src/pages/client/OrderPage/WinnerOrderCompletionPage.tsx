@@ -72,7 +72,7 @@ export default function WinnerOrderCompletionPage() {
           setInfoUser(data.infoSeller);
         }
 
-        const orderDataResult = await orderService.getOrderDetail({ product_id });  // still using query params
+        const orderDataResult = await orderService.getOrderDetail({ product_id: Number(product_id) });  // still using query params
 
         if (orderDataResult.status === "success" && orderDataResult.data) {
           setOrderData(orderDataResult.data);
