@@ -3,7 +3,7 @@ import {
   getExpiredProductsNeedingEmail, 
   processAuctionEndNotification, 
   markAuctionEmailSent 
-} from '@/services/auction-end-mail.service.ts';
+} from '@/modules/products/auction-end-mail.service.ts';
 
 // Track if job is running to prevent overlapping
 let isJobRunning = false;
