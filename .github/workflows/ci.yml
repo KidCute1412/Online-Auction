@@ -1,0 +1,72 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Create Env File
+        run: cp Backend/.env.example Backend/.env
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: Backend
+
+      - name: Build Backend
+        run: npm run build
+        working-directory: Backend
+
+  frontend:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Create Env File
+        run: cp Frontend/.env.example Frontend/.env
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: Frontend
+
+      - name: Lint Frontend
+        run: npm run lint
+        working-directory: Frontend
+
+      - name: Build Frontend
+        run: npm run build
+        working-directory: Frontend
+
+  docker:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
