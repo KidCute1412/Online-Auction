@@ -1,6 +1,6 @@
 import * as CategoriesModel from "./categories.model.ts";
 import * as AccountsModel from "@/modules/accounts/accounts.model.ts";
-import * as productsModel from "@/models/products.model.ts";
+import * as productsModel from "@/modules/products/products.model.ts";
 import { buildTree, Category, CategoryNode } from "@/helpers/category.helper.ts";
 
 // Fetch all level 1 categories

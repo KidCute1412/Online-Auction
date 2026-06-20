@@ -4,11 +4,11 @@ const route = express.Router();
 import homeRoute from "./home.route.ts";
 import accountRoutes from "@/modules/accounts/accounts.routes.ts";
 import { clientCategoryRouter as categoriesRoutes } from "@/modules/categories/categories.routes.ts";
-import productsRoutes from "./products.route.ts";
-import meRoutes from "./me.route.ts";
+import { clientProductRouter as productsRoutes } from "@/modules/products/products.routes.ts";
+import { meRouter as meRoutes } from "@/modules/profiles/profiles.routes.ts";
 import bidRoutes from "@/modules/bids/bids.routes.ts";
 import userRotes from "./user.route.ts";
-import profileRoutes from "./profile.route.ts";
+import { profileRouter as profileRoutes } from "@/modules/profiles/profiles.routes.ts";
 import settingRoutes from "./setting.route.ts";
 import orderRoutes from "@/modules/orders/orders.routes.ts";
 

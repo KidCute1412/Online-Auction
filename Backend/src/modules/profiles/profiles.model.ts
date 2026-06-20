@@ -1,5 +1,6 @@
-import db from "../config/database.config.ts";
+import db from "@/config/database.config.ts";
 
+// Update the user profile detail row
 export async function editUserProfile(data: any) {
   const sql = await db("users")
     .where({ user_id: data.user_id })
@@ -15,10 +16,12 @@ export async function editUserProfile(data: any) {
   return sql;
 }
 
+// Update user authentication role
 export async function updateUserRole(user_id: number, role: string) {
   return await db("users").where({ user_id }).update({ role });
 }
 
+// Fetch user profile detail and identify ownership
 export async function getUserProfileDetail(params: {
   username: string;
   user_id: number;
@@ -26,18 +29,17 @@ export async function getUserProfileDetail(params: {
 }) {
   const isOwner = params.current_user_id === params.user_id;
   const sql = `
-  select *
-  from users u
-  where u.username = ? and u.user_id = ?
+    select *
+    from users u
+    where u.username = ? and u.user_id = ?
   `;
   const result = await db.raw(sql, [params.username, params.user_id]);
-
-  const data = await result.rows[0];
+  const data = result.rows[0];
   if (!data) {
     return null;
   }
   return {
-    data: data,
+    data,
     is_owner: isOwner,
   };
 }

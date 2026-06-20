@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import * as productModel from "../../models/products.model.ts";
-import * as accountModel from "../../models/account.model.ts";
-import { AccountRequest } from "../../interfaces/request.interface.ts";
+import * as ProductsService from "./products.service.ts";
+import { AccountRequest } from "@/interfaces/request.interface.ts";
 
+// Calculate total product listing matching filter parameters
 export async function calTotalProducts(req: Request, res: Response) {
   const filter = {};
   const is_removed = req.body.is_removed || false;
@@ -22,10 +22,11 @@ export async function calTotalProducts(req: Request, res: Response) {
     Object.assign(filter, { search: req.query.search as string });
   }
 
-  const total = await productModel.calTotalProducts(filter, is_removed);
-  res.json({ code: "success", message: "Thành công", total: total });
+  const total = await ProductsService.calTotalProducts(filter, is_removed);
+  res.json({ code: "success", message: "Success", total });
 }
 
+// Fetch admin paginated products list with detailed creator names
 export async function list(req: AccountRequest, res: Response) {
   try {
     const page = req.query.page ? Number(req.query.page) : 1;
@@ -48,88 +49,68 @@ export async function list(req: AccountRequest, res: Response) {
       Object.assign(filter, { search: req.query.search as string });
     }
 
-    const list = await productModel.getProductWithOffsetLimit(
-      (page - 1) * limit,
-      limit,
-      filter,
-      is_removed
-    );
-
-    for (const product of list) {
-      const creator = await accountModel.findAccountById(product.seller_id);
-      product.creator_name = creator ? creator.full_name : "Unknown";
-    }
-
+    const resultList = await ProductsService.getAdminProductList(page, limit, filter, is_removed);
     res.json({
       code: "success",
-      message: "Thành công",
-      list: list,
+      message: "Success",
+      list: resultList,
     });
   } catch (error) {
     console.error("Error in product list controller:", error);
-    res.json({ code: "error", message: "Có lỗi xảy ra", list: [] });
+    res.json({ code: "error", message: "An error occurred", list: [] });
   }
 }
 
+// Fetch detailed product page info
 export async function detail(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const product = await productModel.getProductById(Number(id));
+    const product = await ProductsService.getProductById(Number(id));
 
     if (!product) {
-      return res.json({ code: "error", message: "Không tìm thấy sản phẩm" });
-    }
-
-    // Lấy thông tin người bán
-    const seller = await accountModel.findAccountById(product.seller_id);
-    if (seller) {
-      product.seller_name = seller.full_name;
+      return res.json({ code: "error", message: "Product not found" });
     }
 
     res.json({
       code: "success",
-      message: "Thành công",
-      product: product,
+      message: "Success",
+      product,
     });
   } catch (error) {
     console.error("Error in product detail controller:", error);
-    res.json({ code: "error", message: "Có lỗi xảy ra" });
+    res.json({ code: "error", message: "An error occurred" });
   }
 }
 
+// Soft delete a product
 export async function deleteProduct(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    console.log("Deleting product with ID:", id);
-    await productModel.deleteProductById(Number(id));
-    res.json({ code: "success", message: "Xóa sản phẩm thành công" });
+    await ProductsService.deleteProductById(Number(id));
+    res.json({ code: "success", message: "Deleted product successfully" });
   } catch (error) {
-    res.json({ code: "error", message: "Có lỗi xảy ra khi xóa sản phẩm" });
+    res.json({ code: "error", message: "An error occurred while deleting product" });
   }
 }
 
+// Restore a soft-deleted product
 export async function restoreProduct(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    await productModel.restoreProductById(Number(id));
-    res.json({ code: "success", message: "Khôi phục sản phẩm thành công" });
+    await ProductsService.restoreProductById(Number(id));
+    res.json({ code: "success", message: "Restored product successfully" });
   } catch (error) {
-    res.json({
-      code: "error",
-      message: "Có lỗi xảy ra khi khôi phục sản phẩm",
-    });
+    res.json({ code: "error", message: "An error occurred while restoring product" });
   }
 }
 
+// Permanently destroy a product
 export async function destroyProduct(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    await productModel.destroyProductById(Number(id));
-    res.json({ code: "success", message: "Xóa vĩnh viễn sản phẩm thành công" });
+    await ProductsService.destroyProductById(Number(id));
+    res.json({ code: "success", message: "Permanently deleted product successfully" });
   } catch (error) {
-    res.json({
-      code: "error",
-      message: "Có lỗi xảy ra khi xóa vĩnh viễn sản phẩm",
-    });
+    res.json({ code: "error", message: "An error occurred while permanently deleting product" });
   }
 }

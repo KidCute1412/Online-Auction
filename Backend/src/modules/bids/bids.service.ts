@@ -1,11 +1,11 @@
 import * as BidsModel from "./bids.model.ts";
 import * as userModels from "@/models/users.model.ts";
-import * as productModels from "@/models/products.model.ts";
+import * as productsService from "@/modules/products/products.service.ts";
 
 // Extend bidding time automatically if the bid occurs close to the end time
 export async function autoExtendBiddingTime(product_id: number): Promise<void> {
   try {
-    await productModels.extendBiddingTimeIfNeeded(product_id);
+    await productsService.extendBiddingTimeIfNeeded(product_id);
   } catch (error) {
     console.error("Failed to automatically extend bidding time:", error);
   }
@@ -13,7 +13,7 @@ export async function autoExtendBiddingTime(product_id: number): Promise<void> {
 
 // Retrieve details of a product by ID
 export async function getProductById(product_id: number) {
-  return await productModels.getProductById(product_id);
+  return await productsService.getProductById(product_id);
 }
 
 // Retrieve user account details by ID
@@ -23,7 +23,7 @@ export async function getUserById(user_id: number) {
 
 // Check if a product is currently within its bidding duration
 export async function isProductInBiddingTime(product_id: number): Promise<boolean> {
-  return await productModels.isProductInBiddingTime(product_id);
+  return await productsService.isProductInBiddingTime(product_id);
 }
 
 // Check if the user is the seller of the product

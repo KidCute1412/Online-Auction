@@ -2,7 +2,7 @@ import express from "express";
 import { adminCategoryRouter as categoryRoute } from "@/modules/categories/categories.routes.ts";
 import applicationFormRoute from "./application-form.route.ts";
 import userRoute from "./user.route.ts";
-import productRoute from "./product.route.ts";
+import { adminProductRouter as productRoute } from "@/modules/products/products.routes.ts";
 import * as authMiddleware from "../../middlewares/auth.middleware.ts";
 
 const route = express.Router();
