@@ -36,6 +36,7 @@ export default function BuyNowSection({ product_id, buy_now_price, product_name 
     try {
       const data = await bidService.buyNow({
         product_id: product_id,
+        buy_price: buy_now_price,
       });
 
       if (data.status === "success") {

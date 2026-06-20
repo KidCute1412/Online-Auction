@@ -1,7 +1,7 @@
 import { apiRequest } from "./api.client.ts";
 
 export const bidService = {
-  play: async (body: { product_id: number; bid_price: number; max_bid_price?: number }): Promise<any> => {
+  play: async (body: { product_id: number; bid_price: number; max_price?: number }): Promise<any> => {
     return apiRequest(`/bids`, {
       method: "POST",
       body,
@@ -12,7 +12,7 @@ export const bidService = {
     return apiRequest(`/bids`, { params });
   },
 
-  buyNow: async (body: { product_id: number }): Promise<any> => {
+  buyNow: async (body: { product_id: number; buy_price: number }): Promise<any> => {
     return apiRequest(`/bids/purchase`, {
       method: "POST",
       body,

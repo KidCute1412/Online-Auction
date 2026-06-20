@@ -107,7 +107,7 @@ export default function MyProductsPage() {
         setLoading(true);
         const page = searchParams.get("page") ? parseInt(searchParams.get("page") as string) : 1;
         const type = searchParams.get("type") || "my-favorites";
-        const response = await productService.getPageList({ type, page });
+        const response = await productService.getMyProducts({ type, page });
         const data = response;
 
         if (!data || data.status === "error") {

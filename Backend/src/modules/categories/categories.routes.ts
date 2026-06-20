@@ -14,6 +14,7 @@ clientCategoryRouter.get("/", clientController.getAll);
 // Admin routes
 adminCategoryRouter.get("/tree", adminController.buildTree);
 adminCategoryRouter.get("/count", adminController.calTotalCategories);
+adminCategoryRouter.get("/creators", adminController.getCreators);
 adminCategoryRouter.get("/", adminController.list);
 adminCategoryRouter.get("/:id", adminController.edit);
 adminCategoryRouter.post("/", adminController.createPost);

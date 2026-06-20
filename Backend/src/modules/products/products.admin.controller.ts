@@ -5,7 +5,7 @@ import { AccountRequest } from "@/interfaces/request.interface.ts";
 // Calculate total product listing matching filter parameters
 export async function calTotalProducts(req: Request, res: Response) {
   const filter = {};
-  const is_removed = req.body.is_removed || false;
+  const is_removed = req.query.is_removed === "true";
   if (req.query.status) {
     Object.assign(filter, { status: req.query.status });
   }
@@ -32,7 +32,7 @@ export async function list(req: AccountRequest, res: Response) {
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const filter = {};
-    const is_removed = req.body.is_removed || false;
+    const is_removed = req.query.is_removed === "true";
     if (req.query.status) {
       Object.assign(filter, { status: req.query.status });
     }

@@ -21,6 +21,12 @@ export default function CategoryList() {
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1", 10));
+
+  const pageParam = searchParams.get("page");
+  useEffect(() => {
+    setCurrentPage(parseInt(pageParam || "1", 10));
+  }, [pageParam]);
+
   const {
     statusFilter,
     creatorFilter,
@@ -37,23 +43,32 @@ export default function CategoryList() {
 
   // Local state to keep unmodified search query string
   const [localSearch, setLocalSearch] = useState("");
+  const [creatorOptions, setCreatorOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    categoryService.getCreators()
+      .then((data) => {
+        setCreatorOptions(data);
+      })
+      .catch(() => {
+        setCreatorOptions([]);
+      });
+  }, []);
 
   const fetchItems = () => {
     setIsPageLoading(true);
 
     categoryService
-      .list(
-        {
-          page: currentPage,
-          limit: LIMIT,
-          status: statusFilter,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: slugify(searchFromUrl),
-        },
-        { deleted: false }
-      )
+      .list({
+        page: currentPage,
+        limit: LIMIT,
+        status: statusFilter,
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: slugify(searchFromUrl),
+        deleted: false,
+      })
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -68,18 +83,16 @@ export default function CategoryList() {
 
   const fetchTotal = () => {
     categoryService
-      .list(
-        {
-          status: statusFilter,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: slugify(searchFromUrl),
-        },
-        { deleted: false }
-      )
+      .getTotal({
+        status: statusFilter,
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: slugify(searchFromUrl),
+        deleted: false,
+      })
       .then((data) => {
-        const total = data.list.length;
+        const total = data.total;
         setTotalPages(Math.ceil(total / LIMIT));
         const newTotalPages = Math.ceil(total / LIMIT);
         if (currentPage > newTotalPages && newTotalPages > 0) {
@@ -123,42 +136,7 @@ export default function CategoryList() {
     searchFromUrl,
   ]);
 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  // Memoize unique options for category creator filtering
-  const creatorOptions: string[] = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          items
-            .map((i) => i.created_by)
-            .filter((v) => v != null)
-            .map(String)
-            .filter((v) => v.trim() !== "")
-        )
-      ),
-    [items]
-  );
-
-  const allChecked = useMemo(
-    () => items.length > 0 && items.every((i) => selectedIds.includes(i.id)),
-    [items, selectedIds]
-  );
-
-  const toggleAll = () => {
-    const itemIds = items.map((i) => i.id);
-    setSelectedIds((prev) => {
-      if (allChecked) return prev.filter((id) => !itemIds.includes(id));
-      const newSet = new Set([...prev, ...itemIds]);
-      return Array.from(newSet);
-    });
-  };
-
-  const toggleOne = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
 
   const handleDelete = (id: number) => {
     categoryService
@@ -209,12 +187,6 @@ export default function CategoryList() {
         setSearch={setLocalSearch}
         onSearchSubmit={handleSearchSubmit}
         onResetFilters={resetFilters}
-        bulkActionOptions={[
-          { value: "active", label: "Activate" },
-          { value: "inactive", label: "Deactivate" },
-          { value: "delete", label: "Delete" },
-        ]}
-        onApplyBulkAction={(action) => console.log(action, selectedIds)}
         onCreateNew={() =>
           navigate(`/${import.meta.env.VITE_PATH_ADMIN}/category/create`)
         }
@@ -234,14 +206,6 @@ export default function CategoryList() {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted/30">
               <tr>
-                <th className="px-4 py-3 text-left w-12">
-                  <input
-                    type="checkbox"
-                    checked={allChecked}
-                    onChange={toggleAll}
-                    className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
-                  />
-                </th>
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Category Name
                 </th>
@@ -261,17 +225,8 @@ export default function CategoryList() {
             </thead>
             <tbody className="divide-y divide-border/60">
               {items.map((item) => {
-                const checked = selectedIds.includes(item.id);
                 return (
                   <tr key={item.id} className="hover:bg-muted/20 transition-colors duration-150">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleOne(item.id)}
-                        className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
-                      />
-                    </td>
                     <td className="px-4 py-3 font-medium text-foreground text-center text-sm">
                       {item.name}
                     </td>
@@ -341,7 +296,6 @@ export default function CategoryList() {
       <div className="mt-5 space-y-4 lg:hidden relative">
         {isPageLoading && <Loading></Loading>}
         {items.map((item) => {
-          const checked = selectedIds.includes(item.id);
           return (
             <div
               key={item.id}
@@ -349,12 +303,6 @@ export default function CategoryList() {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleOne(item.id)}
-                    className="w-4 h-4 mt-0.5 rounded text-accent bg-card border-border focus:ring-accent"
-                  />
                   <div>
                     <h3 className="font-bold text-foreground text-base">
                       {item.name}

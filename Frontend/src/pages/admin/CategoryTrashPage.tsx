@@ -44,18 +44,16 @@ export default function CategoryTrashPage() {
     setIsPageLoading(true);
 
     categoryService
-      .list(
-        {
-          page: currentPage,
-          limit: LIMIT,
-          status: statusFilter,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: slugify(searchFromUrl),
-        },
-        { deleted: true }
-      )
+      .list({
+        page: currentPage,
+        limit: LIMIT,
+        status: statusFilter,
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: slugify(searchFromUrl),
+        deleted: true,
+      })
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -70,18 +68,16 @@ export default function CategoryTrashPage() {
 
   const fetchTotal = () => {
     categoryService
-      .list(
-        {
-          status: statusFilter,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: slugify(searchFromUrl),
-        },
-        { deleted: true }
-      )
+      .getTotal({
+        status: statusFilter,
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: slugify(searchFromUrl),
+        deleted: true,
+      })
       .then((data) => {
-        const total = data.list.length;
+        const total = data.total;
         setTotalPages(Math.ceil(total / LIMIT));
         const newTotalPages = Math.ceil(total / LIMIT);
         if (currentPage > newTotalPages && newTotalPages > 0) {

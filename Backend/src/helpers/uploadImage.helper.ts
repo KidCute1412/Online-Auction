@@ -14,7 +14,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir); // ĐÚNG ĐƯỜNG DẪN
   },
   filename: (_, file, cb) => {

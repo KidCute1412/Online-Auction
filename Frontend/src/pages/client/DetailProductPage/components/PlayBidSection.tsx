@@ -87,7 +87,7 @@ export default function PlayBidSection({ product_id, current_price, step_price, 
       const data = await bidService.play({
         product_id: pendingBidData.product_id,
         bid_price: pendingBidData.price,
-        max_bid_price: pendingBidData.max_price,
+        max_price: pendingBidData.max_price,
       });
 
       if (data.status === "success") {

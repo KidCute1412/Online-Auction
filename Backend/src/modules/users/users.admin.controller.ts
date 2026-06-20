@@ -46,7 +46,7 @@ export async function calNumberOfUsers(req: Request, res: Response) {
 // Fetch single user detail
 export async function detail(req: Request, res: Response) {
   try {
-    const user_id = Number(req.params.user_id);
+    const user_id = Number(req.params.id);
     const user = await UsersService.getUserById(user_id);
     if (!user) {
       return res.status(404).json({ code: "error", message: "User does not exist" });
@@ -60,7 +60,7 @@ export async function detail(req: Request, res: Response) {
 // Edit role and status tags of user
 export async function editRole(req: Request, res: Response) {
   try {
-    const user_id = Number(req.params.user_id);
+    const user_id = Number(req.params.id);
     const { role, status } = req.body;
     const user = await UsersService.getUserById(user_id);
     if (!user) {
@@ -76,7 +76,7 @@ export async function editRole(req: Request, res: Response) {
 // Reset user password and alert via email notification
 export async function resetPassword(req: Request, res: Response) {
   try {
-    const user_id = Number(req.params.user_id);
+    const user_id = Number(req.params.id);
     const success = await UsersService.resetUserPassword(user_id);
     if (!success) {
       return res.status(404).json({ code: "error", message: "User does not exist" });

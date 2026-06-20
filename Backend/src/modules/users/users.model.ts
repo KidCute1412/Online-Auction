@@ -95,12 +95,7 @@ export async function calTotalUsers(filter: any) {
   const q = db("users").whereNot({ role: "admin" }).count("user_id as count");
 
   if (filter?.search) {
-    q.andWhere(function (this: any) {
-      this.whereRaw(
-        `LOWER(REPLACE(TRANSLATE(full_name, 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd'), ' ', '-')) LIKE ?`,
-        [`%${filter.search}%`]
-      ).orWhereRaw(`LOWER(email) LIKE ?`, [`%${filter.search}%`]);
-    });
+    q.andWhereRaw("fts @@ websearch_to_tsquery('english', remove_accents(?))", [filter.search]);
   }
   if (filter?.status && filter.status !== "all") {
     q.andWhere("role", filter.status);
@@ -119,12 +114,7 @@ export async function getUsersWithOffsetLimit(offset: number, limit: number, fil
     .limit(limit);
 
   if (filter?.search) {
-    q.andWhere(function (this: any) {
-      this.whereRaw(
-        `LOWER(REPLACE(TRANSLATE(full_name, 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd'), ' ', '-')) LIKE ?`,
-        [`%${filter.search}%`]
-      ).orWhereRaw(`LOWER(email) LIKE ?`, [`%${filter.search}%`]);
-    });
+    q.andWhereRaw("fts @@ websearch_to_tsquery('english', remove_accents(?))", [filter.search]);
   }
   if (filter?.status && filter.status !== "all") {
     q.andWhere("role", filter.status);

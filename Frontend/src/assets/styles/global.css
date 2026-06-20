@@ -156,11 +156,11 @@ html{
 
 }
 
-/* Ngăn Radix Select gây dịch chuyển layout */
-body[data-scroll-locked="1"] {
-  pointer-events: auto !important; /* Khôi phục tương tác */
-  overflow: visible !important;    /* Không khóa scroll */
-  padding-right: 0 !important;     /* Giữ nguyên layout */
+/* Prevent Radix Select from shifting layout */
+body[data-scroll-locked] {
+  pointer-events: auto !important; /* Restore interactions */
+  overflow: visible !important;    /* Do not lock scroll */
+  padding-right: 0 !important;     /* Keep layout unchanged */
 }
 html {
   scrollbar-gutter: stable;
@@ -484,16 +484,16 @@ html {
   animation: scaleIn 0.3s ease-out;
 }
 
-/* Scrollbar styles - ẩn dọc, hiện ngang */
+/* Scrollbar styles - hide vertical, show horizontal */
 .scrollbar-horizontal-only {
   overflow-x: auto;
   overflow-y: auto;
 }
 
-/* Webkit browsers - ẩn scrollbar dọc, hiện ngang */
+/* Webkit browsers - hide vertical scrollbar, show horizontal */
 .scrollbar-horizontal-only::-webkit-scrollbar {
-  height: 8px; /* Hiện scrollbar ngang */
-  width: 0px; /* Ẩn scrollbar dọc */
+  height: 8px; /* Show horizontal scrollbar */
+  width: 0px; /* Hide vertical scrollbar */
 }
 
 .scrollbar-horizontal-only::-webkit-scrollbar-thumb {
@@ -511,14 +511,14 @@ html {
   border-radius: 4px;
 }
 
-/* Firefox - chỉ ẩn scrollbar dọc */
+/* Firefox - hide vertical scrollbar only */
 .scrollbar-horizontal-only {
-  scrollbar-width: auto; /* Hiện scrollbar ngang, ẩn dọc */
+  scrollbar-width: auto; /* Show horizontal scrollbar, hide vertical */
 }
 
 /* IE and Edge */
 .scrollbar-horizontal-only {
-  -ms-overflow-style: auto; /* Hiện scrollbar ngang */
+  -ms-overflow-style: auto; /* Show horizontal scrollbar */
 }
 
 /* Shine animation for CategoryCard */

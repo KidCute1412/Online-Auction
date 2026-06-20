@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Eye, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, Trash2, ShoppingBag, Plus } from "lucide-react";
 import FilterBar from "@/components/admin/FilterBar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatToVN } from "@/utils/format_time";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import PaginationComponent from "@/components/common/Pagination";
 import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
 
 const LIMIT = 10;
 
@@ -27,15 +28,19 @@ export default function ProductListPage() {
   const [items, setItems] = useState<ProductItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1", 10));
 
+  const pageParam = searchParams.get("page");
+  useEffect(() => {
+    setCurrentPage(parseInt(pageParam || "1", 10));
+  }, [pageParam]);
+
   const {
-    creatorFilter,
     dateFrom,
     dateTo,
     search: searchFromUrl,
-    handleCreatorFilterChange,
     handleDateFromChange,
     handleDateToChange,
     handleSearchChange,
@@ -48,17 +53,14 @@ export default function ProductListPage() {
     setIsPageLoading(true);
 
     productService
-      .adminList(
-        {
-          page: currentPage,
-          limit: LIMIT,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: searchFromUrl,
-        },
-        { is_removed: false }
-      )
+      .adminList({
+        page: currentPage,
+        limit: LIMIT,
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+        is_removed: false,
+      })
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -73,17 +75,15 @@ export default function ProductListPage() {
 
   const fetchTotal = () => {
     productService
-      .adminGetTotal(
-        {
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: searchFromUrl,
-        },
-        { is_removed: false }
-      )
+      .adminGetTotal({
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+        is_removed: false,
+      })
       .then((data) => {
         const total = data.total as number;
+        setTotalCount(total);
         setTotalPages(Math.ceil(total / LIMIT));
         const newTotalPages = Math.ceil(total / LIMIT);
         if (currentPage > newTotalPages && newTotalPages > 0) {
@@ -109,267 +109,216 @@ export default function ProductListPage() {
 
   useEffect(() => {
     fetchTotal();
-  }, [creatorFilter, dateFrom, dateTo, searchFromUrl]);
+  }, [dateFrom, dateTo, searchFromUrl]);
 
   useEffect(() => {
     fetchItems();
-  }, [currentPage, creatorFilter, dateFrom, dateTo, searchFromUrl]);
-
-  // Extract all unique seller IDs from items
-  const creatorOptions: string[] = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          items
-            .map((i) => i.seller_id)
-            .filter((v) => v != null)
-            .map(String)
-            .filter((v) => v.trim() !== "")
-        )
-      ),
-    [items]
-  );
-
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  const allChecked = useMemo(
-    () =>
-      items.length > 0 &&
-      items.every((i) => selectedIds.includes(i.product_id)),
-    [items, selectedIds]
-  );
-
-  const toggleAll = () => {
-    const itemIds = items.map((i) => i.product_id);
-    setSelectedIds((prev) => {
-      if (allChecked) return prev.filter((id) => !itemIds.includes(id));
-      const newSet = new Set([...prev, ...itemIds]);
-      return Array.from(newSet);
-    });
-  };
-
-  const toggleOne = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+  }, [currentPage, dateFrom, dateTo, searchFromUrl]);
 
   const handleView = (id: number) => {
     navigate(`/${import.meta.env.VITE_PATH_ADMIN}/product/detail/${id}`);
   };
 
   const handleDelete = (id: number) => {
+    if (!window.confirm("Are you sure you want to remove this product from active listings?")) {
+      return;
+    }
     productService
       .adminDelete(id)
       .then((data) => {
         if (data.code === "success") {
           fetchItems();
           fetchTotal();
-          toast.success("Product deleted successfully!");
+          toast.success("Product moved to trash successfully");
+        } else {
+          toast.error(data.message || "Failed to remove product");
         }
+      })
+      .catch(() => {
+        toast.error("An error occurred while removing product");
       });
   };
 
   if (isLoading) {
     return (
-      <Loading className="ml-[240px] bg-transparent"></Loading>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loading className="bg-transparent" />
+      </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 text-foreground">
-      <h2 className="font-heading font-bold text-xl sm:text-2xl mb-4 text-foreground">
-        Manage Products
-      </h2>
+    <div className="w-full max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border p-5 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-accent/10 text-accent rounded-xl">
+            <ShoppingBag className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Active Products</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Total: {totalCount} active items</p>
+          </div>
+        </div>
 
-      <FilterBar
-        showStatusFilter
-        creatorFilter={creatorFilter}
-        setCreatorFilter={handleCreatorFilterChange}
-        creatorOptions={creatorOptions}
-        dateFrom={dateFrom}
-        setDateFrom={handleDateFromChange}
-        dateTo={dateTo}
-        setDateTo={handleDateToChange}
-        search={localSearch}
-        setSearch={setLocalSearch}
-        onSearchSubmit={handleSearchSubmit}
-        onResetFilters={resetFilters}
-        bulkActionOptions={[
-          { value: "restore", label: "Restore" },
-          { value: "delete", label: "Delete" },
-        ]}
-        onApplyBulkAction={(action) => console.log(action, selectedIds)}
-        onTrashClick={() =>
-          navigate(`/${import.meta.env.VITE_PATH_ADMIN}/product/trash`)
-        }
-      />
+        <button
+          onClick={() => navigate(`/${import.meta.env.VITE_PATH_ADMIN}/product/trash`)}
+          className="cursor-pointer inline-flex items-center justify-center px-4 py-2.5 bg-muted/40 hover:bg-muted border border-border text-muted-foreground hover:text-foreground font-semibold rounded-xl text-sm transition-all"
+        >
+          View Trash Bin
+        </button>
+      </div>
+
+      {/* Styled filter bar without useless bulk action actions */}
+      <div className="bg-card border border-border p-4 rounded-2xl shadow-sm">
+        <FilterBar
+          showStatusFilter={false}
+          dateFrom={dateFrom}
+          setDateFrom={handleDateFromChange}
+          dateTo={dateTo}
+          setDateTo={handleDateToChange}
+          search={localSearch}
+          setSearch={setLocalSearch}
+          onSearchSubmit={handleSearchSubmit}
+          onResetFilters={resetFilters}
+        />
+      </div>
 
       {/* Desktop Table View */}
-      <div className="mt-5 bg-card rounded-xl border border-border overflow-hidden hidden lg:block relative transition-colors duration-300">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden hidden lg:block relative shadow-sm transition-colors duration-300">
         {isPageLoading && (
-          <div className="absolute inset-0 bg-background/70 backdrop-blur-xs flex justify-center items-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-xs flex justify-center items-center z-10 animate-in fade-in duration-200">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-accent"></div>
           </div>
         )}
         <div className="w-full overflow-x-auto">
           <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/30">
+            <thead className="bg-muted/10">
               <tr>
-                <th className="px-4 py-3 text-left w-12">
-                  <input
-                    type="checkbox"
-                    checked={allChecked}
-                    onChange={toggleAll}
-                    className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
-                  />
+                <th className="px-6 py-4.5 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-16">
+                  ID
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-4.5 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Product Name
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Created By
+                <th className="px-6 py-4.5 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Creator Name
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-4.5 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Created At
+                </th>
+                <th className="px-6 py-4.5 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground w-28">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
-              {items.map((item) => {
-                const checked = selectedIds.includes(item.product_id);
-                return (
-                  <tr key={item.product_id} className="hover:bg-muted/20 transition-colors duration-150">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleOne(item.product_id)}
-                        className="w-4 h-4 rounded text-accent bg-card border-border focus:ring-accent"
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-medium text-foreground text-center text-sm">
-                      <span title={item.product_name}>
-                        {item.product_name.split(" ").length > 5
-                          ? item.product_name.split(" ").slice(0, 5).join(" ") +
-                            "..."
-                          : item.product_name}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 text-center text-sm">
-                      <div className="font-medium text-foreground">
-                        {item.creator_name || "Unknown"}
-                      </div>
-                      <div className="text-muted-foreground text-xs mt-0.5">
-                        {formatToVN(item.created_at)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          className="cursor-pointer p-1.5 hover:bg-muted text-accent rounded-lg transition-colors"
-                          onClick={() => handleView(item.product_id)}
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.product_id)}
-                          className="cursor-pointer p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y divide-border/50">
+              {items.map((item) => (
+                <tr key={item.product_id} className="hover:bg-muted/10 transition-colors duration-150">
+                  <td className="px-6 py-4 text-left text-sm font-semibold text-muted-foreground">
+                    #{item.product_id}
+                  </td>
+                  <td className="px-6 py-4 text-left font-semibold text-foreground text-sm max-w-sm truncate">
+                    <span title={item.product_name}>{item.product_name}</span>
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm font-medium text-foreground">
+                    {item.creator_name || "Unknown"}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm text-muted-foreground">
+                    {formatToVN(item.created_at)}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        title="View details"
+                        className="cursor-pointer p-2 hover:bg-accent/10 text-accent rounded-xl transition-all"
+                        onClick={() => handleView(item.product_id)}
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button
+                        title="Move to trash"
+                        onClick={() => handleDelete(item.product_id)}
+                        className="cursor-pointer p-2 hover:bg-destructive/10 text-destructive rounded-xl transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         {items.length === 0 && (
-          <div className="py-8 text-center text-muted-foreground text-sm bg-card transition-colors duration-300">
-            No products match the filters
+          <div className="py-16 text-center text-muted-foreground text-sm">
+            No products found matching the filters
           </div>
         )}
       </div>
 
       {/* Mobile/Tablet Card View */}
-      <div className="mt-5 space-y-4 lg:hidden relative">
-        {isPageLoading && <Loading></Loading>}
-        {items.map((item) => {
-          const checked = selectedIds.includes(item.product_id);
-          return (
-            <div
-              key={item.product_id}
-              className="bg-card rounded-xl border border-border p-4 shadow-sm text-foreground transition-colors duration-300"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleOne(item.product_id)}
-                    className="w-4 h-4 mt-0.5 rounded text-accent bg-card border-border focus:ring-accent"
-                  />
-                  <div>
-                    <h3
-                      className="font-bold text-foreground text-base"
-                      title={item.product_name}
-                    >
-                      {item.product_name.split(" ").length > 5
-                        ? item.product_name.split(" ").slice(0, 5).join(" ") +
-                          "..."
-                        : item.product_name}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created by:</span>
-                  <span className="font-medium text-foreground">
-                    {item.seller_id || "Unknown"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created at:</span>
-                  <span className="text-muted-foreground">
-                    {formatToVN(item.created_at)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 mt-4 pt-3 border-t border-border/55">
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-muted/30 hover:bg-muted text-accent text-sm rounded-lg transition-colors cursor-pointer"
-                  onClick={() => handleView(item.product_id)}
-                >
-                  <Eye size={14} />
-                  <span className="font-medium">View</span>
-                </button>
-
-                <button
-                  onClick={() => handleDelete(item.product_id)}
-                  className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive text-sm rounded-lg transition-colors"
-                >
-                  <Trash2 size={14} />
-                  <span className="font-medium">Delete</span>
-                </button>
+      <div className="space-y-4 lg:hidden relative">
+        {isPageLoading && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-xs flex justify-center items-center z-10 rounded-2xl animate-in fade-in duration-200">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-accent"></div>
+          </div>
+        )}
+        {items.map((item) => (
+          <div
+            key={item.product_id}
+            className="bg-card rounded-2xl border border-border p-5 shadow-sm text-foreground space-y-4"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">ID: #{item.product_id}</span>
+                <h3 className="font-bold text-foreground text-sm mt-0.5" title={item.product_name}>
+                  {item.product_name}
+                </h3>
               </div>
             </div>
-          );
-        })}
+
+            <div className="grid grid-cols-2 gap-4 text-xs bg-muted/10 p-3 rounded-xl border border-border/40">
+              <div>
+                <span className="text-muted-foreground block">Creator:</span>
+                <span className="font-semibold text-foreground mt-0.5 block">{item.creator_name || "Unknown"}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block">Created At:</span>
+                <span className="font-semibold text-foreground mt-0.5 block">{formatToVN(item.created_at)}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-3 border-t border-border/50">
+              <button
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold rounded-xl transition-all cursor-pointer"
+                onClick={() => handleView(item.product_id)}
+              >
+                <Eye size={14} />
+                <span>View Details</span>
+              </button>
+
+              <button
+                onClick={() => handleDelete(item.product_id)}
+                className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive text-xs font-bold rounded-xl transition-all"
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        ))}
 
         {items.length === 0 && (
-          <div className="bg-card rounded-xl border border-border py-8 text-center text-muted-foreground text-sm transition-colors duration-300">
-            No products match the filters
+          <div className="bg-card rounded-2xl border border-border py-16 text-center text-muted-foreground text-sm shadow-sm">
+            No products found matching the filters
           </div>
         )}
       </div>
 
-      <PaginationComponent numberOfPages={totalPages} currentPage={currentPage} controlPage={setCurrentPage}></PaginationComponent>
+      <div className="pt-2">
+        <PaginationComponent numberOfPages={totalPages} currentPage={currentPage} controlPage={setCurrentPage} />
+      </div>
     </div>
   );
 }

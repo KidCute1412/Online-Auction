@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { orderService } from "@/services/order.service.ts";
 import { productService } from "@/services/product.service.ts";
+import { useAuth } from "@/routes/ProtectedRouter.tsx";
 
 type ProductInfo = {
   product_id: number;

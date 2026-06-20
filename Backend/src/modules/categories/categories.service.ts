@@ -104,7 +104,7 @@ export async function getAllDescendantIds(categoryId: number): Promise<number[]>
 // Delete a category and its descendants if no products are linked
 export async function deleteCategory(categoryId: number): Promise<boolean> {
   const descendantIds = await getAllDescendantIds(categoryId);
-  const count = await productsModel.countProductsByCategories(descendantIds);
+  const count = await productsModel.countProductsByCategories([categoryId, ...descendantIds]);
   if (count > 0) {
     return false;
   }
@@ -127,4 +127,9 @@ export async function destroyCategory(categoryId: number): Promise<void> {
     await CategoriesModel.destroyCategoryWithID(descId);
   }
   await CategoriesModel.destroyCategoryWithID(categoryId);
+}
+
+// Fetch list of unique creator full names
+export async function getUniqueCreators() {
+  return await CategoriesModel.getUniqueCreators();
 }

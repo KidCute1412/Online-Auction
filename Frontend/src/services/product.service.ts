@@ -25,12 +25,12 @@ export const productService = {
     });
   },
 
-  getMyProducts: async (): Promise<any> => {
-    return apiRequest(`/products/me`);
+  getMyProducts: async (params?: Record<string, any>): Promise<any> => {
+    return apiRequest(`/products/me`, { params });
   },
 
   search: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/products`, { params });
+    return apiRequest(`/products/search`, { params });
   },
 
   getLoveStatus: async (productId: number): Promise<any> => {

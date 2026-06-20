@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom";
 import { categoryService } from "@/services/category.service";
 import TinyMCEEditor from "@/components/editor/TinyMCEEditor";
@@ -7,11 +6,70 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { slugify } from "@/utils/make_slug";
 import { useBuildTree, useCategoryWithID } from "@/hooks/useCategory";
 import { toast } from "sonner";
+import { ChevronDown, Check } from "lucide-react";
 
 type FlatOption = {
   id: number;
   label: string;
 };
+
+type CustomSelectProps = {
+  value: string;
+  onChange: (val: string) => void;
+  options: { id: string; label: string }[];
+  placeholder: string;
+  name: string;
+};
+
+function CustomSelect({ value, onChange, options, placeholder, name }: CustomSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.id === value);
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm text-foreground shadow-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200 cursor-pointer h-10"
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className="h-4 w-4 opacity-50 shrink-0 transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-border bg-card shadow-lg py-1">
+          {options.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => {
+                onChange(opt.id);
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-3.5 py-2 text-sm text-left hover:bg-muted text-foreground transition-colors duration-150 cursor-pointer"
+            >
+              <span className="truncate pr-4">{opt.label}</span>
+              {value === opt.id && <Check className="h-4 w-4 text-accent shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+      <input type="hidden" name={name} value={value} />
+    </div>
+  );
+}
 
 export default function CategoryEdit() {
   const { id } = useParams();
@@ -19,28 +77,35 @@ export default function CategoryEdit() {
   const { item } = useCategoryWithID(Number(id));
   const { tree } = useBuildTree();
   const [isLoading, setIsLoading] = useState(false);
+  const [parentVal, setParentVal] = useState<string>("none");
+  const [statusVal, setStatusVal] = useState<string>("active");
 
   const navigate = useNavigate();
 
-  const flattenTree = (nodes: any, level = 0): FlatOption[] => {
-    const result: FlatOption[] = [];
-
-    nodes.forEach((node: any) => {
-      const prefix = level > 0 ? "-".repeat(level) + " " : "";
-      result.push({ id: node.id, label: `${prefix}${node.name}` });
-
-      if (node.children && node.children.length > 0) {
-        result.push(...flattenTree(node.children, level + 1));
-      }
-    });
-
-    return result;
-  };
+  useEffect(() => {
+    if (item) {
+      setParentVal(item.parent_id ? item.parent_id.toString() : "none");
+      setStatusVal(item.status);
+    }
+  }, [item]);
 
   const options: FlatOption[] = useMemo(() => {
     if (!tree) return [];
-    return flattenTree(tree);
-  }, [tree]);
+    // Only show top-level categories as parents, excluding current category
+    return tree
+      .filter((node: any) => node.id !== Number(id))
+      .map((node: any) => ({ id: node.id, label: node.name }));
+  }, [tree, id]);
+
+  const selectOptions = useMemo(() => {
+    const list = options.map(opt => ({ id: opt.id.toString(), label: opt.label }));
+    return [{ id: "none", label: "None" }, ...list];
+  }, [options]);
+
+  const statusOptions = [
+    { id: "active", label: "Active" },
+    { id: "inactive", label: "Inactive" },
+  ];
 
   useEffect(() => {
     if (!item) return;
@@ -56,7 +121,7 @@ export default function CategoryEdit() {
         const name = event.target.name.value;
         const status = event.target.status.value;
         const parentValue = event.target.parent.value as string;
-        const parent_id = parentValue === "" ? null : Number(parentValue);
+        const parent_id = parentValue === "" || parentValue === "none" ? null : Number(parentValue);
         let description;
         if (editorRef.current) {
           description = (editorRef.current as any).getContent();
@@ -81,6 +146,7 @@ export default function CategoryEdit() {
             }
             if (data.code === "success") {
               toast.success(data.message);
+              navigate(`/${import.meta.env.VITE_PATH_ADMIN}/category/list`);
             }
           })
           .catch(() => {
@@ -88,7 +154,7 @@ export default function CategoryEdit() {
             toast.error("An error occurred!");
           });
       });
-  }, [item, id]);
+  }, [item, id, navigate]);
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-4 text-foreground">
@@ -112,7 +178,7 @@ export default function CategoryEdit() {
                     type="text"
                     name="name"
                     defaultValue={item.name}
-                    className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2 text-sm text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200"
+                    className="w-full rounded-lg border border-border bg-muted/30 px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200"
                     placeholder="Enter category name"
                   />
                   <div id="nameError" className="text-xs text-destructive mt-0.5 min-h-[16px] font-medium"></div>
@@ -125,19 +191,13 @@ export default function CategoryEdit() {
                   >
                     Parent Category
                   </label>
-                  <select
-                    id="parent"
+                  <CustomSelect
                     name="parent"
-                    className="w-full rounded-lg border border-border bg-card px-3.5 py-2 text-sm text-foreground shadow-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 disabled:bg-muted transition-all duration-200"
-                    defaultValue={item.parent_id ?? ""}
-                  >
-                    <option value="" className="bg-card text-foreground">-- Select parent category --</option>
-                    {options.map((opt) => (
-                      <option key={opt.id} value={opt.id} className="bg-card text-foreground">
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    value={parentVal}
+                    onChange={setParentVal}
+                    options={selectOptions}
+                    placeholder="-- Select parent category --"
+                  />
                 </div>
               </div>
 
@@ -150,15 +210,13 @@ export default function CategoryEdit() {
                   >
                     Status
                   </label>
-                  <select
-                    id="status"
+                  <CustomSelect
                     name="status"
-                    className="w-full rounded-lg border border-border bg-card px-3.5 py-2 text-sm text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all duration-200"
-                    defaultValue={item.status}
-                  >
-                    <option value="active" className="bg-card text-foreground">Active</option>
-                    <option value="inactive" className="bg-card text-foreground">Inactive</option>
-                  </select>
+                    value={statusVal}
+                    onChange={setStatusVal}
+                    options={statusOptions}
+                    placeholder="Select status"
+                  />
                 </div>
               </div>
 
@@ -189,7 +247,7 @@ export default function CategoryEdit() {
                   type="button"
                   className="cursor-pointer w-full sm:w-auto text-sm font-semibold text-accent hover:underline transition-colors py-2"
                   onClick={() => {
-                    navigate(`/${import.meta.env.VITE_PATH_ADMIN}/category/list`);
+                     navigate(`/${import.meta.env.VITE_PATH_ADMIN}/category/list`);
                   }}
                 >
                   Back to list

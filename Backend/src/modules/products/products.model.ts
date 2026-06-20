@@ -3,7 +3,7 @@ import db from "@/config/database.config.ts";
 // Check if the product is in bidding duration
 export async function isProductInBiddingTime(product_id: number): Promise<boolean> {
   const resultQuery = await db.raw(
-    `select * from products where product_id = ? and end_time >= now()`,
+    `select * from products where product_id = ? and start_time <= now() and end_time >= now()`,
     [product_id]
   );
   return resultQuery.rows[0] ? true : false;

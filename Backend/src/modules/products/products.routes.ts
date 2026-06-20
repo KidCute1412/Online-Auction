@@ -22,6 +22,9 @@ clientProductRouter.get("/featured/highest-price", clientController.getTopHighes
 // Get current user's product listings
 clientProductRouter.get("/me", verifyToken, clientController.getMyProductsList);
 
+// Search products by keyword
+clientProductRouter.get("/search", clientController.searchProducts);
+
 // Get product detail by ID
 clientProductRouter.get("/:id", justDecodeToken, clientController.getProductDetailBySlugId);
 

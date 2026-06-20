@@ -49,17 +49,15 @@ export default function ProductTrashPage() {
     setIsPageLoading(true);
 
     productService
-      .adminList(
-        {
-          page: currentPage,
-          limit: LIMIT,
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: searchFromUrl,
-        },
-        { is_removed: true }
-      )
+      .adminList({
+        page: currentPage,
+        limit: LIMIT,
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+        is_removed: true,
+      })
       .then((data) => {
         setItems(data.list);
         setIsLoading(false);
@@ -74,15 +72,13 @@ export default function ProductTrashPage() {
 
   const fetchTotal = () => {
     productService
-      .adminGetTotal(
-        {
-          creator: creatorFilter,
-          dateFrom,
-          dateTo,
-          search: searchFromUrl,
-        },
-        { is_removed: true }
-      )
+      .adminGetTotal({
+        creator: creatorFilter,
+        dateFrom,
+        dateTo,
+        search: searchFromUrl,
+        is_removed: true,
+      })
       .then((data) => {
         const total = data.total as number;
         setTotalPages(Math.ceil(total / LIMIT));

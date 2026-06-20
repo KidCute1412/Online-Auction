@@ -15,6 +15,7 @@ export type AuthType = {
 };
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthType | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function getUserData() {
     try {
@@ -23,6 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       setUser(null);
       console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
     }
   }
   useEffect(() => {
@@ -30,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ auth: user, setAuth: setUser }}>
+    <AuthContext.Provider value={{ auth: user, setAuth: setUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

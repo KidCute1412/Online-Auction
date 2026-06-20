@@ -31,6 +31,12 @@ create table public.users (
   created_at timestamp with time zone null default now(),
   avatar text null,
   status text not null default 'active'::text,
+  fts tsvector GENERATED ALWAYS as (
+    to_tsvector(
+      'english'::regconfig,
+      remove_accents (coalesce(full_name, '')) || ' ' || remove_accents (coalesce(email, ''))
+    )
+  ) STORED null,
   constraint users_pkey primary key (user_id),
   constraint users_email_key unique (email),
   constraint users_status_check check (
@@ -39,6 +45,8 @@ create table public.users (
     )
   )
 ) TABLESPACE pg_default;
+
+create index IF not exists users_fts on public.users using gin (fts) TABLESPACE pg_default;
 
 
 ---------------------- Categories Table

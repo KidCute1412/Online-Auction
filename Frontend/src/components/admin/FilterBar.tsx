@@ -1,7 +1,5 @@
-"use client";
-
-import { useState } from "react";
-import { Filter, RotateCcw, Search, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { Filter, RotateCcw, Search, Trash2, ChevronDown, Check } from "lucide-react";
 
 type StatusOption = {
   value: string;
@@ -12,6 +10,121 @@ type BulkActionOption = {
   value: string;
   label: string;
 };
+
+type FilterSelectProps = {
+  value: string;
+  onChange: (val: string) => void;
+  options: { value: string; label: string }[];
+  placeholder: string;
+};
+
+function FilterSelect({ value, onChange, options, placeholder }: FilterSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  return (
+    <div className="relative h-full flex items-center border-r border-border" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="h-full flex items-center gap-2 px-4 text-sm font-medium text-foreground hover:bg-muted/30 transition-colors cursor-pointer outline-none border-none select-none"
+      >
+        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 z-50 mt-1 min-w-[150px] overflow-y-auto rounded-lg border border-border bg-card shadow-lg py-1">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-4 py-2 text-sm text-left hover:bg-muted text-foreground transition-colors duration-150 cursor-pointer"
+            >
+              <span>{opt.label}</span>
+              {value === opt.value && <Check className="h-4 w-4 text-accent shrink-0 ml-2" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BulkSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  options: { value: string; label: string }[];
+  placeholder: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  return (
+    <div className="relative h-full flex items-center" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="h-full flex items-center justify-between gap-4 px-3 text-sm text-foreground bg-transparent outline-none border-none cursor-pointer select-none"
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[150px] overflow-y-auto rounded-lg border border-border bg-card shadow-lg py-1">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-4 py-2 text-sm text-left hover:bg-muted text-foreground transition-colors duration-150 cursor-pointer"
+            >
+              <span>{opt.label}</span>
+              {value === opt.value && <Check className="h-4 w-4 text-accent shrink-0 ml-2" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type Props = {
   showStatusFilter?: boolean;
@@ -122,52 +235,39 @@ export default function FilterBar({
     onApplyBulkAction(selectedAction);
   };
 
+  const creatorOptionsList = useMemo(() => {
+    return creatorOptions.map((c) => ({ value: c, label: c }));
+  }, [creatorOptions]);
+
   return (
     <div className="mb-7 space-y-6 text-foreground">
       {/* Top section holding all structured filters */}
       {hasTopFilters && (
-        <div className="flex h-14 items-stretch rounded-xl border border-border bg-card overflow-hidden shadow-sm text-sm w-fit transition-colors duration-300">
+        <div className="flex h-14 items-stretch rounded-xl border border-border bg-card shadow-sm text-sm w-fit transition-colors duration-300">
           {/* Section banner */}
-          <div className="flex h-full items-center gap-2 px-4 border-r border-border font-medium text-foreground">
+          <div className="flex h-full items-center gap-2 px-4 border-r border-border font-medium text-foreground rounded-l-xl">
             <Filter className="w-4 h-4 text-accent" />
             <span>Filters</span>
           </div>
 
           {/* Status selector filter */}
           {hasStatusFilter && (
-            <div className="flex h-full items-center gap-2 px-4 border-r border-border">
-              <select
-                className="cursor-pointer bg-transparent outline-none font-medium text-foreground text-sm"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter!(e.target.value)}
-              >
-                {effectiveStatusOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-card text-foreground text-sm">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FilterSelect
+              value={statusFilter!}
+              onChange={setStatusFilter!}
+              options={effectiveStatusOptions}
+              placeholder="Status"
+            />
           )}
 
           {/* Creator selector filter */}
           {hasCreatorFilter && (
-            <div className="flex items-center px-4 h-full border-r border-border">
-              <select
-                className="cursor-pointer bg-transparent outline-none font-medium text-foreground text-sm"
-                value={creatorFilter}
-                onChange={(e) => setCreatorFilter!(e.target.value)}
-              >
-                <option className="bg-card text-foreground text-sm" value="">
-                  Creator
-                </option>
-                {creatorOptions.map((c) => (
-                  <option className="bg-card text-foreground text-sm" key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FilterSelect
+              value={creatorFilter!}
+              onChange={setCreatorFilter!}
+              options={[{ value: "", label: "Creator" }, ...creatorOptionsList]}
+              placeholder="Creator"
+            />
           )}
 
           {/* Date range filter component */}
@@ -207,19 +307,13 @@ export default function FilterBar({
       <div className="flex h-12 items-stretch gap-3">
         {/* Bulk Action selector */}
         {hasBulkAction && (
-          <div className="flex rounded-xl bg-card border border-border overflow-hidden shadow-sm transition-colors duration-300">
-            <select
-              className="cursor-pointer h-full px-3 text-sm text-foreground bg-transparent outline-none border-none"
+          <div className="flex rounded-xl bg-card border border-border shadow-sm transition-colors duration-300">
+            <BulkSelect
               value={selectedAction}
-              onChange={(e) => setSelectedAction(e.target.value)}
-            >
-              <option value="" className="bg-card text-foreground">-- Actions --</option>
-              {effectiveBulkActions.map((act) => (
-                <option key={act.value} value={act.value} className="bg-card text-foreground">
-                  {act.label}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedAction}
+              options={effectiveBulkActions}
+              placeholder="-- Actions --"
+            />
 
             <button
               type="button"

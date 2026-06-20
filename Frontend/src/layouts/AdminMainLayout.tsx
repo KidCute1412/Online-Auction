@@ -4,19 +4,31 @@ import Header from "@/components/admin/Header";
 import Sidebar from "@/components/admin/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/routes/ProtectedRouter";
-
+import {useEffect} from "react"
 export default function MainLayout() {
-  const { auth } = useAuth();
+  const { auth, loading } = useAuth();
   const route = useNavigate();
 
-  if (!auth) {
-    route("/");
-    return null;
-  }
+  useEffect(() => {
+    if (loading) return;
 
-  if (auth.role !== "admin") {
-    route("/");
-    return null;
+    if (!auth) {
+      route("/");
+      return;
+    }
+
+    if (auth.role !== "admin") {
+      route("/");
+      return;
+    }
+  }, [auth, loading, route]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
+      </div>
+    );
   }
 
   return (

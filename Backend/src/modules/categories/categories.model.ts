@@ -76,60 +76,71 @@ export const getCategoryWithOffsetLimit = async (
   deleted: boolean = false
 ) => {
   const q = db("categories")
-    .select("*")
-    .where({ deleted })
-    .orderBy("id", "asc")
+    .select("categories.*")
+    .where({ "categories.deleted": deleted })
+    .orderBy("categories.id", "desc")
     .offset(offset)
     .limit(limit);
 
   if (filter?.status && filter.status !== "all") {
-    q.andWhere("status", filter.status);
+    q.andWhere("categories.status", filter.status);
   }
   if (filter?.creator) {
-    q.andWhereILike("created_by", `%${filter.creator}%`);
+    q.join("users", "categories.created_by", "users.user_id")
+      .andWhereILike("users.full_name", `%${filter.creator}%`);
   }
   if (filter?.dateFrom && filter?.dateTo) {
-    q.andWhereBetween("created_at", [
+    q.andWhereBetween("categories.created_at", [
       `${filter.dateFrom} 00:00:00`,
       `${filter.dateTo} 23:59:59`,
     ]);
   } else if (filter?.dateFrom) {
-    q.andWhere("created_at", ">=", `${filter.dateFrom} 00:00:00`);
+    q.andWhere("categories.created_at", ">=", `${filter.dateFrom} 00:00:00`);
   } else if (filter?.dateTo) {
-    q.andWhere("created_at", "<=", `${filter.dateTo} 23:59:59`);
+    q.andWhere("categories.created_at", "<=", `${filter.dateTo} 23:59:59`);
   }
   if (filter?.search) {
-    q.andWhere("slug", "like", `%${filter.search}%`);
+    q.andWhere("categories.slug", "like", `%${filter.search}%`);
   }
   return q;
 };
 
 // Calculate total category count with filters
 export const calTotalCategories = async (filter: any = {}, deleted: boolean = false) => {
-  const q = db("categories").count("* as total").where({ deleted });
+  const q = db("categories").count("* as total").where({ "categories.deleted": deleted });
 
   if (filter?.status && filter.status !== "all") {
-    q.andWhere("status", filter.status);
+    q.andWhere("categories.status", filter.status);
   }
   if (filter?.creator) {
-    q.andWhereILike("created_by", `%${filter.creator}%`);
+    q.join("users", "categories.created_by", "users.user_id")
+      .andWhereILike("users.full_name", `%${filter.creator}%`);
   }
   if (filter?.dateFrom && filter?.dateTo) {
-    q.andWhereBetween("created_at", [
+    q.andWhereBetween("categories.created_at", [
       `${filter.dateFrom} 00:00:00`,
       `${filter.dateTo} 23:59:59`,
     ]);
   } else if (filter?.dateFrom) {
-    q.andWhere("created_at", ">=", `${filter.dateFrom} 00:00:00`);
+    q.andWhere("categories.created_at", ">=", `${filter.dateFrom} 00:00:00`);
   } else if (filter?.dateTo) {
-    q.andWhere("created_at", "<=", `${filter.dateTo} 23:59:59`);
+    q.andWhere("categories.created_at", "<=", `${filter.dateTo} 23:59:59`);
   }
   if (filter?.search) {
-    q.andWhere("slug", "like", `%${filter.search}%`);
+    q.andWhere("categories.slug", "like", `%${filter.search}%`);
   }
 
   const result = await q;
   return parseInt(result[0].total as string, 10);
+};
+
+// Fetch unique names of users who created categories
+export const getUniqueCreators = async () => {
+  const result = await db("categories")
+    .join("users", "categories.created_by", "users.user_id")
+    .distinct("users.full_name")
+    .select("users.full_name");
+  return result.map((r: any) => r.full_name);
 };
 
 // Fetch category by ID

@@ -23,6 +23,11 @@ export const categoryService = {
     });
   },
 
+  getCreators: async (): Promise<string[]> => {
+    const data = await apiRequest(`/${ADMIN_PATH}/categories/creators`);
+    return data.list;
+  },
+
   getById: async (id: number): Promise<CategoryEditItem> => {
     const data = await apiRequest(`/${ADMIN_PATH}/categories/${id}`);
     const it = data.item;

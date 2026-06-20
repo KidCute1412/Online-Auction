@@ -23,7 +23,7 @@ export async function createPost(req: AccountRequest, res: Response) {
 // Calculate total category entries matching status and creation parameters
 export async function calTotalCategories(req: Request, res: Response) {
   const filter = {};
-  const deleted = req.body.deleted || false;
+  const deleted = req.query.deleted === "true";
   if (req.query.status) {
     Object.assign(filter, { status: req.query.status });
   }
@@ -49,7 +49,7 @@ export async function list(req: AccountRequest, res: Response) {
   const page = req.query.page ? Number(req.query.page) : 1;
   const limit = req.query.limit ? Number(req.query.limit) : 10;
   const filter = {};
-  const deleted = req.body.deleted || false;
+  const deleted = req.query.deleted === "true";
   if (req.query.status) {
     Object.assign(filter, { status: req.query.status });
   }
@@ -138,5 +138,15 @@ export async function destroyCategory(req: Request, res: Response) {
     res.json({ code: "success", message: "Permanently deleted category successfully" });
   } catch (error) {
     res.json({ code: "error", message: "An error occurred" });
+  }
+}
+
+// Fetch all unique category creators
+export async function getCreators(_: Request, res: Response) {
+  try {
+    const list = await CategoriesService.getUniqueCreators();
+    res.json({ code: "success", message: "Success", list });
+  } catch (error) {
+    res.json({ code: "error", message: "An error occurred fetching creators", list: [] });
   }
 }
