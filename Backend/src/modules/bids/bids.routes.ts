@@ -3,16 +3,16 @@ import * as bidsController from "./bids.controller.ts";
 
 const route = Router();
 
-// Handle play bid request
-route.post("/play", bidsController.checkBannedBidder, bidsController.checkRatingUser, bidsController.playBid);
+// Place a new bid on a product
+route.post("/", bidsController.checkBannedBidder, bidsController.checkRatingUser, bidsController.playBid);
 
-// Get bidding history logs
-route.get("/history", bidsController.getBidHistoryByProductId);
+// Get bid history for a product (via query params)
+route.get("/", bidsController.getBidHistoryByProductId);
 
-// Buy now product immediately
-route.post("/buy_now", bidsController.checkBannedBidder, bidsController.checkRatingUser, bidsController.buyNowProduct);
+// Purchase a product immediately via buy now
+route.post("/purchase", bidsController.checkBannedBidder, bidsController.checkRatingUser, bidsController.buyNowProduct);
 
-// Ban a specific bidder from product bidding
-route.post("/ban_bidder", bidsController.banBidder);
+// Ban a bidder from a product auction
+route.post("/bans", bidsController.banBidder);
 
 export default route;

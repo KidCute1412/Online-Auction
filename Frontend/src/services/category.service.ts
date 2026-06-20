@@ -5,27 +5,26 @@ const ADMIN_PATH = import.meta.env.VITE_PATH_ADMIN;
 
 export const categoryService = {
   buildTree: async (): Promise<CategoryNode[]> => {
-    const data = await apiRequest(`/${ADMIN_PATH}/api/category/build-tree`);
+    const data = await apiRequest(`/${ADMIN_PATH}/categories/tree`);
     return data.tree;
   },
 
   list: async (params?: Record<string, any>, body?: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/list`, {
-      method: "POST",
+    return apiRequest(`/${ADMIN_PATH}/categories`, {
+      method: "GET",
       params,
-      body,
     });
   },
 
   getTotal: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/number-of-categories`, {
+    return apiRequest(`/${ADMIN_PATH}/categories/count`, {
       method: "GET",
       params,
     });
   },
 
   getById: async (id: number): Promise<CategoryEditItem> => {
-    const data = await apiRequest(`/${ADMIN_PATH}/api/category/edit/${id}`);
+    const data = await apiRequest(`/${ADMIN_PATH}/categories/${id}`);
     const it = data.item;
     return {
       id: it.id,
@@ -37,54 +36,54 @@ export const categoryService = {
   },
 
   create: async (body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/create`, {
+    return apiRequest(`/${ADMIN_PATH}/categories`, {
       method: "POST",
       body,
     });
   },
 
   update: async (id: number, body: any): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/edit/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/categories/${id}`, {
       method: "PATCH",
       body,
     });
   },
 
   delete: async (id: number): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/delete/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/categories/${id}/status`, {
       method: "PATCH",
     });
   },
 
   restore: async (id: number): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/restore/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/categories/${id}/restoration`, {
       method: "PATCH",
     });
   },
 
   destroy: async (id: number): Promise<any> => {
-    return apiRequest(`/${ADMIN_PATH}/api/category/destroy/${id}`, {
+    return apiRequest(`/${ADMIN_PATH}/categories/${id}`, {
       method: "DELETE",
     });
   },
 
   getAllClient: async (): Promise<any> => {
-    return apiRequest(`/api/categories/all`);
+    return apiRequest(`/categories`);
   },
 
   getClientCat2: async (cat2_id: number): Promise<any> => {
-    return apiRequest(`/api/categories/cat2`, { params: { cat2_id } });
+    return apiRequest(`/categories/level/2/${cat2_id}`);
   },
 
   getLevel1: async (): Promise<any> => {
-    return apiRequest(`/api/categories/level1`);
+    return apiRequest(`/categories/level/1`);
   },
 
   getLevel2NoSlug: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/api/categories/level2/noslug`, { params });
+    return apiRequest(`/categories/level/2`, { params: { ...params, slug: false } });
   },
 
   getLevel2: async (params?: Record<string, any>): Promise<any> => {
-    return apiRequest(`/api/categories/level2`, { params });
+    return apiRequest(`/categories/level/2`, { params });
   },
 };
