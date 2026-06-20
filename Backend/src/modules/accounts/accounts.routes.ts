@@ -5,37 +5,37 @@ import { verifyToken } from "@/middlewares/auth.middleware.ts";
 
 const route = Router();
 
-// Handle client account registration
-route.post("/register", accountValidate.registerPost, accountsController.registerPost);
+// Create a new account (register)
+route.post("/", accountValidate.registerPost, accountsController.registerPost);
 
-// Validate user account status
-route.get("/verify-account", accountsController.verifyAccount);
+// Check account verification status
+route.get("/verification", accountsController.verifyAccount);
 
-// Verify register OTP and finalize register
-route.post("/verify-register", accountsController.registerVerifyPost);
+// Verify registration OTP and finalize account
+route.post("/registration/verification", accountsController.registerVerifyPost);
 
 // Verify forgot password OTP
-route.patch("/verify-forgot-password", accountsController.forgotPasswordVerify);
+route.patch("/password/recovery/verification", accountsController.forgotPasswordVerify);
 
-// Initiate forgot password process
-route.post("/forgot-password", accountsController.forgotPassword);
+// Initiate password recovery process
+route.post("/password/recovery", accountsController.forgotPassword);
 
-// Reset account password
-route.post("/reset-password", accountsController.resetPassword);
+// Reset account password (full replacement)
+route.put("/password", accountsController.resetPassword);
 
 // Change password with auth validation
-route.patch("/change-password", verifyToken, accountsController.changePassword);
+route.patch("/password", verifyToken, accountsController.changePassword);
 
-// Confirm and verify password change with OTP
-route.post("/verify-change-password", verifyToken, accountsController.verifyChangePassword);
+// Verify password change OTP
+route.post("/password/verification", verifyToken, accountsController.verifyChangePassword);
 
-// Perform account login
-route.post("/login", accountValidate.loginPost, accountsController.loginPost);
+// Create login session
+route.post("/sessions", accountValidate.loginPost, accountsController.loginPost);
 
-// Authenticate and login with Google OAuth
-route.post("/google-login", accountsController.googleLoginPost);
+// Create login session via Google OAuth
+route.post("/sessions/google", accountsController.googleLoginPost);
 
-// Log out user session
-route.post("/logout", verifyToken, accountsController.logoutPost);
+// Destroy login session (logout)
+route.delete("/sessions", verifyToken, accountsController.logoutPost);
 
 export default route;
